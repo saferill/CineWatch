@@ -28,12 +28,6 @@ async function tmdbFetch<T>(path: string, lang?: string, page = 1): Promise<T> {
   return res.json();
 }
 
-  const url = `${BASE_URL}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey()}&language=${selectedLang}&page=${page}`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
-  if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
-  return res.json();
-}
-
 export async function getTrending(): Promise<Movie[]> {
   const data = await tmdbFetch<TMDBResponse<Movie>>("/trending/movie/week");
   return data.results;
