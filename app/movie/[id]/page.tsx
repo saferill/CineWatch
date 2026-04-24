@@ -138,7 +138,9 @@ export default async function MovieDetailPage({
             {/* Overview */}
             <div className="mt-8">
               <h2 className="text-lg font-semibold mb-3">Overview</h2>
-              <p className="text-zinc-400 leading-relaxed">{movie.overview}</p>
+              <p className="text-zinc-400 leading-relaxed">
+                {movie.overview || "Description not available in Indonesian. Switch back to English to read the full summary."}
+              </p>
             </div>
 
             {/* Actions */}

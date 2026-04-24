@@ -22,9 +22,9 @@ export default function MovieCard({
   const isAL = isAnilistItem(movie);
   const title = isAL
     ? movie.title.english || movie.title.romaji
-    : "name" in movie
-    ? movie.name
-    : movie.title;
+    : ("name" in movie ? movie.name : movie.title) || 
+      ("original_title" in movie ? movie.original_title : "") ||
+      ("original_name" in movie ? movie.original_name : "Unknown Title");
   const date = isAL
     ? movie.seasonYear?.toString()
     : "release_date" in movie
