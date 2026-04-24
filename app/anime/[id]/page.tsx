@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import AnimeEpisodes from "@/app/components/AnimeEpisodes";
+import WatchlistButton from "@/app/components/WatchlistButton";
 import { getAnime } from "@/app/lib/anilist";
 import { IconPlayerPlay, IconStar, IconClock, IconCalendar } from "@tabler/icons-react";
 
@@ -138,11 +139,12 @@ export default async function AnimeDetailPage({
             <div className="mt-8 flex gap-4">
               <Link
                 href={`/anime/${anime.id}/watch`}
-                className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent-hover transition-colors"
+                className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-accent text-accent-foreground font-medium text-sm hover:bg-accent-hover transition-colors"
               >
                 <IconPlayerPlay className="w-5 h-5" fill="currentColor" stroke={1.5} />
                 Watch Now
               </Link>
+              <WatchlistButton id={anime.id} type="anime" title={title} poster={anime.coverImage.large} />
             </div>
 
             <div className="mt-8">

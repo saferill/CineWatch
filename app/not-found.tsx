@@ -15,7 +15,7 @@ export default function NotFound() {
         <div className="flex gap-4 mt-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-medium hover:bg-accent-hover transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-accent-foreground font-medium hover:bg-accent-hover transition-colors"
           >
             <IconHome className="w-5 h-5" stroke={1.5} />
             Go Home

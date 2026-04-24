@@ -59,7 +59,7 @@ export default function HomeTabsSection({
               onClick={() => setActiveTab(id)}
               className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
                 activeTab === id
-                  ? "bg-accent text-white shadow-[0_0_20px_rgba(229,9,20,0.3)]"
+                  ? "bg-accent text-accent-foreground shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                   : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04]"
               }`}
             >

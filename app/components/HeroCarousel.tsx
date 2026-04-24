@@ -56,7 +56,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative w-full h-[260px] sm:h-[360px] md:h-[460px] lg:h-[540px] overflow-hidden rounded-2xl border border-white/[0.06]"
+      className="relative w-full h-[260px] sm:h-[360px] md:h-[460px] lg:h-[540px] overflow-hidden rounded-2xl border border-white/[0.04] shadow-2xl"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -76,11 +76,11 @@ export default function HeroCarousel({
       ))}
 
       {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-[#080810]/50 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#080810]/90 via-[#080810]/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
 
       {/* Subtle vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_50%,rgba(8,8,16,0.5)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_50%,rgba(0,0,0,0.5)_100%)]" />
 
       {/* Content */}
       <div
@@ -90,8 +90,8 @@ export default function HeroCarousel({
       >
         {/* Badge */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/20 border border-accent/30 text-[10px] sm:text-xs font-bold text-accent uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] sm:text-xs font-bold text-white uppercase tracking-widest backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse-dot" />
             Featured
           </span>
         </div>
@@ -139,7 +139,7 @@ export default function HeroCarousel({
         <div className="flex items-center gap-3">
           <Link
             href={`/movie/${movie.id}/watch`}
-            className="flex items-center gap-2 h-9 sm:h-10 px-4 sm:px-5 rounded-xl bg-accent text-white font-semibold text-xs sm:text-sm hover:bg-accent-hover transition-all duration-200 shadow-[0_0_20px_rgba(229,9,20,0.4)] hover:shadow-[0_0_30px_rgba(229,9,20,0.6)]"
+            className="flex items-center gap-2 h-9 sm:h-10 px-4 sm:px-5 rounded-xl bg-accent text-accent-foreground font-semibold text-xs sm:text-sm hover:bg-accent-hover transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] hover:scale-105"
           >
             <IconPlayerPlay
               className="w-3.5 h-3.5 sm:w-4 sm:h-4"
@@ -180,7 +180,7 @@ export default function HeroCarousel({
             onClick={() => goTo(i)}
             className={`h-1.5 rounded-full transition-all duration-400 ${
               i === current
-                ? "w-6 bg-accent shadow-[0_0_8px_rgba(229,9,20,0.6)]"
+                ? "w-6 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                 : "w-1.5 bg-white/25 hover:bg-white/50"
             }`}
           />

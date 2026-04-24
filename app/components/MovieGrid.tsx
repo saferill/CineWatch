@@ -25,11 +25,24 @@ export default function MovieGrid({
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    const scrollAmount = scrollRef.current.clientWidth * 0.75;
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    const scrollAmount = clientWidth * 0.75;
+
+    if (direction === "left") {
+      if (scrollLeft <= 10) {
+        // Loop to end
+        scrollRef.current.scrollTo({ left: scrollWidth, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      }
+    } else {
+      if (scrollLeft + clientWidth >= scrollWidth - 10) {
+        // Loop to start
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }
   };
 
   if (movies.length === 0) {

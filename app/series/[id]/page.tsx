@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import SeasonTabs from "@/app/components/SeasonTabs";
 import TrailerButton from "@/app/components/TrailerButton";
-import { getTVShow, getTVShowCredits, getTVSeason, getTVLogo, getTVTrailer, posterUrl, backdropUrl } from "@/app/lib/tmdb";
+import WatchlistButton from "@/app/components/WatchlistButton";
+import MovieGrid from "@/app/components/MovieGrid";
+import { getTVShow, getTVShowCredits, getTVSeason, getTVLogo, getTVTrailer, getTVRecommendations, posterUrl, backdropUrl } from "@/app/lib/tmdb";
 import { IconPlayerPlay, IconStar, IconCalendar, IconDeviceTv, IconUsers } from "@tabler/icons-react";
 
 export default async function TVDetailPage({
@@ -22,13 +23,14 @@ export default async function TVDetailPage({
     notFound();
   }
 
-  let tv, credits, logo, trailer;
+  let tv, credits, logo, trailer, recommendations;
   try {
-    [tv, credits, logo, trailer] = await Promise.all([
+    [tv, credits, logo, trailer, recommendations] = await Promise.all([
       getTVShow(tvId),
       getTVShowCredits(tvId),
       getTVLogo(tvId).catch(() => null),
       getTVTrailer(tvId),
+      getTVRecommendations(tvId),
     ]);
   } catch {
     notFound();
@@ -61,8 +63,17 @@ export default async function TVDetailPage({
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className={`object-cover ${trailer ? "hidden sm:block opacity-0 transition-opacity duration-1000 delay-[2000ms]" : ""}`}
           />
+          {trailer && (
+            <div className="absolute inset-[-10%] sm:inset-0 w-full h-[120%] sm:h-full hidden sm:block">
+              <iframe
+                src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailer.key}&modestbranding=1`}
+                className="w-full h-full object-cover scale-150 pointer-events-none"
+                allow="autoplay; encrypted-media"
+              />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           {logo && (
             <div className="absolute bottom-8 left-8 sm:bottom-12 sm:left-12 lg:bottom-16 lg:left-16">
@@ -132,12 +143,13 @@ export default async function TVDetailPage({
             <div className="mt-8 flex gap-4">
               <Link
                 href={`/series/${tv.id}/watch`}
-                className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent-hover transition-colors"
+                className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-accent text-accent-foreground font-medium text-sm hover:bg-accent-hover transition-colors"
               >
                 <IconPlayerPlay className="w-5 h-5" fill="currentColor" stroke={1.5} />
                 Watch Now
               </Link>
               {trailer && <TrailerButton videoKey={trailer.key} />}
+              <WatchlistButton id={tv.id} type="tv" title={tv.name} poster={posterUrl(tv.poster_path, "w500")} />
             </div>
 
             <div className="mt-8">
@@ -196,6 +208,12 @@ export default async function TVDetailPage({
               ))}
             </div>
           </section>
+        )}
+
+        {recommendations && recommendations.length > 0 && (
+          <div className="mt-14">
+            <MovieGrid movies={recommendations} title="Similar Series" isTV />
+          </div>
         )}
       </main>
     </>

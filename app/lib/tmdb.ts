@@ -61,6 +61,11 @@ export async function getTopRated(): Promise<Movie[]> {
   return data.results;
 }
 
+export async function getMovieRecommendations(id: number): Promise<Movie[]> {
+  const data = await tmdbFetch<TMDBResponse<Movie>>(`/movie/${id}/recommendations`);
+  return data.results;
+}
+
 export async function getTrendingTV(): Promise<TVShow[]> {
   const data = await tmdbFetch<TMDBResponse<TVShow>>("/trending/tv/week");
   return data.results;
@@ -88,6 +93,11 @@ export async function getPopularTV(): Promise<TVShow[]> {
 
 export async function getTopRatedTV(): Promise<TVShow[]> {
   const data = await tmdbFetch<TMDBResponse<TVShow>>("/tv/top_rated");
+  return data.results;
+}
+
+export async function getTVRecommendations(id: number): Promise<TVShow[]> {
+  const data = await tmdbFetch<TMDBResponse<TVShow>>(`/tv/${id}/recommendations`);
   return data.results;
 }
 

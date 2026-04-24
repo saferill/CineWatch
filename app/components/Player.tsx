@@ -164,7 +164,7 @@ export default function Player({
 
   function getEmbedUrl(src: Source): string {
     if (src === "vidking") {
-      const color = "e50914";
+      const color = "ffffff";
       if (type === "movie") {
         return `https://www.vidking.net/embed/movie/${movieId}?autoPlay=true&color=${color}`;
       }
@@ -248,7 +248,7 @@ export default function Player({
                               onClick={() => setPickerOpen(false)}
                               className={`text-center text-xs py-1 rounded ${
                                 s.season_number === currentSeason && ep === currentEpisode
-                                  ? "bg-accent text-white"
+                                  ? "bg-accent text-accent-foreground font-semibold"
                                   : "text-zinc-400 hover:bg-white/10"
                               }`}
                             >
@@ -279,7 +279,7 @@ export default function Player({
                 key={s.id}
                 onClick={() => setSource(s.id)}
                 className={`px-2 sm:px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                  source === s.id ? "bg-accent text-white" : "glass text-zinc-400 hover:text-white"
+                  source === s.id ? "bg-accent text-accent-foreground" : "glass text-zinc-400 hover:text-white"
                 }`}
               >
                 {s.label}
@@ -296,13 +296,13 @@ export default function Player({
           <div className="bg-zinc-900 rounded-2xl p-6 sm:p-8 max-w-sm w-full mx-4 text-center border border-glass-border">
             <h3 className="text-lg sm:text-xl font-semibold mb-2">Up Next</h3>
             <p className="text-zinc-400 mb-6">
-              Starting in <span className="text-accent font-bold text-2xl">{countdown}</span> seconds...
+              Starting in <span className="text-white font-bold text-2xl">{countdown}</span> seconds...
             </p>
             <div className="flex gap-3 justify-center">
               <button onClick={cancelCountdown} className="px-5 py-2.5 rounded-xl glass font-medium hover:bg-white/[0.08]">
                 Cancel
               </button>
-              <Link href={episodeLinks.next} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-white font-medium hover:bg-accent-hover">
+              <Link href={episodeLinks.next} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-accent-foreground font-medium hover:bg-accent-hover transition-colors">
                 <IconPlayerPlay className="w-5 h-5" fill="currentColor" />
                 Play Now
               </Link>

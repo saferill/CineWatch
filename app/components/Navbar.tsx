@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import SearchBar from "./SearchBar";
 import {
   IconMovie,
@@ -11,6 +12,8 @@ import {
   IconFlame,
   IconMenu2,
   IconX,
+  IconBookmark,
+  IconDice5,
 } from "@tabler/icons-react";
 
 const NAV_LINKS = [
@@ -18,6 +21,7 @@ const NAV_LINKS = [
   { href: "/movies", label: "Movies", icon: IconMovie, exact: false },
   { href: "/series", label: "Series", icon: IconDeviceTv, exact: false },
   { href: "/anime", label: "Anime", icon: IconMoodHappy, exact: false },
+  { href: "/watchlist", label: "My List", icon: IconBookmark, exact: false },
 ];
 
 export default function Navbar() {
@@ -46,20 +50,21 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "bg-[#080810]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
-            : "bg-gradient-to-b from-black/60 to-transparent backdrop-blur-sm"
+            ? "bg-black/80 backdrop-blur-2xl border-b border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
+            : "bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm"
         }`}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-              <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center shadow-[0_0_15px_rgba(229,9,20,0.4)] group-hover:shadow-[0_0_25px_rgba(229,9,20,0.6)] transition-all duration-300 group-hover:scale-105">
-                <IconMovie className="w-4.5 h-4.5 text-white" stroke={2} />
-              </div>
-              <span className="font-black text-base tracking-tight hidden sm:block">
-                Cine<span className="text-gradient-accent">Watch</span>
-              </span>
+            <Link href="/" className="flex items-center shrink-0 group transition-transform hover:scale-105 active:scale-95">
+              <Image 
+                src="/logo.png" 
+                alt="CineWatch" 
+                width={140} 
+                height={40} 
+                className="h-9 w-auto object-contain brightness-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]" 
+                priority
+              />
             </Link>
 
             {/* Desktop Nav Links */}
@@ -97,6 +102,19 @@ export default function Navbar() {
             {/* Search */}
             <SearchBar />
 
+            {/* Surprise Me / Dice */}
+            <button
+              onClick={() => {
+                const randomId = [157336, 155, 120, 27205, 550, 680, 238][Math.floor(Math.random() * 7)];
+                window.location.href = `/movie/${randomId}`;
+              }}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass text-xs font-semibold text-zinc-400 hover:text-accent-foreground hover:bg-white/10 transition-colors ml-2"
+              title="Surprise Me!"
+            >
+              <IconDice5 className="w-4 h-4" stroke={2} />
+              Surprise Me
+            </button>
+
             {/* Mobile menu button */}
             <button
               className="md:hidden w-9 h-9 rounded-xl glass flex items-center justify-center text-zinc-400 hover:text-white transition-colors ml-1"
@@ -127,7 +145,7 @@ export default function Navbar() {
                   href={href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     active
-                      ? "bg-accent/10 text-white border border-accent/20"
+                      ? "bg-white/10 text-white border border-white/20"
                       : "text-zinc-400 hover:text-white hover:bg-white/[0.05]"
                   }`}
                 >

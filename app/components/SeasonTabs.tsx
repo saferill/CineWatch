@@ -47,7 +47,7 @@ export default function SeasonTabs({
             scroll={false}
             className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               season.season_number === activeSeason
-                ? "bg-accent text-white"
+                ? "bg-accent text-accent-foreground"
                 : "glass hover:bg-white/10"
             }`}
           >

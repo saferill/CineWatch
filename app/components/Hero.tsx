@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Movie } from "@/app/lib/types";
-import { backdropUrl } from "@/app/lib/tmdb";
+import { backdropUrl, posterUrl } from "@/app/lib/tmdb";
 import { IconPlayerPlay, IconStar, IconInfoCircle } from "@tabler/icons-react";
+import WatchlistButton from "./WatchlistButton";
 
 export default function Hero({ movie }: { movie: Movie }) {
   return (
@@ -40,7 +41,7 @@ export default function Hero({ movie }: { movie: Movie }) {
         <div className="mt-6 flex gap-4">
           <Link
             href={`/movie/${movie.id}/watch`}
-            className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent-hover transition-colors"
+            className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-accent text-accent-foreground font-medium text-sm hover:bg-accent-hover transition-colors"
           >
             <IconPlayerPlay className="w-5 h-5" fill="currentColor" stroke={1.5} />
             Watch Now
@@ -52,6 +53,7 @@ export default function Hero({ movie }: { movie: Movie }) {
             <IconInfoCircle className="w-5 h-5" stroke={1.5} />
             Details
           </Link>
+          <WatchlistButton id={movie.id} type="movie" title={movie.title} poster={posterUrl(movie.poster_path, "w500")} />
         </div>
       </div>
     </section>
