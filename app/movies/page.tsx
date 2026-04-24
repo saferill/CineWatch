@@ -1,7 +1,9 @@
 import Navbar from "@/app/components/Navbar";
 import MovieGrid from "@/app/components/MovieGrid";
+import LoadMore from "@/app/components/LoadMore";
 import { getPopular, getTopRated, getTrending } from "@/app/lib/tmdb";
-import { IconMovie } from "@tabler/icons-react";
+import { fetchPopularMovies } from "@/app/actions/movieActions";
+import { IconMovie, IconArrowRight } from "@tabler/icons-react";
 
 export const metadata = {
   title: "Movies — CineWatch",
@@ -34,6 +36,14 @@ export default async function MoviesPage() {
           <MovieGrid movies={trending} title="Trending Now" />
           <MovieGrid movies={popular} title="Most Popular" />
           <MovieGrid movies={topRated} title="Top Rated All Time" />
+          
+          <div className="pt-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-6 bg-accent rounded-full" />
+              <h2 className="text-2xl font-bold">Discover More</h2>
+            </div>
+            <LoadMore fetchAction={fetchPopularMovies} initialPage={1} />
+          </div>
         </div>
       </main>
     </>

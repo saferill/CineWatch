@@ -1,6 +1,8 @@
-import { getMoviesByGenre, getTVByGenre } from "@/app/lib/tmdb";
 import Navbar from "@/app/components/Navbar";
 import MovieCard from "@/app/components/MovieCard";
+import LoadMore from "@/app/components/LoadMore";
+import { getMoviesByGenre, getTVByGenre } from "@/app/lib/tmdb";
+import { fetchMoviesByGenre, fetchTVByGenre } from "@/app/actions/movieActions";
 import { IconFilter, IconMovie, IconDeviceTv } from "@tabler/icons-react";
 
 const GENRES = [
@@ -93,6 +95,16 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
                 />
               ))}
             </div>
+
+            <LoadMore 
+              fetchAction={type === "movie" 
+                ? fetchMoviesByGenre.bind(null, activeGenreId) 
+                : fetchTVByGenre.bind(null, activeGenreId)
+              } 
+              initialPage={1} 
+              isTV={type === "tv"} 
+            />
+          </div>
           </div>
         </div>
       </main>

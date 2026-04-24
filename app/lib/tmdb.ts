@@ -9,8 +9,8 @@ function apiKey(): string {
   return key;
 }
 
-async function tmdbFetch<T>(path: string, lang = "en-US"): Promise<T> {
-  const url = `${BASE_URL}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey()}&language=${lang}`;
+async function tmdbFetch<T>(path: string, lang = "en-US", page = 1): Promise<T> {
+  const url = `${BASE_URL}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey()}&language=${lang}&page=${page}`;
   const res = await fetch(url, { next: { revalidate: 3600 } });
   if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
   return res.json();
@@ -51,8 +51,8 @@ export async function getMovieCredits(id: number): Promise<Credits> {
   return tmdbFetch<Credits>(`/movie/${id}/credits`);
 }
 
-export async function getPopular(): Promise<Movie[]> {
-  const data = await tmdbFetch<TMDBResponse<Movie>>("/movie/popular");
+export async function getPopular(page = 1): Promise<Movie[]> {
+  const data = await tmdbFetch<TMDBResponse<Movie>>("/movie/popular", "en-US", page);
   return data.results;
 }
 
@@ -86,8 +86,8 @@ export async function getTVShowCredits(id: number): Promise<Credits> {
   return tmdbFetch<Credits>(`/tv/${id}/credits`);
 }
 
-export async function getPopularTV(): Promise<TVShow[]> {
-  const data = await tmdbFetch<TMDBResponse<TVShow>>("/tv/popular");
+export async function getPopularTV(page = 1): Promise<TVShow[]> {
+  const data = await tmdbFetch<TMDBResponse<TVShow>>("/tv/popular", "en-US", page);
   return data.results;
 }
 
@@ -107,30 +107,38 @@ export async function getTVSeason(tvId: number, seasonNumber: number): Promise<S
 
 const ANIME_GENRE_ID = 16;
 
-export async function getAnimeMovies(): Promise<Movie[]> {
+export async function getAnimeMovies(page = 1): Promise<Movie[]> {
   const data = await tmdbFetch<TMDBResponse<Movie>>(
-    `/discover/movie?with_genres=${ANIME_GENRE_ID}&sort_by=popularity.desc`
+    `/discover/movie?with_genres=${ANIME_GENRE_ID}&sort_by=popularity.desc`,
+    "en-US",
+    page
   );
   return data.results;
 }
 
-export async function getMoviesByGenre(genreId: number): Promise<Movie[]> {
+export async function getMoviesByGenre(genreId: number, page = 1): Promise<Movie[]> {
   const data = await tmdbFetch<TMDBResponse<Movie>>(
-    `/discover/movie?with_genres=${genreId}&sort_by=popularity.desc`
+    `/discover/movie?with_genres=${genreId}&sort_by=popularity.desc`,
+    "en-US",
+    page
   );
   return data.results;
 }
 
-export async function getAnimeTV(): Promise<TVShow[]> {
+export async function getAnimeTV(page = 1): Promise<TVShow[]> {
   const data = await tmdbFetch<TMDBResponse<TVShow>>(
-    `/discover/tv?with_genres=${ANIME_GENRE_ID}&sort_by=popularity.desc`
+    `/discover/tv?with_genres=${ANIME_GENRE_ID}&sort_by=popularity.desc`,
+    "en-US",
+    page
   );
   return data.results;
 }
 
-export async function getTVByGenre(genreId: number): Promise<TVShow[]> {
+export async function getTVByGenre(genreId: number, page = 1): Promise<TVShow[]> {
   const data = await tmdbFetch<TMDBResponse<TVShow>>(
-    `/discover/tv?with_genres=${genreId}&sort_by=popularity.desc`
+    `/discover/tv?with_genres=${genreId}&sort_by=popularity.desc`,
+    "en-US",
+    page
   );
   return data.results;
 }

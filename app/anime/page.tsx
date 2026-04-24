@@ -1,6 +1,8 @@
 import Navbar from "@/app/components/Navbar";
 import MovieGrid from "@/app/components/MovieGrid";
+import LoadMore from "@/app/components/LoadMore";
 import { getTrendingAnime, getPopularAnime, getTopRatedAnime } from "@/app/lib/anilist";
+import { fetchPopularAnime } from "@/app/actions/movieActions";
 import { IconMoodHappy } from "@tabler/icons-react";
 
 export const metadata = {
@@ -34,6 +36,14 @@ export default async function AnimePage() {
           <MovieGrid movies={trending.media} title="Trending Now" isAnime />
           <MovieGrid movies={popular.media} title="Most Popular" isAnime />
           <MovieGrid movies={topRated.media} title="Top Rated All Time" isAnime />
+          
+          <div className="pt-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-6 bg-accent rounded-full" />
+              <h2 className="text-2xl font-bold">Discover More</h2>
+            </div>
+            <LoadMore fetchAction={fetchPopularAnime} initialPage={1} isAnime />
+          </div>
         </div>
       </main>
     </>

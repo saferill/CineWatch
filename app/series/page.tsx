@@ -1,6 +1,8 @@
 import Navbar from "@/app/components/Navbar";
 import MovieGrid from "@/app/components/MovieGrid";
+import LoadMore from "@/app/components/LoadMore";
 import { getPopularTV, getTopRatedTV, getTrendingTV } from "@/app/lib/tmdb";
+import { fetchPopularTV } from "@/app/actions/movieActions";
 import { IconDeviceTv } from "@tabler/icons-react";
 
 export const metadata = {
@@ -34,6 +36,14 @@ export default async function SeriesPage() {
           <MovieGrid movies={trending} title="Trending Now" isTV />
           <MovieGrid movies={popular} title="Most Popular" isTV />
           <MovieGrid movies={topRated} title="Top Rated All Time" isTV />
+          
+          <div className="pt-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-6 bg-accent rounded-full" />
+              <h2 className="text-2xl font-bold">Discover More</h2>
+            </div>
+            <LoadMore fetchAction={fetchPopularTV} initialPage={1} isTV />
+          </div>
         </div>
       </main>
     </>
