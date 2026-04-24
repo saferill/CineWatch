@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
-import { getMovie, getMovieCredits, posterUrl } from "@/app/lib/tmdb";
+import { getMovie, getMovieCredits } from "@/app/lib/tmdb";
+import { posterUrl } from "@/app/lib/tmdb-utils";
 import { IconArrowLeft } from "@tabler/icons-react";
 
 export default async function CastPage({
