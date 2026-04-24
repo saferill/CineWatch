@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   themeColor: "#000000",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "CineWatch — Watch Movies, Series & Anime",
+    description: "Discover and watch movies, TV series, and anime instantly. Powered by TMDB & Anilist.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({
