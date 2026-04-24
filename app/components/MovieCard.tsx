@@ -20,11 +20,11 @@ export default function MovieCard({
   isAnime?: boolean;
 }) {
   const isAL = isAnilistItem(movie);
-  const title = isAL
+  const title = (isAL
     ? movie.title.english || movie.title.romaji
-    : ("name" in movie ? movie.name : movie.title) || 
-      ("original_title" in movie ? movie.original_title : "") ||
-      ("original_name" in movie ? movie.original_name : "Unknown Title");
+    : (("name" in movie ? movie.name : movie.title) || 
+      ("original_title" in (movie as any) ? (movie as any).original_title : "") ||
+      ("original_name" in (movie as any) ? (movie as any).original_name : "Unknown Title"))) as string;
   const date = isAL
     ? movie.seasonYear?.toString()
     : "release_date" in movie
