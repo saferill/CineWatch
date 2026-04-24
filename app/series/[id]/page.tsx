@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import SeasonTabs from "@/app/components/SeasonTabs";
 import TrailerButton from "@/app/components/TrailerButton";
