@@ -44,11 +44,13 @@ export default function ContinueWatching() {
   const uniqueItems = Array.from(uniqueMap.values()).slice(0, 3);
 
   return (
-    <section>
-      <h2 className="text-sm sm:text-base md:text-xl font-bold tracking-tight mb-2 sm:mb-3 md:mb-4">
-        Continue Watching
-      </h2>
-      <div className="flex flex-wrap gap-3 sm:gap-4 md:gap-5 overflow-visible">
+    <section className="animate-fade-up">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-1 h-6 bg-accent rounded-full" />
+        <h2 className="text-xl font-bold tracking-tight">Continue Watching</h2>
+      </div>
+      
+      <div className="flex flex-wrap gap-4 sm:gap-6">
         {uniqueItems.map((item) => {
           const href =
             item.type === "movie"
@@ -57,47 +59,42 @@ export default function ContinueWatching() {
               ? `/series/${item.id}/watch?season=${item.season ?? 1}&ep=${item.episode ?? 1}`
               : `/anime/${item.id}/watch?ep=${item.episode ?? 1}`;
 
-          const detailHref =
-            item.type === "movie"
-              ? `/movie/${item.id}`
-              : item.type === "tv"
-              ? `/series/${item.id}`
-              : `/anime/${item.id}`;
-
           return (
             <Link
               key={`${item.type}-${item.id}`}
               href={href}
-              className="group block shrink-0 w-[calc(50%-1.5rem)] sm:w-[calc(33.333%-1rem)] md:w-[140px] lg:w-[160px] snap-start"
+              className="group relative block w-[calc(50%-0.5rem)] sm:w-[180px] lg:w-[200px] shrink-0"
             >
-              <div className="relative aspect-[2/3] rounded-md sm:rounded-lg overflow-hidden glass-subtle">
+              <div className="relative aspect-[2/3] rounded-3xl overflow-hidden border border-white/[0.05] group-hover:border-white/20 transition-all duration-300 shadow-xl group-hover:shadow-accent/10 group-hover:scale-[1.02]">
                 <Image
-                  src={
-                    item.poster ||
-                    "https://placehold.co/400x600/0a0a0a/71717a?text=No+Image"
-                  }
+                  src={item.poster || "https://placehold.co/400x600/0a0a0a/71717a?text=No+Image"}
                   alt={item.title}
                   fill
-                  sizes="120px sm:140px md:160px lg:180px"
-                  className="object-cover"
+                  sizes="200px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent flex items-center justify-center">
-                    <IconPlayerPlay
-                      className="w-5 h-5 sm:w-6 sm:h-6 text-white ml-0.5 sm:ml-1"
-                      fill="currentColor"
-                      stroke={1.5}
-                    />
+                
+                {/* Overlay with progress bar at bottom */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100">
+                  <div className="w-14 h-14 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center shadow-2xl">
+                    <IconPlayerPlay className="w-6 h-6 text-black ml-1" fill="currentColor" />
                   </div>
                 </div>
+
+                {/* Progress bar simulation */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+                  <div className="h-full bg-accent w-[45%]" />
+                </div>
               </div>
-              <div className="mt-1.5 sm:mt-2 px-0.5">
-                <h3 className="font-semibold text-[10px] sm:text-xs truncate text-card-foreground">
+
+              <div className="mt-3 px-1">
+                <h3 className="font-bold text-sm truncate text-white group-hover:text-accent transition-colors">
                   {item.title}
                 </h3>
                 {item.episodeTitle && (
-                  <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
                     {item.episodeTitle}
                   </p>
                 )}

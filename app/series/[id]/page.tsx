@@ -7,7 +7,8 @@ import TrailerButton from "@/app/components/TrailerButton";
 import WatchlistButton from "@/app/components/WatchlistButton";
 import MovieGrid from "@/app/components/MovieGrid";
 import { getTVShow, getTVShowCredits, getTVSeason, getTVLogo, getTVTrailer, getTVRecommendations, posterUrl, backdropUrl } from "@/app/lib/tmdb";
-import { IconPlayerPlay, IconStar, IconCalendar, IconDeviceTv, IconUsers } from "@tabler/icons-react";
+import { IconPlayerPlay, IconStar, IconCalendar, IconDeviceTv, IconUsers, IconShare } from "@tabler/icons-react";
+import ShareButton from "@/app/components/ShareButton";
 
 export default async function TVDetailPage({
   params,
@@ -151,6 +152,7 @@ export default async function TVDetailPage({
               </Link>
               {trailer && <TrailerButton videoKey={trailer.key} />}
               <WatchlistButton id={tv.id} type="tv" title={tv.name} poster={posterUrl(tv.poster_path, "w500")} />
+              <ShareButton title={tv.name} />
             </div>
 
             <div className="mt-8">

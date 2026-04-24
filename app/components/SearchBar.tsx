@@ -14,14 +14,27 @@ export default function SearchBar() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!query.trim()) return;
+    
+    // Only search automatically if query is long enough (3+ chars)
+    if (query.trim().length < 3) return;
+
     debounceRef.current = setTimeout(() => {
-      router.push(`/?q=${encodeURIComponent(query.trim())}`);
-    }, 400);
+      // Only push if we are NOT already on that search query to avoid redundant navigations
+      const searchUrl = `/?q=${encodeURIComponent(query.trim())}`;
+      router.push(searchUrl);
+    }, 800); // Increased to 800ms for better typing experience
+
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [query, router]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && query.trim()) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      router.push(`/?q=${encodeURIComponent(query.trim())}`);
+    }
+  };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -51,6 +64,7 @@ export default function SearchBar() {
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        onKeyDown={handleKeyDown}
         placeholder="Search movies, shows..."
         className="w-full h-9 rounded-xl border border-white/[0.07] bg-white/[0.04] backdrop-blur-sm pl-9 pr-8 text-xs text-foreground placeholder:text-zinc-600 outline-none focus:border-accent/40 focus:bg-white/[0.07] focus:ring-1 focus:ring-accent/20 transition-all duration-200"
       />

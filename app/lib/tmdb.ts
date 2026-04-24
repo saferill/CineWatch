@@ -9,8 +9,8 @@ function apiKey(): string {
   return key;
 }
 
-async function tmdbFetch<T>(path: string): Promise<T> {
-  const url = `${BASE_URL}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey()}`;
+async function tmdbFetch<T>(path: string, lang = "en-US"): Promise<T> {
+  const url = `${BASE_URL}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey()}&language=${lang}`;
   const res = await fetch(url, { next: { revalidate: 3600 } });
   if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
   return res.json();
@@ -114,9 +114,23 @@ export async function getAnimeMovies(): Promise<Movie[]> {
   return data.results;
 }
 
+export async function getMoviesByGenre(genreId: number): Promise<Movie[]> {
+  const data = await tmdbFetch<TMDBResponse<Movie>>(
+    `/discover/movie?with_genres=${genreId}&sort_by=popularity.desc`
+  );
+  return data.results;
+}
+
 export async function getAnimeTV(): Promise<TVShow[]> {
   const data = await tmdbFetch<TMDBResponse<TVShow>>(
     `/discover/tv?with_genres=${ANIME_GENRE_ID}&sort_by=popularity.desc`
+  );
+  return data.results;
+}
+
+export async function getTVByGenre(genreId: number): Promise<TVShow[]> {
+  const data = await tmdbFetch<TMDBResponse<TVShow>>(
+    `/discover/tv?with_genres=${genreId}&sort_by=popularity.desc`
   );
   return data.results;
 }

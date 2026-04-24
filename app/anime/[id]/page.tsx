@@ -5,7 +5,8 @@ import Navbar from "@/app/components/Navbar";
 import AnimeEpisodes from "@/app/components/AnimeEpisodes";
 import WatchlistButton from "@/app/components/WatchlistButton";
 import { getAnime } from "@/app/lib/anilist";
-import { IconPlayerPlay, IconStar, IconClock, IconCalendar } from "@tabler/icons-react";
+import { IconPlayerPlay, IconStar, IconClock, IconCalendar, IconShare } from "@tabler/icons-react";
+import ShareButton from "@/app/components/ShareButton";
 
 export default async function AnimeDetailPage({
   params,
@@ -145,6 +146,7 @@ export default async function AnimeDetailPage({
                 Watch Now
               </Link>
               <WatchlistButton id={anime.id} type="anime" title={title} poster={anime.coverImage.large || ""} />
+              <ShareButton title={title} />
             </div>
 
             <div className="mt-8">

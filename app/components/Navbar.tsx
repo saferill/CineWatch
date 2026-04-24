@@ -14,10 +14,13 @@ import {
   IconX,
   IconBookmark,
   IconDice5,
+  IconLanguage,
 } from "@tabler/icons-react";
+import LanguageToggle from "./LanguageToggle";
 
 const NAV_LINKS = [
   { href: "/", label: "Home", icon: IconFlame, exact: true },
+  { href: "/explore", label: "Explore", icon: IconDice5, exact: false },
   { href: "/movies", label: "Movies", icon: IconMovie, exact: false },
   { href: "/series", label: "Series", icon: IconDeviceTv, exact: false },
   { href: "/anime", label: "Anime", icon: IconMoodHappy, exact: false },
@@ -114,6 +117,8 @@ export default function Navbar() {
               <IconDice5 className="w-4 h-4" stroke={2} />
               Surprise Me
             </button>
+
+            <LanguageToggle />
 
             {/* Mobile menu button */}
             <button
