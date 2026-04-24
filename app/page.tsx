@@ -3,6 +3,8 @@ import HeroCarousel from "@/app/components/HeroCarousel";
 import MovieGrid from "@/app/components/MovieGrid";
 import ContinueWatching from "@/app/components/ContinueWatching";
 import HomeTabsSection from "@/app/components/HomeTabsSection";
+import LoadMore from "@/app/components/LoadMore";
+import { fetchPopularMovies } from "@/app/actions/movieActions";
 import {
   getTrending,
   getPopular,
@@ -108,6 +110,14 @@ export default async function HomePage({
             topRated: topRatedAnime.media,
           }}
         />
+
+        <div className="pt-10">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-1 h-6 bg-accent rounded-full" />
+            <h2 className="text-2xl font-bold">Discover More</h2>
+          </div>
+          <LoadMore fetchAction={fetchPopularMovies} initialPage={1} />
+        </div>
       </main>
     </>
   );
