@@ -15,6 +15,8 @@ export default function LanguageToggle() {
     const next = lang === "en-US" ? "id-ID" : "en-US";
     setLang(next);
     localStorage.setItem("cinewatch_lang", next);
+    // Set cookie for server-side access
+    document.cookie = `cinewatch_lang=${next}; path=/; max-age=31536000`;
     // Force reload to apply language change globally
     window.location.reload();
   };
