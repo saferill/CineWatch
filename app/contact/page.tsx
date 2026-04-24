@@ -1,5 +1,5 @@
 import Navbar from "@/app/components/Navbar";
-import { IconMail, IconBrandDiscord, IconBrandGithub } from "@tabler/icons-react";
+import { IconMail } from "@tabler/icons-react";
 
 export default function ContactPage() {
   return (
@@ -13,32 +13,21 @@ export default function ContactPage() {
           Connect with us through the channels below.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-8 rounded-3xl glass border border-white/[0.05] hover:border-white/[0.1] transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <IconMail className="w-6 h-6 text-white" />
+        <div className="flex justify-center">
+          <div className="p-10 rounded-[40px] glass border border-white/[0.05] hover:border-white/[0.1] transition-all group max-w-sm w-full text-center">
+            <div className="w-16 h-16 mx-auto rounded-3xl bg-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <IconMail className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-lg font-bold mb-2">Email</h3>
-            <p className="text-zinc-500 text-sm mb-4">Official inquiries and support.</p>
-            <a href="mailto:support@saferill.com" className="text-white font-medium hover:text-accent transition-colors">support@saferill.com</a>
-          </div>
-
-          <div className="p-8 rounded-3xl glass border border-white/[0.05] hover:border-white/[0.1] transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <IconBrandDiscord className="w-6 h-6 text-blue-400" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Discord</h3>
-            <p className="text-zinc-500 text-sm mb-4">Join our community server.</p>
-            <a href="#" className="text-white font-medium hover:text-blue-400 transition-colors">saferill#0000</a>
-          </div>
-
-          <div className="p-8 rounded-3xl glass border border-white/[0.05] hover:border-white/[0.1] transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <IconBrandGithub className="w-6 h-6 text-zinc-300" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">GitHub</h3>
-            <p className="text-zinc-500 text-sm mb-4">Report issues or contribute.</p>
-            <a href="https://github.com/saferill/CineWatch" target="_blank" className="text-white font-medium hover:text-zinc-300 transition-colors">CineWatch Repo</a>
+            <h3 className="text-xl font-bold mb-3">Email Support</h3>
+            <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
+              For any inquiries, support, or feedback, please reach out to us via email.
+            </p>
+            <a 
+              href="mailto:saferill93@gmail.com" 
+              className="inline-block px-6 py-3 rounded-2xl bg-white text-black font-bold hover:scale-105 transition-transform"
+            >
+              saferill93@gmail.com
+            </a>
           </div>
         </div>
 

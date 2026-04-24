@@ -41,9 +41,9 @@ export default function Onboarding() {
           <Image 
             src="/logo.png" 
             alt="CineWatch Logo" 
-            width={240} 
-            height={80} 
-            className="h-16 w-auto object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
+            width={400} 
+            height={140} 
+            className="h-24 sm:h-32 w-auto object-contain drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]"
             priority
           />
         </div>
