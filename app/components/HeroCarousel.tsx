@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Movie } from "@/app/lib/types";
-import { backdropUrl } from "@/app/lib/tmdb";
+import { backdropUrl } from "@/app/lib/tmdb-utils";
 import {
   IconPlayerPlay,
   IconStar,

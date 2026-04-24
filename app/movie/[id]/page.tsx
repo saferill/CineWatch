@@ -5,7 +5,8 @@ import Navbar from "@/app/components/Navbar";
 import TrailerButton from "@/app/components/TrailerButton";
 import WatchlistButton from "@/app/components/WatchlistButton";
 import MovieGrid from "@/app/components/MovieGrid";
-import { getMovie, getMovieCredits, getMovieLogo, getMovieTrailer, getMovieRecommendations, posterUrl, backdropUrl } from "@/app/lib/tmdb";
+import { getMovie, getMovieCredits, getMovieLogo, getMovieTrailer, getMovieRecommendations } from "@/app/lib/tmdb";
+import { posterUrl, backdropUrl } from "@/app/lib/tmdb-utils";
 import { IconPlayerPlay, IconStar, IconClock, IconCalendar, IconUsers, IconShare } from "@tabler/icons-react";
 import ShareButton from "@/app/components/ShareButton";
 

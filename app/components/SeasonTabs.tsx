@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Episode } from "@/app/lib/types";
-import { stillUrl } from "@/app/lib/tmdb";
+import { stillUrl } from "@/app/lib/tmdb-utils";
 import {
   IconPlayerPlay,
   IconStar,

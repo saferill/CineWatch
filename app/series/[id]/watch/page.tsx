@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Player from "@/app/components/Player";
-import { getTVShow, posterUrl } from "@/app/lib/tmdb";
+import { getTVShow } from "@/app/lib/tmdb";
+import { posterUrl } from "@/app/lib/tmdb-utils";
 
 export default async function WatchPage({
   params,

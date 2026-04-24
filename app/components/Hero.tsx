@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Movie } from "@/app/lib/types";
-import { backdropUrl, posterUrl } from "@/app/lib/tmdb";
+import { backdropUrl, posterUrl } from "@/app/lib/tmdb-utils";
 import { IconPlayerPlay, IconStar, IconInfoCircle } from "@tabler/icons-react";
 import WatchlistButton from "./WatchlistButton";
 

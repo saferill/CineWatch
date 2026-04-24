@@ -2,7 +2,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import MovieCard from "@/app/components/MovieCard";
-import { getPerson, getPersonCredits, posterUrl } from "@/app/lib/tmdb";
+import { getPerson, getPersonCredits } from "@/app/lib/tmdb";
+import { posterUrl } from "@/app/lib/tmdb-utils";
 import { IconCake, IconMapPin, IconBriefcase } from "@tabler/icons-react";
 
 function calculateAge(birthday: string | null, deathday: string | null): number | null {

@@ -6,7 +6,8 @@ import SeasonTabs from "@/app/components/SeasonTabs";
 import TrailerButton from "@/app/components/TrailerButton";
 import WatchlistButton from "@/app/components/WatchlistButton";
 import MovieGrid from "@/app/components/MovieGrid";
-import { getTVShow, getTVShowCredits, getTVSeason, getTVLogo, getTVTrailer, getTVRecommendations, posterUrl, backdropUrl } from "@/app/lib/tmdb";
+import { getTVShow, getTVShowCredits, getTVSeason, getTVLogo, getTVTrailer, getTVRecommendations } from "@/app/lib/tmdb";
+import { posterUrl, backdropUrl } from "@/app/lib/tmdb-utils";
 import { IconPlayerPlay, IconStar, IconCalendar, IconDeviceTv, IconUsers, IconShare } from "@tabler/icons-react";
 import ShareButton from "@/app/components/ShareButton";
 

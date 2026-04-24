@@ -28,19 +28,10 @@ async function tmdbFetch<T>(path: string, lang?: string, page = 1): Promise<T> {
   return res.json();
 }
 
-export function posterUrl(path: string | null, size = "w500"): string {
-  if (!path) return "https://placehold.co/500x750/18181b/a1a1aa?text=No+Image";
-  return `${IMAGE_BASE}/${size}${path}`;
-}
-
-export function backdropUrl(path: string | null): string {
-  if (!path) return "https://placehold.co/1280x720/18181b/a1a1aa?text=No+Image";
-  return `${IMAGE_BASE}/w1280${path}`;
-}
-
-export function stillUrl(path: string | null): string {
-  if (!path) return "https://placehold.co/300x169/18181b/a1a1aa?text=No+Image";
-  return `${IMAGE_BASE}/w300${path}`;
+  const url = `${BASE_URL}${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey()}&language=${selectedLang}&page=${page}`;
+  const res = await fetch(url, { next: { revalidate: 3600 } });
+  if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
+  return res.json();
 }
 
 export async function getTrending(): Promise<Movie[]> {
@@ -188,10 +179,7 @@ export async function getTVLogo(id: number): Promise<string | null> {
   return logo ? `${IMAGE_BASE}/w500${logo.file_path}` : null;
 }
 
-export function logoUrl(path: string | null): string {
-  if (!path) return "";
-  return path;
-}
+
 
 async function getVideos(path: string): Promise<Video | null> {
   try {

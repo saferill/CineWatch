@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Movie, TVShow, AnilistAnime } from "@/app/lib/types";
-import { posterUrl } from "@/app/lib/tmdb";
+import { posterUrl } from "@/app/lib/tmdb-utils";
 import { IconStar, IconPlayerPlay } from "@tabler/icons-react";
 
 type MediaItem = Movie | TVShow | AnilistAnime;
