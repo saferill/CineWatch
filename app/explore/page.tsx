@@ -105,7 +105,6 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
               isTV={type === "tv"} 
             />
           </div>
-          </div>
         </div>
       </main>
     </>
