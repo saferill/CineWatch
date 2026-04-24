@@ -144,7 +144,7 @@ export default async function AnimeDetailPage({
                 <IconPlayerPlay className="w-5 h-5" fill="currentColor" stroke={1.5} />
                 Watch Now
               </Link>
-              <WatchlistButton id={anime.id} type="anime" title={title} poster={anime.coverImage.large} />
+              <WatchlistButton id={anime.id} type="anime" title={title} poster={anime.coverImage.large || ""} />
             </div>
 
             <div className="mt-8">
