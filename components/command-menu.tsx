@@ -235,22 +235,7 @@ export function CommandMenu({ ...props }: CommandDialogProps) {
               <Home className="mr-2 size-4" />
               Home
             </CommandItem>
-            <CommandItem
-              className="cursor-pointer"
-              onSelect={() =>
-                runCommand(() =>
-                  window.open(siteConfig.author.website, '_blank')
-                )
-              }
-            >
-              <div className="flex items-center gap-4">
-                <Avatar>
-                  <AvatarImage src="/personal-logo.png" />
-                  <AvatarFallback>G</AvatarFallback>
-                </Avatar>
-                Portfolio
-              </div>
-            </CommandItem>
+
             <CommandItem
               className="cursor-pointer"
               onSelect={() =>
