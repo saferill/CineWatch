@@ -1,7 +1,7 @@
 import { IMAGE_CACHE_HOST_URL } from './constants'
 
 const apiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_TMDB_BASEURL,
+  baseUrl: process.env.NEXT_PUBLIC_TMDB_BASEURL || 'https://api.themoviedb.org/3/',
   apiKey: process.env.TMDB_API_KEY,
   headerKey: process.env.TMDB_HEADER_KEY,
   originalImage: (imgPath: string) =>
