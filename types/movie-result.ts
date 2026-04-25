@@ -29,7 +29,7 @@ interface MovieResponse {
 
 type Param = Record<string, string | number>
 
-type ItemType = 'movie' | 'tv'
+type ItemType = 'movie' | 'tv' | 'person'
 
 interface MultiRequestProps {
   trendingMediaForHero: Movie[]

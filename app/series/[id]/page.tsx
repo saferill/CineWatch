@@ -114,9 +114,9 @@ const SeriesPage = async (props: PageDetailsProps) => {
 
   const jsonLd = tvSeriesJsonLd({
     id: seriesDetails.id,
-    title: seriesDetails.name,
+    name: seriesDetails.name,
     description: seriesDetails.overview,
-    releaseDate: seriesDetails.first_air_date,
+    firstAirDate: seriesDetails.first_air_date,
     genres: seriesDetails.genres?.map((g) => g.name),
     imageUrl: seriesDetails.backdrop_path
       ? getImageURL(seriesDetails.backdrop_path)
