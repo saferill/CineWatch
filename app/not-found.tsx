@@ -1,11 +1,11 @@
 import Link from "next/link";
-import Navbar from "@/app/components/Navbar";
+
 import { IconHome, IconSearch } from "@tabler/icons-react";
 
 export default function NotFound() {
   return (
     <>
-      <Navbar />
+      
       <main className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
         <h1 className="text-9xl font-bold text-accent">404</h1>
         <p className="text-2xl font-semibold mt-4">Page Not Found</p>

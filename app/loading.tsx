@@ -1,9 +1,9 @@
-import Navbar from "@/app/components/Navbar";
+
 
 export default function Loading() {
   return (
     <>
-      <Navbar />
+      
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-10 animate-pulse">
         {/* Hero Skeleton */}
         <div className="w-full h-[260px] sm:h-[360px] md:h-[460px] lg:h-[540px] bg-white/[0.03] rounded-2xl border border-white/[0.05]" />

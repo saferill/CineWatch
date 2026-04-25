@@ -1,4 +1,4 @@
-import Navbar from "@/app/components/Navbar";
+
 import MovieCard from "@/app/components/MovieCard";
 import LoadMore from "@/app/components/LoadMore";
 import { getMoviesByGenre, getTVByGenre } from "@/app/lib/tmdb";
@@ -32,7 +32,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <Navbar />
+      
       <main className="mx-auto max-w-7xl px-6 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>

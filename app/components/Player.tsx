@@ -191,7 +191,7 @@ export default function Player({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col z-50">
+    <div className="legacy-theme fixed inset-0 bg-black flex flex-col z-[9999]">
       <div className="flex items-center justify-between h-14 px-4 sm:px-6 bg-black/80 backdrop-blur-xl border-b border-glass-border shrink-0">
         <Link
           href={

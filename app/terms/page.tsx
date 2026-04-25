@@ -1,9 +1,9 @@
-import Navbar from "@/app/components/Navbar";
+
 
 export default function TermsPage() {
   return (
     <>
-      <Navbar />
+      
       <main className="mx-auto max-w-4xl px-6 py-20">
         <h1 className="text-4xl font-black mb-8 tracking-tight">Terms of Service</h1>
         

@@ -1,51 +1,63 @@
-import Navbar from "@/app/components/Navbar";
-import MovieGrid from "@/app/components/MovieGrid";
-import LoadMore from "@/app/components/LoadMore";
-import { getPopular, getTopRated, getTrending } from "@/app/lib/tmdb";
-import { fetchPopularMovies } from "@/app/actions/movieActions";
-import { IconMovie, IconArrowRight } from "@tabler/icons-react";
+import React from 'react'
+import { Metadata } from 'next'
+import { getPopularMovies } from '@/services/movies'
 
-export const metadata = {
-  title: "Movies — CineWatch",
-  description: "Browse trending, popular, and top rated movies.",
-};
+import { siteConfig } from '@/config/site'
+import { QUERY_KEYS } from '@/lib/queryKeys'
+import {
+  breadcrumbJsonLd,
+  collectionPageJsonLd,
+  JsonLd,
+} from '@/lib/structured-data'
+import { MediaContent } from '@/components/media/media-content'
 
-export default async function MoviesPage() {
-  const [trending, popular, topRated] = await Promise.all([
-    getTrending(),
-    getPopular(),
-    getTopRated(),
-  ]);
+const MOVIES_TITLE = `Movies — Browse Popular, Trending & Top Rated`
+const MOVIES_DESCRIPTION =
+  'Browse popular, trending, and top-rated movies. Filter by genre, year, and rating to find your next watch on CineWatch.'
+const MOVIES_URL = `${siteConfig.websiteURL}/movies`
 
-  return (
-    <>
-      <Navbar />
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center">
-            <IconMovie className="w-6 h-6 text-accent" stroke={2} />
-          </div>
-          <div>
-            <p className="text-xs text-zinc-600 font-medium uppercase tracking-widest">Browse</p>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Movies</h1>
-          </div>
-        </div>
-
-        <div className="space-y-12">
-          <MovieGrid movies={trending} title="Trending Now" />
-          <MovieGrid movies={popular} title="Most Popular" />
-          <MovieGrid movies={topRated} title="Top Rated All Time" />
-          
-          <div className="pt-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-1 h-6 bg-accent rounded-full" />
-              <h2 className="text-2xl font-bold">Discover More</h2>
-            </div>
-            <LoadMore fetchAction={fetchPopularMovies} initialPage={1} />
-          </div>
-        </div>
-      </main>
-    </>
-  );
+export const metadata: Metadata = {
+  title: 'Movies',
+  description: MOVIES_DESCRIPTION,
+  keywords: [
+    'popular movies',
+    'trending movies',
+    'top rated movies',
+    'new releases',
+    'movie tracker',
+  ],
+  alternates: {
+    canonical: '/movies',
+  },
 }
+
+async function Movies() {
+  const movies = await getPopularMovies()
+  return (
+    <section className="container h-full py-20 lg:py-36">
+      <JsonLd
+        data={collectionPageJsonLd({
+          name: MOVIES_TITLE,
+          description: MOVIES_DESCRIPTION,
+          url: MOVIES_URL,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', url: '/' },
+          { name: 'Movies', url: '/movies' },
+        ])}
+      />
+      <MediaContent
+        media={movies}
+        getPopularMediaAction={getPopularMovies}
+        queryKey={QUERY_KEYS.MOVIES_KEY}
+        enableFilters={true}
+        filterLayout="sidebar"
+        title="Movies"
+      />
+    </section>
+  )
+}
+
+export default Movies

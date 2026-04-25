@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/app/components/Navbar";
+
 import { useWatchlist } from "@/app/hooks/useWatchlist";
 import MovieCard from "@/app/components/MovieCard";
 import { IconBookmarkOff } from "@tabler/icons-react";
@@ -11,7 +11,7 @@ export default function WatchlistPage() {
 
   return (
     <>
-      <Navbar />
+      
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-10">
           <p className="text-xs text-zinc-600 font-medium uppercase tracking-widest">Your Collection</p>

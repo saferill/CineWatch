@@ -1,4 +1,4 @@
-import Navbar from "@/app/components/Navbar";
+
 import MovieGrid from "@/app/components/MovieGrid";
 import LoadMore from "@/app/components/LoadMore";
 import { getTrendingAnime, getPopularAnime, getTopRatedAnime } from "@/app/lib/anilist";
@@ -19,7 +19,7 @@ export default async function AnimePage() {
 
   return (
     <>
-      <Navbar />
+      
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center gap-4 mb-10">

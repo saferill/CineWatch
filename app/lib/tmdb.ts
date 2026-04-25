@@ -195,3 +195,7 @@ export async function getMovieTrailer(id: number): Promise<Video | null> {
 export async function getTVTrailer(id: number): Promise<Video | null> {
   return getVideos(`/tv/${id}`);
 }
+
+export async function getTVSeasonTrailer(tvId: number, seasonNumber: number): Promise<Video | null> {
+  return getVideos(`/tv/${tvId}/season/${seasonNumber}`);
+}

@@ -1,124 +1,83 @@
-import Navbar from "@/app/components/Navbar";
-import HeroCarousel from "@/app/components/HeroCarousel";
-import MovieGrid from "@/app/components/MovieGrid";
-import ContinueWatching from "@/app/components/ContinueWatching";
-import HomeTabsSection from "@/app/components/HomeTabsSection";
-import LoadMore from "@/app/components/LoadMore";
-import { fetchPopularMovies } from "@/app/actions/movieActions";
+import React, { Suspense } from 'react'
+import { Metadata } from 'next'
+import { populateHomePageData } from '@/services/movies'
+
+import { siteConfig } from '@/config/site'
 import {
-  getTrending,
-  getPopular,
-  getTopRated,
-  getTrendingTV,
-  getPopularTV,
-  getTopRatedTV,
-  searchMovies,
-  searchTVShows,
-  getMovieLogo,
-} from "@/app/lib/tmdb";
-import {
-  getTrendingAnime,
-  getPopularAnime,
-  getTopRatedAnime,
-  searchAnime,
-} from "@/app/lib/anilist";
+  breadcrumbJsonLd,
+  collectionPageJsonLd,
+  JsonLd,
+} from '@/lib/structured-data'
+import { HeroSlider } from '@/components/header/hero-slider'
+import { FullScreenLoader } from '@/components/loaders/intro-pages-loader'
+import { MoviesIntroSection } from '@/components/main-page/intro-section'
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-  const query = typeof params.q === "string" ? params.q : undefined;
+const HOME_DESCRIPTION =
+  'Discover trending movies and TV shows, track what you watch, and never miss a release. CineWatch brings the latest, top-rated, and popular titles into one seamless experience.'
 
-  if (query) {
-    const [movies, tvShows, anime] = await Promise.all([
-      searchMovies(query),
-      searchTVShows(query),
-      searchAnime(query),
-    ]);
+export const metadata: Metadata = {
+  title: `CineWatch — Discover & Track Movies and TV Shows`,
+  description: HOME_DESCRIPTION,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: `CineWatch — Discover & Track Movies and TV Shows`,
+    description: HOME_DESCRIPTION,
+    url: siteConfig.websiteURL,
+    type: 'website',
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'CineWatch Logo',
+      },
+    ],
+  },
+  twitter: {
+    title: `CineWatch — Discover & Track Movies and TV Shows`,
+    description: HOME_DESCRIPTION,
+    images: ['/logo.png'],
+  },
+}
 
-    return (
-      <>
-        <Navbar />
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-          {/* Search header */}
-          <div>
-            <p className="text-sm text-zinc-500 mb-1">Search results for</p>
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              &ldquo;<span className="text-gradient-accent">{query}</span>&rdquo;
-            </h1>
-          </div>
-          <MovieGrid movies={movies} title="Movies" viewAllHref="/movies" />
-          {tvShows.length > 0 && (
-            <MovieGrid movies={tvShows} title="TV Series" isTV viewAllHref="/series" />
-          )}
-          {anime.media.length > 0 && (
-            <MovieGrid movies={anime.media} title="Anime" isAnime viewAllHref="/anime" />
-          )}
-        </main>
-      </>
-    );
-  }
-
-  const [
-    trending,
-    popular,
-    topRated,
-    trendingTV,
-    popularTV,
-    topRatedTV,
-    trendingAnime,
-    popularAnime,
-    topRatedAnime,
-  ] = await Promise.all([
-    getTrending(),
-    getPopular(),
-    getTopRated(),
-    getTrendingTV(),
-    getPopularTV(),
-    getTopRatedTV(),
-    getTrendingAnime(undefined, 10),
-    getPopularAnime(undefined, 10),
-    getTopRatedAnime(undefined, 10),
-  ]);
-
-  const featured = trending.slice(0, 5);
-  const logos = await Promise.all(
-    featured.map((m) => getMovieLogo(m.id).catch(() => null))
-  );
+async function IndexPage() {
+  const {
+    trendingMediaForHero,
+    latestTrendingMovies,
+    allTimeTopRatedMovies,
+    popularMovies,
+    latestTrendingSeries,
+    popularSeries,
+    allTimeTopRatedSeries,
+  } = await populateHomePageData()
 
   return (
-    <>
-      <Navbar />
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-10">
-        {/* Hero Carousel */}
-        {featured.length > 0 && (
-          <HeroCarousel movies={featured} logos={logos} />
-        )}
-
-        {/* Continue Watching */}
-        <ContinueWatching />
-
-        {/* Category Tabs */}
-        <HomeTabsSection
-          moviesData={{ trending, popular, topRated }}
-          seriesData={{ trendingTV, popularTV, topRatedTV }}
-          animeData={{
-            trending: trendingAnime.media,
-            popular: popularAnime.media,
-            topRated: topRatedAnime.media,
-          }}
-        />
-
-        <div className="pt-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-1 h-6 bg-accent rounded-full" />
-            <h2 className="text-2xl font-bold">Discover More</h2>
-          </div>
-          <LoadMore fetchAction={fetchPopularMovies} initialPage={1} />
-        </div>
-      </main>
-    </>
-  );
+    <section className="h-full">
+      <JsonLd
+        data={collectionPageJsonLd({
+          name: `CineWatch — Home`,
+          description: HOME_DESCRIPTION,
+          url: siteConfig.websiteURL,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([{ name: 'Home', url: '/' }])}
+      />
+      <Suspense fallback={<FullScreenLoader />}>
+        <HeroSlider movies={latestTrendingMovies.slice(0, 10)} />
+      </Suspense>
+      <MoviesIntroSection
+        latestTrendingMovies={latestTrendingMovies}
+        allTimeTopRatedMovies={allTimeTopRatedMovies}
+        popularMovies={popularMovies}
+        latestTrendingSeries={latestTrendingSeries}
+        popularSeries={popularSeries}
+        allTimeTopRatedSeries={allTimeTopRatedSeries}
+      />
+    </section>
+  )
 }
+
+export default IndexPage

@@ -1,10 +1,10 @@
-import Navbar from "@/app/components/Navbar";
+
 import { IconMail } from "@tabler/icons-react";
 
 export default function ContactPage() {
   return (
     <>
-      <Navbar />
+      
       <main className="mx-auto max-w-4xl px-6 py-20">
         <h1 className="text-4xl font-black mb-8 tracking-tight">Contact Us</h1>
         

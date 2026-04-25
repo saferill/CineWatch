@@ -15,20 +15,20 @@ interface AnimePlayerProps {
 }
 
 const EMBED_PROVIDERS = [
-  { 
-    name: "VidNest (Sub)", 
+  {
+    name: "VidNest (Sub)",
     getUrl: (title: string, ep: number, anilistId: number) => {
       return `https://vidnest.fun/anime/${anilistId}/${ep}/sub`;
     }
   },
-  { 
-    name: "VidNest (Dub)", 
+  {
+    name: "VidNest (Dub)",
     getUrl: (title: string, ep: number, anilistId: number) => {
       return `https://vidnest.fun/anime/${anilistId}/${ep}/dub`;
     }
   },
-  { 
-    name: "VidNest (Hindi)", 
+  {
+    name: "VidNest (Hindi)",
     getUrl: (title: string, ep: number, anilistId: number) => {
       return `https://vidnest.fun/anime/${anilistId}/${ep}/hindi`;
     }
@@ -71,7 +71,7 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
   }, [animeId, animeTitle, episode, poster]);
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col z-50">
+    <div className="legacy-theme fixed inset-0 bg-black flex flex-col z-50">
       <div className="flex items-center justify-between h-14 px-6 bg-black/80 backdrop-blur-xl border-b border-glass-border shrink-0">
         <Link
           href={`/anime/${animeId}`}
