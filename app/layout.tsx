@@ -67,19 +67,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'CineWatch — Watch Movies, Series & Anime',
     description: "Discover and watch movies, TV series, and anime instantly. Powered by TMDB & Anilist.",
-    images: ['/logo.png'],
-  },
-  icons: {
-    icon: [
-      { url: '/logo.png', sizes: 'any' },
-    ],
-    apple: [
-      {
-        url: '/logo.png',
-        sizes: '180x180',
-        type: 'image/png',
-      },
-    ],
   },
 }
 
