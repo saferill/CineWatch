@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="public/opengraph-image.png" alt="CineWatch Banner" width="100%" />
   
   <br />
   <br />
