@@ -16,7 +16,7 @@ export const HeroSlider = async ({ movies }: { movies: Movie[] }) => {
        const logo = movie.media_type === 'tv' ? await getTVLogo(movie.id) : await getMovieLogo(movie.id);
        return { ...movie, trailerId: trailer?.key, logoUrl: logo };
     } catch {
-       return movie;
+       return { ...movie, trailerId: undefined, logoUrl: null };
     }
   }));
 
