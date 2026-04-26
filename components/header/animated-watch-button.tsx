@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { ItemType } from '@/types/movie-result'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
-import { Icons } from '@/components/icons'
+import { Play } from 'lucide-react'
 
 interface AnimatedWatchButtonProps {
   movieId: number
@@ -35,8 +35,8 @@ export const AnimatedWatchButton = ({
 
   return (
     <motion.div
-      className={cn('flex justify-center lg:w-fit lg:justify-start')}
-      whileHover={{ scale: 1.1 }}
+      className={cn('flex justify-center w-full lg:w-fit lg:justify-start')}
+      whileHover={{ scale: 1.05 }}
       transition={{ type: 'spring', stiffness: 500 }}
       initial={shouldAnimate ? { opacity: 0, y: 80 } : { opacity: 1, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
@@ -44,16 +44,14 @@ export const AnimatedWatchButton = ({
       <Link
         href={href}
         className={cn(
-          'mt-6',
           buttonVariants({
             variant: 'watchNow',
-            size: '2xl',
-            className: 'rounded-full',
+            className: 'w-full rounded-md font-semibold lg:font-bold px-4 lg:px-6 py-2 lg:py-3 h-10 lg:h-12 flex items-center justify-center whitespace-nowrap',
           })
         )}
       >
-        <Icons.menu className="mr-2" />
-        More Details
+        <Play className="mr-2 size-4 lg:size-5 fill-current" />
+        Play
       </Link>
     </motion.div>
   )

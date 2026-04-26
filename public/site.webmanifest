@@ -1,6 +1,6 @@
 {
-  "name": "Reely — Movie & TV Show Tracker",
-  "short_name": "Reely",
+  "name": "CineWatch — Movie & TV Show Tracker",
+  "short_name": "CineWatch",
   "description": "Discover, track, and watch trending movies and TV shows all in one place.",
   "start_url": "/",
   "scope": "/",
@@ -13,19 +13,19 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/android-chrome-192x192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android-chrome-512x512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/logo.png",
       "sizes": "180x180",
       "type": "image/png"
     }
@@ -35,13 +35,13 @@
       "name": "Browse Movies",
       "short_name": "Movies",
       "url": "/movies",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     },
     {
       "name": "Browse TV Shows",
       "short_name": "TV",
       "url": "/tv-shows",
-      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     }
   ]
 }

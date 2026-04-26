@@ -75,6 +75,9 @@ interface RootLayoutProps {
 }
 
 import { Onboarding } from '@/components/onboarding'
+import { SplashScreen } from '@/components/splash-screen'
+import { MobileBottomNav } from '@/components/layouts/mobile-bottom-nav'
+import { AntiInspect } from '@/components/anti-inspect'
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -92,8 +95,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable
         )}
       >
+        <AntiInspect />
+        <SplashScreen />
         <Onboarding />
-        <div className="flex flex-col">
+        <div className="flex flex-col pb-16 lg:pb-0"> {/* Added pb-16 for mobile bottom nav */}
           <SiteHeader />
           <div className="h-full flex-1 overflow-x-hidden">
             <NuqsAdapter>
@@ -103,6 +108,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </NuqsAdapter>
             <ToastProvider />
             <Footer />
+            <MobileBottomNav />
             {GOOGLE_GTM_ID && <GoogleTagManager gtmId={GOOGLE_GTM_ID} />}
           </div>
         </div>

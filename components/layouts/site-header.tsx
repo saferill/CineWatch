@@ -13,13 +13,14 @@ import { MobileNav } from '@/components/layouts/mobile-nav'
 
 export function SiteHeader() {
   const { isShowNavBackground } = useNavbarScrollOverlay()
+  
   return (
     <header
       className={cn(
-        'fixed inset-x-0 top-0 z-40 w-full transition duration-200',
-        {
-          'bg-background/80': isShowNavBackground,
-        }
+        'fixed inset-x-0 top-0 z-40 w-full transition-all duration-500',
+        isShowNavBackground 
+          ? 'bg-zinc-950/95 shadow-md backdrop-blur-sm' 
+          : 'bg-gradient-to-b from-black/80 via-black/30 to-transparent'
       )}
     >
       <div className="container flex h-16 max-w-(--breakpoint-2xl) items-center space-x-4 sm:justify-between sm:space-x-0">
@@ -29,7 +30,6 @@ export function SiteHeader() {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <CommandMenu />
           </div>
-
         </div>
       </div>
     </header>

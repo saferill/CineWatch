@@ -25,6 +25,9 @@ interface ListProps {
 }
 
 export const List = ({ title, items, itemType = 'movie' }: ListProps) => {
+  const isTop10 = title.toLowerCase().includes('top rated') || title.toLowerCase().includes('top 10')
+  const displayItems = isTop10 ? items.slice(0, 10) : items
+
   return (
     <nav className="py-10">
       <motion.div
@@ -58,9 +61,11 @@ export const List = ({ title, items, itemType = 'movie' }: ListProps) => {
           </motion.span>
         </Link>
       </motion.div>
+      
       {items.length === 0 && (
         <p className="text-lg text-gray-400">No items to show</p>
       )}
+      
       {items.length > 0 && (
         <Splide
           options={{
@@ -71,9 +76,9 @@ export const List = ({ title, items, itemType = 'movie' }: ListProps) => {
             autoWidth: true,
           }}
         >
-          {items.map((item) => (
-            <SplideSlide key={item.id}>
-              <Card item={item} itemType={itemType} />
+          {displayItems.map((item, index) => (
+            <SplideSlide key={`${item.id}-${index}`}>
+              <Card item={item} itemType={itemType} rank={isTop10 ? index + 1 : undefined} />
             </SplideSlide>
           ))}
         </Splide>

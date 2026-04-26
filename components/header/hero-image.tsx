@@ -1,4 +1,7 @@
+'use client'
+
 import React from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 import { MovieDetails } from '@/types/movie-details'
 import { Movie } from '@/types/movie-result'
@@ -14,8 +17,14 @@ interface HeroImageProps {
 export const HeroImage = ({ movie }: HeroImageProps) => {
   const media = movie
   const alt = media?.title || media?.name || 'ALT TEXT'
+
+  // Parallax & Fade Effect Hooks
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 600], [0, 200])
+  const opacity = useTransform(scrollY, [0, 500], [1, 0])
+
   return (
-    <>
+    <motion.div style={{ y, opacity }} className="absolute inset-0 w-full h-full scale-[1.1] origin-top">
       {media?.backdrop_path && (
         <BlurredImage
           src={getImageURL(media?.backdrop_path)}
@@ -38,6 +47,6 @@ export const HeroImage = ({ movie }: HeroImageProps) => {
           priority
         />
       )}
-    </>
+    </motion.div>
   )
 }

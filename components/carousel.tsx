@@ -164,7 +164,7 @@ export function Carousel({
       {/* Enhanced Navigation Dots with smooth animations */}
       {hasMultipleSlides && (
         <motion.div
-          className="absolute bottom-3 left-1/2 z-30 -translate-x-1/2 px-2 sm:bottom-6 sm:px-4"
+          className="absolute bottom-1.5 sm:bottom-6 left-1/2 z-50 -translate-x-1/2 px-2 sm:px-4"
           initial={CAROUSEL_NAVIGATION_VARIANTS.initial}
           animate={CAROUSEL_NAVIGATION_VARIANTS.animate(isMounted)}
           transition={CAROUSEL_NAVIGATION_VARIANTS.transition}

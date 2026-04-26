@@ -6,9 +6,9 @@ export const siteConfig = {
 
   // Author and creator information
   author: {
-    name: 'CineWatch Team',
+    name: 'saferill',
     email: 'contact@cinewatch.com',
-    website: 'https://cinewatch.com/',
+    website: 'https://github.com/saferill',
     twitter: '@CineWatch',
   },
 
@@ -147,7 +147,7 @@ export const siteConfig = {
   personalLogo: '/logo.png',
   links: {
     twitter: 'https://twitter.com/CineWatch',
-    github: 'https://github.com/CineWatch',
+    github: 'https://github.com/saferill',
     website: 'https://cinewatch.com/',
     buyMeACoffee: 'https://buymeacoffee.com/cinewatch',
   },

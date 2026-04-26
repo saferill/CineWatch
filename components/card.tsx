@@ -1,106 +1,166 @@
-import React from 'react'
+'use client'
+
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { CalendarDays, Play } from 'lucide-react'
+import { Play, Info, Plus } from 'lucide-react'
 
 import { MediaType } from '@/types/media'
 import { ItemType } from '@/types/movie-result'
-import { CARD_VARIANT } from '@/lib/motion-variants'
 import {
-  dateFormatter,
   getPosterImageURL,
-  itemRedirect,
+  getImageURL,
   itemDetailRedirect,
   numberRounder,
 } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card'
 import { BlurredImage } from '@/components/blurred-image'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { getTrailerAction } from '@/actions/media'
 
 interface CardProps {
   item: MediaType
   itemType?: ItemType
   isTruncateOverview?: boolean
+  rank?: number
 }
 
 export const Card = ({
   item,
   itemType = 'movie',
   isTruncateOverview = true,
+  rank,
 }: CardProps) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [trailerId, setTrailerId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isOpen && !trailerId) {
+      getTrailerAction(item.id, itemType as 'movie' | 'tv').then((key) => {
+        if (key) setTrailerId(key)
+      })
+    }
+  }, [isOpen, item.id, itemType, trailerId])
+
+  const year = item?.release_date?.slice(0, 4) || item?.first_air_date?.slice(0, 4) || 'N/A'
+  // Netflix-style match percentage (fake formula for visual effect based on rating)
+  const matchScore = item.vote_average ? Math.round(item.vote_average * 10) : 0
+
   return (
-    <HoverCard>
-      <HoverCardTrigger asChild>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
         {item?.poster_path && (
-          <Link href={`${itemDetailRedirect(itemType)}/${item.id}`}>
-            <motion.div
-              initial="rest"
-              whileHover="hover"
-              animate="rest"
-              className="pointer-events-none lg:pointer-events-auto"
-            >
-              <motion.div className="group relative overflow-hidden rounded-md shadow-lg shadow-black/50 transition-all duration-300 hover:shadow-cyan-500/20" variants={CARD_VARIANT}>
-                <BlurredImage
-                  src={`${getPosterImageURL(item.poster_path)}`}
-                  alt={item.title || item.name || 'Movie'}
-                  width={250}
-                  height={375}
-                  className="cursor-pointer object-cover transition-all duration-500 group-hover:scale-105"
-                />
-                <div className="absolute left-2 top-2 z-20 flex flex-col gap-1.5">
-                  <Badge variant="secondary" className="w-fit bg-black/60 text-[10px] text-white backdrop-blur-md">
-                    HD
-                  </Badge>
-                  {item.vote_average ? (
-                    <Badge variant="secondary" className="w-fit bg-cyan-500/80 text-[10px] text-white backdrop-blur-md">
-                      ★ {(item.vote_average).toFixed(1)}
-                    </Badge>
-                  ) : null}
-                </div>
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100">
-                  <div className="flex size-14 items-center justify-center rounded-full bg-cyan-500/90 shadow-[0_0_20px_rgba(6,182,212,0.6)] transition-transform duration-300 hover:bg-cyan-400 group-hover:scale-110">
-                    <Play className="ml-1 size-6 fill-white text-white" />
+          <motion.div
+            className="relative cursor-pointer group w-full h-full"
+            initial="rest"
+            whileHover="hover"
+            animate="rest"
+          >
+            <div className="space-y-2">
+              <motion.div 
+                className="relative overflow-visible rounded-md transition-all duration-300 z-10 hover:z-50 flex items-end"
+                whileHover={{ scale: 1.10, y: -5 }}
+              >
+                {rank && (
+                  <div 
+                    className="text-[100px] lg:text-[140px] font-black leading-none tracking-tighter text-black flex-shrink-0 -mr-6 lg:-mr-10 z-0 drop-shadow-lg"
+                    style={{ WebkitTextStroke: '3px #555', WebkitTextFillColor: 'black' }}
+                  >
+                    {rank}
+                  </div>
+                )}
+                <div className="relative">
+                  <BlurredImage
+                    src={`${getPosterImageURL(item.poster_path)}`}
+                    alt={item.title || item.name || 'Movie'}
+                    width={250}
+                    height={375}
+                    className={rank ? "w-[120px] lg:w-[150px] h-auto object-cover rounded-md shadow-lg transition-shadow group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] z-10 relative" : "w-[160px] lg:w-[200px] h-auto object-cover rounded-md shadow-lg transition-shadow group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] z-10 relative"}
+                  />
+                  
+                  {/* Overlay on Hover */}
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 rounded-md">
+                     <div className="flex size-12 lg:size-14 items-center justify-center rounded-full border-2 border-white bg-black/40 hover:bg-white hover:text-black text-white transition-all transform scale-90 group-hover:scale-100 shadow-xl">
+                       <Play className="ml-1 size-5 lg:size-6 fill-current" />
+                     </div>
+                     <p className="mt-4 text-[10px] lg:text-xs font-semibold tracking-wide text-white drop-shadow-md">QUICK VIEW</p>
                   </div>
                 </div>
               </motion.div>
-            </motion.div>
-          </Link>
+              
+              {/* Title under card */}
+              <h3 className="text-sm font-medium text-slate-300 line-clamp-1 group-hover:text-white transition-colors px-1">
+                {item.title || item.name}
+              </h3>
+            </div>
+          </motion.div>
         )}
-      </HoverCardTrigger>
-      <HoverCardContent className="hidden w-80 md:block" side="right">
-        <div className="flex justify-between space-x-4">
-          <Avatar>
-            <AvatarImage src="/personal-logo.png" />
-            <AvatarFallback>VC</AvatarFallback>
-          </Avatar>
-          <div className="space-y-1">
-            <div className="flex items-center justify-between gap-2">
-              <h4 className="text-sm font-semibold">
-                {item?.title} ({item?.release_date?.slice(0, 4)})
-              </h4>
-              <Badge>{numberRounder(item.vote_average)}</Badge>
-            </div>
-            <p className="text-sm">
-              {isTruncateOverview && item.overview.length > 100 ? (
-                <>{item.overview.slice(0, 100)}...</>
-              ) : (
-                item.overview.slice(0, 400)
-              )}
-            </p>
-            <div className="flex items-center pt-2">
-              <CalendarDays className="mr-2 size-4 opacity-70" />{' '}
-              <span className="text-xs text-muted-foreground">
-                {dateFormatter(item?.release_date, true)}
-              </span>
-            </div>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden bg-[#141414] border-zinc-800 text-white rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+        {/* Modal Header: Video Background */}
+        <div className="relative w-full h-[350px] bg-black overflow-hidden">
+          {trailerId ? (
+            <iframe
+              className="absolute top-1/2 left-1/2 w-[150%] h-[150%] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-80"
+              src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailerId}&modestbranding=1`}
+              allow="autoplay; encrypted-media"
+            />
+          ) : (
+            <img 
+              src={item.backdrop_path ? getImageURL(item.backdrop_path) : getPosterImageURL(item.poster_path)}
+              className="w-full h-full object-cover opacity-60"
+              alt="Backdrop"
+            />
+          )}
+          
+          {/* Gradients */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#141414] to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#141414]/50 to-transparent" />
+          
+          <div className="absolute bottom-6 left-8 right-8 flex items-end justify-between z-10">
+            <h2 className="text-3xl font-extrabold max-w-[80%] drop-shadow-2xl tracking-tight">
+              {item.title || item.name}
+            </h2>
           </div>
         </div>
-      </HoverCardContent>
-    </HoverCard>
+
+        {/* Modal Body: Info & Actions */}
+        <div className="p-8 pt-2 space-y-6">
+          <div className="flex items-center gap-4 text-sm font-bold tracking-wide">
+            {matchScore > 0 && <span className="text-green-500">{matchScore}% Match</span>}
+            <span className="text-slate-300">{year}</span>
+            <Badge variant="outline" className="text-[10px] uppercase text-slate-300 border-zinc-600 px-2 py-0.5 rounded-sm bg-zinc-800/50">HD</Badge>
+          </div>
+          
+          <p className="text-sm text-zinc-300 leading-relaxed max-w-[90%]">
+            {item.overview || "No synopsis available for this title."}
+          </p>
+          
+          <div className="flex items-center gap-3 pt-4 border-t border-zinc-800/50 mt-4">
+            <Link 
+              href={`${itemDetailRedirect(itemType)}/${item.id}`} 
+              className="flex items-center justify-center gap-2 rounded-md bg-white px-8 py-2.5 font-bold text-black transition-colors hover:bg-zinc-200"
+              onClick={() => setIsOpen(false)}
+            >
+              <Play className="size-5 fill-black" />
+              Play
+            </Link>
+            
+            <button className="flex size-10 items-center justify-center rounded-full border-2 border-zinc-500 bg-zinc-900 hover:border-white transition-colors group">
+              <Plus className="size-5 group-hover:scale-110 transition-transform" />
+            </button>
+            
+            <Link 
+              href={`${itemDetailRedirect(itemType)}/${item.id}`} 
+              className="flex size-10 items-center justify-center rounded-full border-2 border-zinc-500 bg-zinc-900 hover:border-white transition-colors ml-auto group"
+              onClick={() => setIsOpen(false)}
+            >
+              <Info className="size-5 group-hover:scale-110 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

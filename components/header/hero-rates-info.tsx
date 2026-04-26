@@ -45,7 +45,7 @@ export const HeroRatesInfos = ({
   }
 
   return (
-    <div className="my-4 flex flex-wrap items-center gap-2 lg:gap-3">
+    <div className="my-2 md:my-4 flex flex-wrap justify-center md:justify-start items-center gap-2 lg:gap-3">
       <Badge className="uppercase">{item?.original_language}</Badge>
       <Badge className="uppercase">{item?.adult ? 'NC-17' : 'PG-13'}</Badge>
       <div className="flex items-center text-xs lg:text-base">

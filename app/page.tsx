@@ -12,6 +12,8 @@ import { HeroSlider } from '@/components/header/hero-slider'
 import { FullScreenLoader } from '@/components/loaders/intro-pages-loader'
 import { MoviesIntroSection } from '@/components/main-page/intro-section'
 
+export const dynamic = 'force-dynamic'
+
 const HOME_DESCRIPTION =
   'Discover trending movies and TV shows, track what you watch, and never miss a release. CineWatch brings the latest, top-rated, and popular titles into one seamless experience.'
 
@@ -53,6 +55,18 @@ async function IndexPage() {
     allTimeTopRatedSeries,
   } = await populateHomePageData()
 
+  // Combine multiple sources to get 50 unique items for the Hero Slider
+  const combinedHeroMovies = [
+    ...latestTrendingMovies,
+    ...popularMovies,
+    ...latestTrendingSeries,
+    ...allTimeTopRatedMovies,
+    ...popularSeries
+  ];
+  
+  // Remove duplicates
+  const uniqueHeroMovies = Array.from(new Map(combinedHeroMovies.map(item => [item.id, item])).values()).slice(0, 50);
+
   return (
     <section className="h-full">
       <JsonLd
@@ -66,7 +80,7 @@ async function IndexPage() {
         data={breadcrumbJsonLd([{ name: 'Home', url: '/' }])}
       />
       <Suspense fallback={<FullScreenLoader />}>
-        <HeroSlider movies={latestTrendingMovies.slice(0, 10)} />
+        <HeroSlider movies={uniqueHeroMovies as any} />
       </Suspense>
       <MoviesIntroSection
         latestTrendingMovies={latestTrendingMovies}

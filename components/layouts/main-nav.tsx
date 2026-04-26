@@ -32,8 +32,8 @@ export function MainNav({ items }: MainNavProps) {
                   href={item.href}
                   scroll={item.scroll}
                   className={cn(
-                    'flex items-center text-base font-medium text-secondary-foreground',
-                    pathname === item.href && 'underline underline-offset-4',
+                    'flex items-center text-base font-medium transition-colors hover:text-primary',
+                    pathname === item.href ? 'text-primary font-bold underline underline-offset-8 decoration-2' : 'text-secondary-foreground',
                     buttonVariants({
                       size: 'text',
                       variant: 'ghost',
