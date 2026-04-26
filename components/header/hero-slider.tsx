@@ -31,7 +31,7 @@ export const HeroSlider = async ({ movies }: { movies: Movie[] }) => {
             {movie.trailerId ? (
                <HeroVideoPlayer trailerId={movie.trailerId} />
             ) : (
-               <HeroImage movie={movie as HeroImageMedia} />
+               <HeroImage movie={movie as unknown as HeroImageMedia} />
             )}
             
             {/* Netflix-style Left Gradient Vignette (Hidden on mobile) */}
