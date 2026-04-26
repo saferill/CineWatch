@@ -28,12 +28,15 @@ With lightning-fast performance powered by Next.js 16 (App Router), cinematic an
 
 ## ✨ Key Features
 
-- **🎥 Unlimited Streaming** — Watch movies, TV series, and anime instantly using multiple high-quality streaming providers.
+- **🎥 Unlimited Streaming** — Watch movies, TV series, and anime instantly using multiple high-quality streaming providers (VidSrc integration).
 - **⚡ Smart Search Engine** — Find exactly what you're looking for with our debounced, lightning-fast search functionality covering titles, actors, and genres.
 - **🎨 Premium UI/UX** — Enjoy a responsive, dark-mode optimized interface with glassmorphism effects, cinematic carousels, and smooth micro-animations.
-- **📺 Dedicated Anime Section** — Comprehensive anime catalog integrated with Anilist, featuring multi-language dub support (Sub, Dub, Hindi).
+- **📱 Mobile-First Netflix UI** — Implements a native app-like experience with a bottom navigation bar, dynamic responsive hero sliders, and optimized trailer viewing on small screens.
+- **🛡️ Anti-Inspect Security** — Advanced protection system that disables developer tools, right-clicks, and keyboard shortcuts to secure the application source.
+- **🚀 Progressive Web App (PWA)** — Installable directly to your home screen with custom splash screens and seamless offline-ready capabilities.
+- **🖥️ Mega Footer Navigation** — A comprehensive, multi-column categorized mega footer for instant access to discover, trending, and popular catalogs.
+- **📺 Dedicated Anime Section** — Comprehensive anime catalog integrated with Anilist, featuring multi-language dub support.
 - **📚 Watch History & Tracking** — Keep track of what you've watched, manage your watchlist, and pick up right where you left off.
-- **📱 Responsive Design** — A flawless experience across desktop, tablet, and mobile devices.
 
 ## 🛠️ Tech Stack
 
