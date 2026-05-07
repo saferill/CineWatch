@@ -8,7 +8,12 @@ import {
   IconPlayerSkipForward,
   IconChevronDown,
   IconPlayerPlay,
+  IconPictureInPicture,
+  IconFlag,
 } from "@tabler/icons-react";
+import { useFloatingPlayer } from "@/context/floating-player-context";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type Source = "vidsrc" | "vidking" | "autoembed" | "vidlink" | "vidsrcrip" | "embedsu";
 
@@ -59,6 +64,8 @@ export default function Player({
   seasons = [],
   poster = "",
 }: PlayerProps) {
+  const { openPlayer } = useFloatingPlayer();
+  const router = useRouter();
   const [source, setSource] = useState<Source>("vidsrc");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showNextModal, setShowNextModal] = useState(false);
@@ -243,6 +250,59 @@ export default function Player({
         </span>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              openPlayer(embedUrl, movieTitle);
+              router.back();
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+            title="Aktifkan Mini Player"
+          >
+            <IconPictureInPicture className="w-4 h-4" />
+            <span className="hidden lg:inline">Mini Player</span>
+          </button>
+
+          <button
+            onClick={async () => {
+              const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+              
+              if (webhookUrl) {
+                try {
+                  await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      embeds: [{
+                        title: "🚨 LAPORAN LINK MATI",
+                        color: 0xff0000,
+                        fields: [
+                          { name: "Judul", value: movieTitle, inline: true },
+                          { name: "ID", value: movieId.toString(), inline: true },
+                          { name: "Server", value: source, inline: true },
+                          { name: "Tipe", value: type, inline: true },
+                          { name: "Halaman", value: window.location.href }
+                        ],
+                        timestamp: new Date().toISOString()
+                      }]
+                    })
+                  });
+                } catch (e) {
+                  console.error("Failed to send report", e);
+                }
+              }
+
+              toast.success("Laporan terkirim! Tim kami akan segera mengecek server ini.", {
+                description: `Server: ${source}`,
+                duration: 5000,
+              });
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500 hover:bg-red-500/20 transition-all"
+            title="Lapor Link Mati"
+          >
+            <IconFlag className="w-4 h-4" />
+            <span className="hidden lg:inline">Lapor Mati</span>
+          </button>
+
           {type === "tv" && episodeLinks && (
             <div className="flex items-center gap-1">
               <Link

@@ -1,174 +1,173 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, ChevronRight, Play, Bell } from 'lucide-react'
+import { Calendar, Clock, ChevronRight, Play, Bell, Info, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { fetchDonghuaHome } from '@/services/donghua'
+import { NotificationToggle } from '@/components/media/notification-toggle'
 
 const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 
-const SCHEDULE_DATA: Record<string, any[]> = {
-  'Senin': [
-    { title: 'The Demon Hunter', time: '10:00', type: 'Donghua', status: 'New Episode', image: 'https://images.tmdb.org/t/p/w500/u3vK3rG7G0A9zS8Gq4l6W5mF7L6.jpg' },
-    { title: 'Peerless Martial Spirit', time: '18:00', type: 'Donghua', status: 'Ongoing', image: 'https://images.tmdb.org/t/p/w500/kZ9E9ZzZzZzZzZzZzZzZzZzZzZz.jpg' }
-  ],
-  'Selasa': [
-    { title: 'Against the Sky Supreme', time: '11:00', type: 'Donghua', status: 'New Episode', image: 'https://images.tmdb.org/t/p/w500/mN9m9m9m9m9m9m9m9m9m9m9m9m9.jpg' }
-  ],
-  'Rabu': [
-    { title: 'Swallowed Star', time: '09:00', type: 'Donghua', status: 'New Episode', image: 'https://images.tmdb.org/t/p/w500/vN9v9v9v9v9v9v9v9v9v9v9v9v9.jpg' },
-    { title: 'A Will Eternal', time: '10:00', type: 'Donghua', status: 'Hot', image: 'https://images.tmdb.org/t/p/w500/bN9b9b9b9b9b9b9b9b9b9b9b9b9.jpg' }
-  ],
-  'Kamis': [
-    { title: 'Throne of Seal', time: '10:00', type: 'Donghua', status: 'New Episode', image: 'https://images.tmdb.org/t/p/w500/u3vK3rG7G0A9zS8Gq4l6W5mF7L6.jpg' }
-  ],
-  'Jumat': [
-    { title: 'Perfect World', time: '10:00', type: 'Donghua', status: 'New Episode', image: 'https://images.tmdb.org/t/p/w500/xN9x9x9x9x9x9x9x9x9x9x9x9x9.jpg' }
-  ],
-  'Sabtu': [
-    { title: 'Soul Land II', time: '09:00', type: 'Donghua', status: 'Popular', image: 'https://images.tmdb.org/t/p/w500/yN9y9y9y9y9y9y9y9y9y9y9y9y9.jpg' },
-    { title: 'Shrouding the Heavens', time: '10:00', type: 'Donghua', status: 'New Episode', image: 'https://images.tmdb.org/t/p/w500/zN9z9z9z9z9z9z9z9z9z9z9z9z9.jpg' }
-  ],
-  'Minggu': [
-    { title: 'Battle Through the Heavens', time: '10:00', type: 'Donghua', status: 'Must Watch', image: 'https://images.tmdb.org/t/p/w500/aN9a9a9a9a9a9a9a9a9a9a9a9a9.jpg' },
-    { title: 'Martial Universe', time: '11:00', type: 'Donghua', status: 'Ongoing', image: 'https://images.tmdb.org/t/p/w500/cN9cN9cN9cN9cN9cN9cN9cN9cN9.jpg' }
-  ]
-}
-
 export default function SchedulePage() {
-  const [activeDay, setActiveDay] = useState('Sabtu') // Default to current day ideally
+  const [activeDay, setActiveDay] = useState('Sabtu')
+  const [donghuaList, setDonghuaList] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const today = new Date().toLocaleDateString('id-ID', { weekday: 'long' })
+    setActiveDay(today || 'Sabtu')
+
+    async function loadData() {
+      try {
+        const data = await fetchDonghuaHome()
+        setDonghuaList(data.recent || [])
+      } catch (error) {
+        console.error('Failed to load schedule data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
 
   return (
     <main className="min-h-screen bg-black pt-32 pb-20">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-accent font-bold tracking-widest uppercase text-xs">
-              <Calendar className="size-4" />
-              <span>Update Harian</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
-              JADWAL <span className="text-accent">RILIS</span>
-            </h1>
-            <p className="text-zinc-500 max-w-md">
-              Jangan lewatkan episode terbaru dari Donghua dan Anime favoritmu. Jadwal diperbarui secara real-time.
-            </p>
-          </div>
-          
-          <div className="flex bg-zinc-900/50 backdrop-blur-xl border border-white/5 p-1 rounded-2xl overflow-x-auto no-scrollbar">
-            {DAYS.map((day) => (
-              <button
-                key={day}
-                onClick={() => setActiveDay(day)}
-                className={cn(
-                  "px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap",
-                  activeDay === day 
-                    ? "bg-accent text-black shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)]" 
-                    : "text-zinc-500 hover:text-white"
-                )}
-              >
-                {day}
-              </button>
-            ))}
-          </div>
+      <div className="container mx-auto px-4 max-w-7xl">
+        {/* Header Section */}
+        <div className="flex flex-col gap-10 mb-16 text-center md:text-left">
+           <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none">
+                 Release <span className="text-accent">Schedule</span>
+              </h1>
+              <p className="text-zinc-500 font-bold max-w-xl mx-auto md:mx-0">
+                 Pantau jadwal penayangan episode terbaru. Aktifkan notifikasi browser agar Anda tetap mendapatkan kabar meskipun tidak membuka website.
+              </p>
+           </div>
+
+           {/* Day Nav */}
+           <div className="flex bg-zinc-900/40 border border-white/5 p-1.5 rounded-[2rem] overflow-x-auto no-scrollbar shadow-2xl w-fit mx-auto md:mx-0">
+             {DAYS.map((day) => (
+               <button
+                 key={day}
+                 onClick={() => setActiveDay(day)}
+                 className={cn(
+                   "px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300",
+                   activeDay === day 
+                     ? "bg-accent text-black shadow-[0_10px_20px_rgba(var(--accent-rgb),0.3)]" 
+                     : "text-zinc-500 hover:text-white"
+                 )}
+               >
+                 {day}
+               </button>
+             ))}
+           </div>
         </div>
 
-        {/* Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeDay}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 gap-4"
-            >
-              {(SCHEDULE_DATA[activeDay] || []).map((item, index) => (
-                <div 
-                  key={index}
-                  className="group relative flex items-center gap-6 p-4 rounded-[2rem] bg-zinc-900/30 border border-white/5 hover:border-accent/30 transition-all duration-500 overflow-hidden"
-                >
-                  {/* Background Glow */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  {/* Image */}
-                  <div className="relative size-24 md:size-32 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10">
-                    <img 
-                      src={item.image} 
-                      alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                  </div>
+        {/* Content Grid - Clean & Spaced */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+           <AnimatePresence mode="wait">
+             <motion.div
+               key={activeDay + loading}
+               initial={{ opacity: 0, y: 10 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -10 }}
+               className="contents"
+             >
+               {loading ? (
+                 Array.from({ length: 10 }).map((_, i) => (
+                   <div key={i} className="aspect-[2/3] rounded-[2rem] bg-zinc-900/50 animate-pulse" />
+                 ))
+               ) : (
+                 donghuaList.map((item, index) => (
+                   <div 
+                    key={index}
+                    className="group relative flex flex-col gap-4"
+                   >
+                     {/* Poster Container */}
+                     <div className="relative aspect-[2/3] rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900 shadow-2xl transition-all duration-500 group-hover:border-accent/40 group-hover:scale-[1.02]">
+                        <Link href={item.href} className="absolute inset-0 z-0">
+                           <img 
+                              src={item.poster} 
+                              alt={item.title} 
+                              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                           />
+                        </Link>
+                        
+                        {/* Status Overlay */}
+                        <div className="absolute top-4 left-4 z-10">
+                           <Badge className="bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black px-2 py-0.5 rounded-lg">
+                              EP {item.episodes}
+                           </Badge>
+                        </div>
 
-                  {/* Info */}
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[10px] uppercase border-accent/30 text-accent font-bold">
-                        {item.type}
-                      </Badge>
-                      <span className="flex items-center gap-1.5 text-zinc-500 text-xs font-bold">
-                        <Clock className="size-3" />
-                        {item.time} WIB
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-white group-hover:text-accent transition-colors line-clamp-1">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                       <span className="text-sm text-zinc-500 font-medium">{item.status}</span>
-                       <button className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-accent opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all">
-                          Lihat <ChevronRight className="size-4" />
-                       </button>
-                    </div>
-                  </div>
+                        {/* Notification Button - Now Icon Only to save space */}
+                        <div className="absolute top-4 right-4 z-20">
+                           <NotificationToggle id={item.title} title={item.title} type="donghua" iconOnly />
+                        </div>
 
-                  {/* Subscribe Icon */}
-                  <button className="p-3 rounded-full bg-white/5 hover:bg-accent hover:text-black transition-all">
-                    <Bell className="size-5" />
-                  </button>
-                </div>
-              ))}
-              
-              {(!SCHEDULE_DATA[activeDay] || SCHEDULE_DATA[activeDay].length === 0) && (
-                 <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[3rem]">
-                    <p className="text-zinc-500 font-bold uppercase tracking-widest">Belum ada jadwal untuk hari ini</p>
-                 </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                        {/* Play Overlay */}
+                        <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-black/40 backdrop-blur-[2px] pointer-events-none">
+                           <div className="size-16 rounded-full bg-accent flex items-center justify-center text-black shadow-2xl">
+                              <Play className="size-8 fill-current" />
+                           </div>
+                        </div>
+                     </div>
 
-          {/* Sidebar Promo */}
-          <div className="hidden lg:block space-y-6">
-             <div className="relative rounded-[3rem] p-10 bg-accent text-black overflow-hidden group">
-                <div className="absolute -right-10 -bottom-10 size-64 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-                <div className="relative z-10 space-y-6">
-                   <h2 className="text-4xl font-black leading-none">JANGAN<br/>KELEWATAN!</h2>
-                   <p className="font-bold opacity-80">Aktifkan notifikasi untuk mendapatkan pemberitahuan instan saat episode baru rilis.</p>
-                   <button className="flex items-center gap-3 bg-black text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform">
-                      <Bell className="size-5" /> Aktifkan Sekarang
-                   </button>
-                </div>
-             </div>
-             
-             <div className="rounded-[3rem] p-8 border border-white/5 bg-zinc-900/20 space-y-6">
-                <h3 className="text-xl font-bold">Terpopuler Minggu Ini</h3>
-                <div className="space-y-4">
-                   {[1, 2, 3].map(i => (
-                      <div key={i} className="flex items-center gap-4 group cursor-pointer">
-                         <div className="size-12 rounded-xl bg-zinc-800 flex items-center justify-center font-black text-xl text-zinc-600 group-hover:text-accent transition-colors">0{i}</div>
-                         <div>
-                            <p className="font-bold line-clamp-1">Donghua Judul {i}</p>
-                            <p className="text-xs text-zinc-500">Trending #1</p>
-                         </div>
-                      </div>
-                   ))}
-                </div>
-             </div>
-          </div>
+                     {/* Info Section - Clean Typography */}
+                     <div className="px-2 space-y-1">
+                        <Link href={item.href} className="block">
+                           <h3 className="text-sm font-black text-white group-hover:text-accent transition-colors line-clamp-1 uppercase tracking-tight">
+                              {item.title}
+                           </h3>
+                        </Link>
+                        <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+                           <Clock className="size-3 text-accent" />
+                           10:00 WIB
+                        </div>
+                     </div>
+                   </div>
+                 ))
+               )}
+             </motion.div>
+           </AnimatePresence>
+        </div>
+
+        {/* Empty State */}
+        {!loading && donghuaList.length === 0 && (
+           <div className="py-40 text-center border-2 border-dashed border-white/5 rounded-[4rem]">
+              <Info className="size-10 text-zinc-800 mx-auto mb-4" />
+              <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Belum ada rilis hari {activeDay}</p>
+           </div>
+        )}
+
+        {/* Notification Education Section */}
+        <div className="mt-32 p-12 rounded-[4rem] bg-gradient-to-br from-zinc-900/50 to-transparent border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+           <div className="space-y-4 text-center md:text-left max-w-xl">
+              <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Tetap Terhubung (Push Notification)</h2>
+              <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+                 Agar notifikasi bisa muncul meskipun Anda tidak membuka website selama berhari-hari, Anda harus mengizinkan **Notifikasi Browser**. Kami akan mengirimkan sinyal ke perangkat Anda saat episode baru dideteksi oleh server.
+              </p>
+           </div>
+           <button 
+              onClick={() => {
+                if ('Notification' in window) {
+                   Notification.requestPermission().then(permission => {
+                      if (permission === 'granted') {
+                         new Notification('CineWatch Notifikasi Aktif!', {
+                            body: 'Anda akan menerima kabar meskipun browser ditutup.',
+                            icon: '/logo.png'
+                         });
+                      }
+                   });
+                }
+              }}
+              className="bg-accent text-black px-12 py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl"
+           >
+              Aktifkan Sekarang
+           </button>
         </div>
       </div>
     </main>

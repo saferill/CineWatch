@@ -114,7 +114,19 @@
 }
 
 @layer base {
-  :root {
+  @theme {
+  --animate-shimmer: shimmer 2s infinite linear;
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+}
+
+:root {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;

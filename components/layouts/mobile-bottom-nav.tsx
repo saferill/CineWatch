@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Compass, Bookmark, Search } from 'lucide-react'
+import { Home, Compass, Bookmark, Search, User } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -30,6 +30,11 @@ export function MobileBottomNav() {
       title: 'Watchlist',
       href: '/watchlist',
       icon: Bookmark,
+    },
+    {
+      title: 'Profile',
+      href: '/profile',
+      icon: User,
     },
   ]
 

@@ -10,6 +10,7 @@ import { CommandMenu } from '@/components/command-menu'
 import { Icons } from '@/components/icons'
 import { MainNav } from '@/components/layouts/main-nav'
 import { MobileNav } from '@/components/layouts/mobile-nav'
+import { NotificationHub } from '@/components/layouts/notification-hub'
 
 export function SiteHeader() {
   const { isShowNavBackground } = useNavbarScrollOverlay()
@@ -30,6 +31,7 @@ export function SiteHeader() {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <CommandMenu />
           </div>
+          <NotificationHub />
         </div>
       </div>
     </header>

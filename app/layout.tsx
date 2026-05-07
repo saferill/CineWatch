@@ -18,6 +18,10 @@ import {
 import { cn } from '@/lib/utils'
 import { Footer } from '@/components/layouts/footer'
 import { SiteHeader } from '@/components/layouts/site-header'
+import { FloatingPlayerProvider } from '@/context/floating-player-context'
+import { FloatingPlayer } from '@/components/media/floating-player'
+import { SpeedOptimizer } from '@/components/media/speed-optimizer'
+import { FeedbackForm } from '@/components/feedback-form'
 
 export const viewport: Viewport = {
   themeColor: [
@@ -74,10 +78,12 @@ interface RootLayoutProps {
   children: React.ReactNode
 }
 
-import { Onboarding } from '@/components/onboarding'
 import { SplashScreen } from '@/components/splash-screen'
 import { MobileBottomNav } from '@/components/layouts/mobile-bottom-nav'
 import { AntiInspect } from '@/components/anti-inspect'
+import { SWRegister } from '@/components/sw-register'
+import { OneSignalInit } from '@/components/onesignal-init'
+import { ContentProtection } from '@/components/content-protection'
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -95,23 +101,30 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable
         )}
       >
+        <SWRegister />
+        <OneSignalInit />
+        <ContentProtection />
         <AntiInspect />
         <SplashScreen />
-        <Onboarding />
-        <div className="flex flex-col pb-16 lg:pb-0"> {/* Added pb-16 for mobile bottom nav */}
-          <SiteHeader />
-          <div className="h-full flex-1 overflow-x-hidden">
-            <NuqsAdapter>
-              <QueryProvider>
-                <CSPostHogProvider>{children}</CSPostHogProvider>
-              </QueryProvider>
-            </NuqsAdapter>
-            <ToastProvider />
-            <Footer />
-            <MobileBottomNav />
-            {GOOGLE_GTM_ID && <GoogleTagManager gtmId={GOOGLE_GTM_ID} />}
+        <FloatingPlayerProvider>
+          <div className="flex flex-col pb-16 lg:pb-0"> {/* Added pb-16 for mobile bottom nav */}
+            <SiteHeader />
+            <div className="h-full flex-1 overflow-x-hidden">
+              <NuqsAdapter>
+                <QueryProvider>
+                  <CSPostHogProvider>{children}</CSPostHogProvider>
+                </QueryProvider>
+              </NuqsAdapter>
+              <ToastProvider />
+              <Footer />
+              <MobileBottomNav />
+              {GOOGLE_GTM_ID && <GoogleTagManager gtmId={GOOGLE_GTM_ID} />}
+            </div>
           </div>
-        </div>
+          <FloatingPlayer />
+          <SpeedOptimizer />
+          <FeedbackForm />
+        </FloatingPlayerProvider>
       </body>
     </html>
   )

@@ -10,9 +10,10 @@ interface NotificationToggleProps {
   id: string | number
   title: string
   type: 'movie' | 'tv' | 'donghua'
+  iconOnly?: boolean
 }
 
-export function NotificationToggle({ id, title, type }: NotificationToggleProps) {
+export function NotificationToggle({ id, title, type, iconOnly }: NotificationToggleProps) {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [showToast, setShowToast] = useState(false)
 
@@ -47,10 +48,11 @@ export function NotificationToggle({ id, title, type }: NotificationToggleProps)
         size="lg"
         onClick={toggleSubscription}
         className={cn(
-          "relative group overflow-hidden rounded-2xl gap-2 transition-all duration-500",
+          "relative group overflow-hidden transition-all duration-500",
+          iconOnly ? "rounded-full p-2 size-10" : "rounded-2xl gap-2 px-6",
           isSubscribed 
-            ? "border-accent bg-accent/10 text-accent hover:bg-accent/20" 
-            : "border-white/10 bg-white/5 hover:border-accent/50"
+            ? "border-accent bg-accent text-black hover:bg-accent/80" 
+            : "border-white/10 bg-black/60 backdrop-blur-md text-white hover:border-accent/50"
         )}
       >
         <AnimatePresence mode="wait">
@@ -62,8 +64,8 @@ export function NotificationToggle({ id, title, type }: NotificationToggleProps)
               exit={{ scale: 0, rotate: 45 }}
               className="flex items-center gap-2"
             >
-              <BellOff className="size-5" />
-              <span>Hapus Pengingat</span>
+              <BellOff className={cn(iconOnly ? "size-5" : "size-5")} />
+              {!iconOnly && <span>Hapus Pengingat</span>}
             </motion.div>
           ) : (
             <motion.div
@@ -73,8 +75,8 @@ export function NotificationToggle({ id, title, type }: NotificationToggleProps)
               exit={{ scale: 0, rotate: -45 }}
               className="flex items-center gap-2"
             >
-              <Bell className="size-5 group-hover:animate-bounce" />
-              <span>Ingatkan Saya</span>
+              <Bell className={cn(iconOnly ? "size-5" : "size-5", "group-hover:animate-bounce")} />
+              {!iconOnly && <span>Ingatkan Saya</span>}
             </motion.div>
           )}
         </AnimatePresence>
