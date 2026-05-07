@@ -6,14 +6,15 @@ import { ItemType } from '@/types/movie-result'
 import { Season } from '@/types/series-details'
 import { MOVIES_GENRE } from '@/lib/genres'
 import { apiConfig } from '@/lib/tmdbConfig'
+import { IMAGE_CACHE_HOST_URL } from '@/lib/constants'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-function getImageURL(path: string) {
+function getImageURL(path: string, size: string = 'original') {
   if (path.startsWith("http")) return path;
-  return `${apiConfig.originalImage(path)}`
+  return `${IMAGE_CACHE_HOST_URL}/${size}${path}`
 }
 
 function getPosterImageURL(path: string) {
