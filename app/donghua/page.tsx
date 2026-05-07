@@ -4,9 +4,14 @@ import type { DonghuaHomeResponse, DonghuaItem } from '@/types/donghua';
 
 export const dynamic = 'force-dynamic';
 
+import Link from 'next/link';
+
 async function DonghuaCard({ item }: { item: DonghuaItem }) {
   return (
-    <div className="flex flex-col gap-2 p-2 rounded-md bg-zinc-900 hover:bg-zinc-800 transition-colors group cursor-pointer border border-zinc-800">
+    <Link 
+      href={item.href}
+      className="flex flex-col gap-2 p-2 rounded-md bg-zinc-900 hover:bg-zinc-800 transition-colors group cursor-pointer border border-zinc-800"
+    >
       <div className="relative aspect-[3/4] overflow-hidden rounded">
         <img 
           src={item.poster} 
@@ -19,7 +24,7 @@ async function DonghuaCard({ item }: { item: DonghuaItem }) {
       </div>
       <h3 className="text-sm font-medium text-white truncate px-1">{item.title}</h3>
       <p className="text-[10px] text-zinc-400 px-1 uppercase tracking-wider">{item.episodes} Episodes</p>
-    </div>
+    </Link>
   );
 }
 

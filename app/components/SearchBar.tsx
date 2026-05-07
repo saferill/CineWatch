@@ -14,7 +14,7 @@ export default function SearchBar() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    
+
     // Only search automatically if query is long enough (3+ chars)
     if (query.trim().length < 3) return;
 
