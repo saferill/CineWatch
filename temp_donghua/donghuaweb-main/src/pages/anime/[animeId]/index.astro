@@ -1,0 +1,153 @@
+---
+import Layout from "@layouts/Layout.astro";
+import WidgetTitle from "@components/WidgetTitle.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Sesepuh from "@components/Sesepuh.astro";
+import Content from "@components/Content.astro";
+import Sidebar from "@components/Sidebar.astro";
+import animeConfig from "@configs/animeConfig";
+import generateUrlPath from "@utils/generateUrlPath";
+import PlayIcon from "@components/icons/PlayIcon.astro";
+import StarIcon from "@components/icons/StarIcon.astro";
+import AnimeDetails from "@components/AnimeDetails.astro";
+import Error from "@components/Error.astro";
+import animeInfoService from "@services/animeInfoService"; 
+import genreService from "@services/genreService";
+
+const config = (animeConfig as any).default || animeConfig;
+const {
+  molidonghub: { siteName },
+} = config;
+
+const { animeId } = Astro.params;
+
+const animeInfo = await animeInfoService({ animeId: animeId! });
+const { data, ok, statusCode, message, statusMessage } = animeInfo;
+
+const allGenresData = await genreService();
+const sidebarGenreList = allGenresData.ok 
+  ? allGenresData.data.genreList.filter(g => !/^(\d{4}|spring|summer|fall|winter)/i.test(g.title))
+  : [];
+
+const title = ok ? `Anime ${data.title} - ${siteName}` : `Error - ${siteName}`;
+const description = ok && data.synopsis?.paragraphs ? data.synopsis.paragraphs[0] : "";
+
+const lastEpisode = (ok && data.episodeList && data.episodeList.length > 0)
+  ? data.episodeList[data.episodeList.length - 1]
+  : null;
+---
+
+{
+  !ok ? (
+    <Error statusCode={statusCode} message={message || statusMessage} />
+  ) : (
+    <Layout
+      seo={{
+        title,
+        description: description,
+      }}
+    >
+      <Breadcrumb
+        currentPage={{
+          title: data.title,
+          href: Astro.url.href,
+          action: "replace",
+        }}
+      />
+      <Sesepuh>
+        <Content>
+          <div class="relative">
+            <img
+              src={data.poster}
+              class="w-full aspect-[16/6] object-cover rounded-t-md"
+              alt={data.title}
+            />
+            <div class="absolute top-0 right-0 bottom-0 left-0 rounded-t-md bg-gradient-to-t from-zinc-100 dark:from-zinc-900 to-transparent" />
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-center items-center sm:justify-start gap-4 sm:items-end xs:-mt-[100px] sm:-mt-[150px] relative p-4">
+            <img
+              src={data.poster}
+              alt={data.title}
+              class="w-[150px] sm:w-[170px] md:w-[200px] rounded-md aspect-[3/4]"
+            />
+            <div class="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left">
+              <h1 class="text-xl md:text-2xl font-extrabold line-clamp-2">
+                {data.title || data.synonyms}
+              </h1>
+              <p class="flex">
+                <span class="flex gap-1 items-center">
+                  <StarIcon class="w-4 h-4" />
+                  {data.score.value} | {data.status}
+                </span>
+              </p>
+              {lastEpisode && (
+                <a
+                  href={generateUrlPath("/episode", lastEpisode.episodeId)}
+                  class="max-w-min flex gap-1 text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-amber-300 font-medium rounded-full text-sm px-5 py-2.5 text-center dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-800"
+                >
+                  <PlayIcon />
+                  Tonton
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            {data.synopsis.paragraphs.map((paragraph) => (
+              <p class="text-zinc-600 dark:text-zinc-400">{paragraph}</p>
+            ))}
+          </div>
+
+          <WidgetTitle title="Detail Anime" />
+          {/* FIX: Gunakan Component PascalCase */}
+          <AnimeDetails anime={data} />
+
+          {data.batchList.length > 0 && (
+            <>
+              <WidgetTitle title="Download Batch" />
+              {data.batchList.map((batch) => (
+                <a href={generateUrlPath("/batch", batch.batchId)} class="line-clamp-2 flex gap-1 text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-amber-300 font-medium rounded-md text-sm px-5 py-2.5 text-center dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-800">
+                  {batch.title}
+                </a>
+              ))}
+            </>
+          )}
+
+          {data.trailer && (
+            <iframe src={data.trailer} allowfullscreen class="aspect-video rounded-lg" />
+          )}
+
+          <WidgetTitle title="Daftar Episode" />
+          <div class="flex flex-col gap-4 max-h-[500px] overflow-x-auto">
+            {data.episodeList.map((episode) => {
+              const epsTitle = episode.title || `Episode ${episode.episodeId.split('-').pop()}`;
+              return (
+                  <a href={generateUrlPath("/episode", episode.episodeId)} class="flex gap-4 items-center hover:bg-zinc-300 dark:hover:bg-zinc-700 p-2 rounded-md">
+                    <div class="text-white py-2 px-4 bg-sky-700 dark:bg-sky-600 rounded-sm min-w-max">
+                      {epsTitle}
+                    </div>
+                    <div class="line-clamp-1">
+                      {data.title} {epsTitle}
+                    </div>
+                  </a>
+                );
+            })}
+          </div>
+        </Content>
+
+        <Sidebar>
+           <WidgetTitle title="Daftar Genre" href="/genres" />
+            <div class="flex flex-wrap gap-2 mb-6 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+            {sidebarGenreList.map((genre) => (
+                <a href={generateUrlPath("/genres", genre.genreId)} class="text-xs font-medium px-2.5 py-1.5 rounded bg-zinc-200 text-zinc-800 hover:bg-amber-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-amber-600 transition-colors">
+                {genre.title}
+                </a>
+            ))}
+            </div>
+          <WidgetTitle title="Sidebar" />
+        </Sidebar>
+      </Sesepuh>
+    </Layout>
+  )
+}

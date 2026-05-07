@@ -1,0 +1,56 @@
+---
+import Layout from "@layouts/Layout.astro";
+import WidgetTitle from "@components/WidgetTitle.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Sesepuh from "@components/Sesepuh.astro";
+import Content from "@components/Content.astro";
+import Sidebar from "@components/Sidebar.astro";
+import animeConfig from "@configs/animeConfig";
+import azanimeService from "@services/azAnimeService";
+import AnimeList2 from "@components/AnimeList2.astro";
+import Pagination from "@components/Pagination.astro";
+import Error from "@components/Error.astro";
+
+const config = (animeConfig as any).default || animeConfig;
+const {
+  molidonghub: { siteName },
+} = config;
+
+const { letter } = Astro.params;
+const page = Astro.url.searchParams.get("page");
+const azResult = await azanimeService({ letter: letter! }, { page });
+const { ok, data, statusCode, message, statusMessage, pagination } = azResult;
+---
+
+{
+  !ok ? (
+    <Error
+      statusCode={statusCode}
+      message={message || statusMessage}
+    />
+  ) : (
+    <Layout
+      seo={{
+        title: `anime List ${letter} - ${siteName}`,
+        description: `Daftar anime berawalan huruf ${letter}`,
+      }}
+    >
+      <Breadcrumb />
+      <Sesepuh>
+        <Content>
+          <WidgetTitle title={`Daftar anime: ${letter}`} />
+          <AnimeList2
+            anime={{
+              list: data.animeList,
+              baseUrlPath: "/anime",
+            }}
+          />
+          <Pagination pagination={pagination} />
+        </Content>
+        <Sidebar>
+          <WidgetTitle title="Sidebar" />
+        </Sidebar>
+      </Sesepuh>
+    </Layout>
+  )
+}

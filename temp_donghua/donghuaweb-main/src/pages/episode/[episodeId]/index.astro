@@ -1,0 +1,125 @@
+---
+import Layout from "@layouts/Layout.astro";
+import WidgetTitle from "@components/WidgetTitle.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Sesepuh from "@components/Sesepuh.astro";
+import Content from "@components/Content.astro";
+import Sidebar from "@components/Sidebar.astro";
+import animeConfig from "@configs/animeConfig";
+import generateUrlPath from "@utils/generateUrlPath";
+import DownloadLink from "@components/DownloadLink.astro";
+import VideoPlayer from "@components/VideoPlayer.astro";
+import Error from "@components/Error.astro";
+import AnimeList3 from "@components/AnimeList3.astro";
+import episodeService from "@services/episodeService";
+import genreService from "@services/genreService";
+
+const config = (animeConfig as any).default || animeConfig;
+const {
+  molidonghub: { siteName },
+} = config;
+
+const { episodeId } = Astro.params;
+const episodeResult = await episodeService({ episodeId: episodeId! });
+const { data, ok, statusCode, message, statusMessage } = episodeResult;
+
+const allGenresData = await genreService();
+const sidebarGenreList = allGenresData.ok 
+  ? allGenresData.data.genreList.filter(g => !/^(\d{4}|spring|summer|fall|winter)/i.test(g.title))
+  : [];
+
+const title = ok ? `Nonton Anime ${data.title} - ${siteName}` : `Error - ${siteName}`;
+---
+
+{
+  !ok ? (
+    <Error statusCode={statusCode} message={message || statusMessage} />
+  ) : (
+    <Layout seo={{ title, description: "" }}>
+      <Breadcrumb
+        currentPage={{
+          title: data.title,
+          href: Astro.url.href,
+          action: "replace",
+        }}
+      />
+      <Sesepuh>
+        <Content>
+          <WidgetTitle title={data.title} />
+          <VideoPlayer
+            anime={{
+              defaultStreamingUrl: data.defaultStreamingUrl,
+              server: data.server,
+            }}
+          />
+
+          <div class="flex flex-wrap justify-center gap-4 my-4">
+            {data.hasPrevEpisode && data.prevEpisode && (
+              <a href={generateUrlPath("/episode", data.prevEpisode.episodeId)} class="navigation-episode-item">
+                {"<- "} {data.prevEpisode.title}
+              </a>
+            )}
+            <a href={generateUrlPath("/anime", data.animeId)} class="navigation-episode-item">
+               All Eps
+            </a>
+            {data.hasNextEpisode && data.nextEpisode && (
+              <a href={generateUrlPath("/episode", data.nextEpisode.episodeId)} class="navigation-episode-item">
+                {data.nextEpisode.title} {" ->"}
+              </a>
+            )}
+          </div>
+
+          <WidgetTitle title="Link Download" />
+          <DownloadLink anime={{ downloadUrl: data.downloadUrl }} />
+        </Content>
+        
+        <Sidebar>
+            <WidgetTitle title="Daftar Genre" href="/genres" />
+            <div class="flex flex-wrap gap-2 mb-6 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+            {sidebarGenreList.map((genre) => (
+                <a href={generateUrlPath("/genres", genre.genreId)} class="text-xs font-medium px-2.5 py-1.5 rounded bg-zinc-200 text-zinc-800 hover:bg-amber-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-amber-600 transition-colors">
+                 {genre.title}
+                </a>
+            ))}
+            </div>
+            <WidgetTitle title="Anime Movie" href="/movies" />
+            {/* FIX: Gunakan Component PascalCase */}
+            <AnimeList3
+                anime={{
+                list: data.movie.animeList,
+                baseUrlPath: "/anime",
+                }}
+            />
+        </Sidebar>
+      </Sesepuh>
+    </Layout>
+    <script is:inline define:vars={{ 
+      episodeTitle: data.title, 
+      poster: data.poster, 
+      href: Astro.url.pathname,
+      episodeLabel: data.title 
+    }}>
+      const historyKey = "molidonghub_history";
+      try {
+        const currentHistory = JSON.parse(localStorage.getItem(historyKey) || "[]");
+        const newEntry = {
+          title: episodeTitle,
+          poster: poster,
+          href: href,
+          episode: episodeLabel.replace(/.*(Episode\s+\d+).*/i, "$1") || "Tonton", // Ambil string "Episode X"
+          timestamp: new Date().getTime(),
+        };
+        const filteredHistory = currentHistory.filter(item => item.href !== href);
+        filteredHistory.unshift(newEntry);
+        
+        if (filteredHistory.length > 20) {
+          filteredHistory.pop();
+        }
+
+        localStorage.setItem(historyKey, JSON.stringify(filteredHistory));
+      } catch (e) {
+        console.error("Gagal menyimpan history", e);
+      }
+    </script>
+  )
+}

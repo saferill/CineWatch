@@ -1,0 +1,84 @@
+---
+import Layout from "@layouts/Layout.astro";
+import WidgetTitle from "@components/WidgetTitle.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Sesepuh from "@components/Sesepuh.astro";
+import Content from "@components/Content.astro";
+import Sidebar from "@components/Sidebar.astro";
+import animeConfig from "@configs/animeConfig";
+import animeByGenreService from "@services/animeByGenreService";
+import genreService from "@services/genreService"; // Import Service Genre
+import AnimeList2 from "@components/AnimeList2.astro";
+import Pagination from "@components/Pagination.astro";
+import Error from "@components/Error.astro";
+import generateUrlPath from "@utils/generateUrlPath";
+
+// Safe import config
+const config = (animeConfig as any).default || animeConfig;
+const {
+  molidonghub: { siteName },
+} = config;
+
+const { genreId } = Astro.params;
+const page = Astro.url.searchParams.get("page");
+const animeByGenre = await animeByGenreService({ genreId: genreId! }, { page });
+
+const allGenresData = await genreService();
+const genreList = allGenresData.ok 
+  ? allGenresData.data.genreList.filter(g => !/^(\d{4}|spring|summer|fall|winter)/i.test(g.title))
+  : [];
+
+---
+
+{
+  () => {
+    if (animeByGenre.ok) {
+      const displayTitle = genreId!.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+      const title = `anime ${displayTitle} - ${siteName}`;
+
+      return (
+        <Layout
+          seo={{
+            title,
+            description: `Nonton Donghua Genre ${displayTitle} Subtitle Indonesia`,
+          }}
+        >
+          <Breadcrumb />
+          <Sesepuh>
+            <Content>
+              <WidgetTitle title={`anime: ${displayTitle}`} />
+              <AnimeList2
+                anime={{
+                  list: animeByGenre.data.animeList,
+                  baseUrlPath: "/anime",
+                }}
+              />
+              <Pagination pagination={animeByGenre.pagination} />
+            </Content>
+            
+            <Sidebar>
+              <WidgetTitle title="Daftar Genre" href="/genres" />
+              <div class="flex flex-wrap gap-2">
+                {genreList.map((genre) => (
+                  <a
+                    href={generateUrlPath("/genres", genre.genreId)}
+                    class="text-xs font-medium px-2.5 py-1.5 rounded bg-zinc-200 text-zinc-800 hover:bg-amber-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-amber-600 transition-colors"
+                  >
+                    {genre.title}
+                  </a>
+                ))}
+              </div>
+            </Sidebar>
+          </Sesepuh>
+        </Layout>
+      );
+    }
+
+    return (
+      <Error
+        statusCode={animeByGenre.statusCode}
+        message={animeByGenre.message || animeByGenre.statusMessage}
+      />
+    );
+  }
+}

@@ -1,0 +1,106 @@
+---
+import Layout from "@layouts/Layout.astro";
+import WidgetTitle from "@components/WidgetTitle.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Sesepuh from "@components/Sesepuh.astro";
+import Content from "@components/Content.astro";
+import Sidebar from "@components/Sidebar.astro";
+import animeConfig from "@configs/animeConfig";
+
+const {
+  molidonghub: { siteName },
+} = animeConfig;
+
+const title = `Riwayat Menonton - ${siteName}`;
+---
+
+<Layout
+  seo={{
+    title,
+    description: "Riwayat nonton anime di Molidonghub",
+  }}
+>
+  <Breadcrumb />
+  <Sesepuh>
+    <Content>
+      <div class="flex justify-between items-center">
+        <WidgetTitle title="Riwayat Menonton" />
+        <button
+          id="clear-history"
+          class="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-bold"
+        >
+          Hapus Semua
+        </button>
+      </div>
+
+      <div id="history-list" class="py-3 gap-4 grid xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+        </div>
+      
+      <div id="empty-msg" class="hidden text-center py-10 text-zinc-500">
+        Belum ada riwayat menonton.
+      </div>
+    </Content>
+    <Sidebar>
+      <WidgetTitle title="Sidebar" />
+    </Sidebar>
+  </Sesepuh>
+</Layout>
+
+<script is:inline>
+  const historyKey = "molidonghub_history";
+  const historyContainer = document.getElementById("history-list");
+  const emptyMsg = document.getElementById("empty-msg");
+  const clearBtn = document.getElementById("clear-history");
+
+  function renderHistory() {
+    const historyData = JSON.parse(localStorage.getItem(historyKey) || "[]");
+
+    if (historyData.length === 0) {
+      if (historyContainer) historyContainer.innerHTML = "";
+      if (emptyMsg) emptyMsg.classList.remove("hidden");
+      if (clearBtn) clearBtn.classList.add("hidden");
+      return;
+    }
+
+    if (emptyMsg) emptyMsg.classList.add("hidden");
+    if (clearBtn) clearBtn.classList.remove("hidden");
+
+    if (historyContainer) {
+      historyContainer.innerHTML = historyData
+        .map(
+          (item) => `
+        <a href="${item.href}" class="group relative">
+          <div class="relative overflow-hidden rounded-lg">
+            <img
+              loading="lazy"
+              class="anime1-item-img"
+              src="${item.poster}"
+              alt="${item.title}"
+            />
+            <span class="anime1-item-eps">${item.episode}</span>
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+          </div>
+          <div class="p-2">
+            <h3 class="anime1-item-title">${item.title}</h3>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 text-center">
+              ${new Date(item.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+            </p>
+          </div>
+        </a>
+      `
+        )
+        .join("");
+    }
+  }
+
+  renderHistory();
+  
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      if (confirm("Yakin ingin menghapus semua riwayat?")) {
+        localStorage.removeItem(historyKey);
+        renderHistory();
+      }
+    });
+  }
+</script>
