@@ -1,6 +1,5 @@
 # 🎬 CineWatch: The Ultimate Cinematic Experience
 
-![CineWatch Banner](https://images.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.svg)
 
 <div align="center">
 
