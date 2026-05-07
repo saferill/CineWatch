@@ -1,0 +1,10 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.reely.space
+
+# Sitemaps
+Sitemap: https://www.reely.space/sitemap.xml
+Sitemap: https://www.reely.space/server-sitemap-index.xml

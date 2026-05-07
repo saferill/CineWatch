@@ -1,0 +1,63 @@
+import React from 'react'
+import { Metadata } from 'next'
+import { getPopularMovies } from '@/services/movies'
+
+import { siteConfig } from '@/config/site'
+import { QUERY_KEYS } from '@/lib/queryKeys'
+import {
+  breadcrumbJsonLd,
+  collectionPageJsonLd,
+  JsonLd,
+} from '@/lib/structured-data'
+import { MediaContent } from '@/components/media/media-content'
+
+const MOVIES_TITLE = `Movies — Browse Popular, Trending & Top Rated`
+const MOVIES_DESCRIPTION =
+  'Browse popular, trending, and top-rated movies. Filter by genre, year, and rating to find your next watch on CineWatch.'
+const MOVIES_URL = `${siteConfig.websiteURL}/movies`
+
+export const metadata: Metadata = {
+  title: 'Movies',
+  description: MOVIES_DESCRIPTION,
+  keywords: [
+    'popular movies',
+    'trending movies',
+    'top rated movies',
+    'new releases',
+    'movie tracker',
+  ],
+  alternates: {
+    canonical: '/movies',
+  },
+}
+
+async function Movies() {
+  const movies = await getPopularMovies()
+  return (
+    <section className="container h-full py-20 lg:py-36">
+      <JsonLd
+        data={collectionPageJsonLd({
+          name: MOVIES_TITLE,
+          description: MOVIES_DESCRIPTION,
+          url: MOVIES_URL,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', url: '/' },
+          { name: 'Movies', url: '/movies' },
+        ])}
+      />
+      <MediaContent
+        media={movies}
+        getPopularMediaAction={getPopularMovies}
+        queryKey={QUERY_KEYS.MOVIES_KEY}
+        enableFilters={true}
+        filterLayout="sidebar"
+        title="Movies"
+      />
+    </section>
+  )
+}
+
+export default Movies
