@@ -4,10 +4,10 @@
   <br />
   <br />
 
-  <h1>🎬 CineWatch</h1>
+  <h1>🎬 CineWatch — Ultimate Streaming Hub</h1>
   
   <p>
-    <strong>A Premium Streaming Platform for Movies, TV Shows, Anime, and Donghua</strong>
+    <strong>A State-of-the-Art, Premium Streaming Platform for Global Entertainment</strong>
   </p>
 
   <p>
@@ -20,77 +20,78 @@
 
 <hr />
 
-## 🌟 Introduction
+## 🌟 Tentang CineWatch
 
-**CineWatch** is a beautifully crafted, modern streaming platform built to provide an unparalleled viewing experience. Designed with a premium, sleek user interface, it allows users to effortlessly discover, track, and watch their favorite movies, television series, anime, and now **Donghua**.
+**CineWatch** adalah platform streaming premium yang dirancang untuk memberikan pengalaman menonton kelas dunia. Dengan antarmuka yang modern, elegan, dan sangat responsif, CineWatch menggabungkan teknologi web tercanggih untuk menghadirkan ribuan koleksi film, serial TV, anime, dan donghua langsung ke perangkat Anda tanpa gangguan.
 
-With lightning-fast performance powered by Next.js 16 (App Router), cinematic animations via Framer Motion, and seamless API integrations, CineWatch delivers a distraction-free entertainment hub right to your screen.
+Dibuat dengan fokus pada **Estetika Visual** dan **Kecepatan Performa**, CineWatch bukan sekadar situs streaming biasa—ini adalah pusat hiburan digital pribadi Anda.
 
-## ✨ Key Features
+## 🚀 Fitur Utama & Kapabilitas
 
-- **🎥 Unlimited Streaming** — Watch movies, TV series, and anime instantly using multiple high-quality streaming providers (VidSrc & OnlyFlix integration).
-- **🏮 Dedicated Donghua Section** — Explore a vast collection of Chinese animation with dedicated streaming servers and real-time updates.
-- **🔍 Premium Cinematic Search** — Experience a high-end "Spotlight" style search with a 3-column cinematic gallery, live previews, and instant categorization.
-- **🎨 Elite UI/UX** — Enjoy a responsive, dark-mode optimized interface with advanced glassmorphism effects, cinematic carousels, and smooth micro-animations.
-- **📱 Mobile-First Netflix UI** — Implements a native app-like experience with a bottom navigation bar, dynamic responsive hero sliders, and optimized trailer viewing.
-- **🛡️ Anti-Inspect Security** — Advanced protection system that secures the application source and prevents unauthorized developer tool access.
-- **🚀 Progressive Web App (PWA)** — Installable directly to your home screen with custom splash screens and seamless offline-ready capabilities.
-- **📚 Watch History & Tracking** — Keep track of what you've watched, manage your watchlist, and pick up right where you left off.
+CineWatch dilengkapi dengan berbagai fitur canggih yang membedakannya dari platform lain:
 
-## 🛠️ Tech Stack
+### 🎭 Katalog Konten Multi-Dimensi
+- **Movies & TV Series**: Akses ke database raksasa TMDB dengan update harian untuk film blockbuster dan serial populer.
+- **Anime Hub**: Katalog anime lengkap yang terintegrasi dengan metadata Anilist, lengkap dengan informasi musim, genre, dan rating.
+- **Donghua Exclusive**: Bagian khusus untuk animasi Tiongkok (Donghua) dengan update episode terbaru dan server streaming yang stabil.
+- **Dynamic Exploration**: Cari konten berdasarkan Trending, Populer, Top Rated, atau genre spesifik.
 
-CineWatch leverages modern web technologies for maximum performance and developer experience:
+### 🔍 Pengalaman Pencarian Pintar (Spotlight Search)
+- **Cinematic Overlay**: Fitur pencarian full-screen dengan desain glassmorphism yang mewah.
+- **Instant Preview**: Lihat hasil pencarian dalam bentuk grid poster cinematic secara real-time saat Anda mengetik.
+- **Smart Categorization**: Hasil pencarian dipisahkan secara cerdas antara film, serial, dan aktor untuk kemudahan navigasi.
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) & [Framer Motion](https://www.framer.com/motion/)
-- **Data Sources:** 
-  - [TMDB API](https://www.themoviedb.org/api) (Movies & TV Shows)
-  - [Anilist API](https://anilist.co/api/v2/) (Anime Metadata)
-  - [Moli Provider](https://moli.my.id/) (Donghua Streaming)
-- **Deployment:** [Vercel](https://vercel.com/)
+### 📺 Player & Streaming Premium
+- **Multi-Server Streaming**: Pilih dari berbagai server provider (VidSrc, OnlyFlix, Moli) untuk memastikan kelancaran menonton.
+- **Trailer Integration**: Tonton trailer resmi langsung di dalam aplikasi sebelum memutuskan untuk menonton.
+- **Episode Navigator**: Navigasi antar episode yang mulus untuk serial TV, anime, dan donghua.
 
-## 🚀 Getting Started
+### 🛠️ Personalisasi & Tracking
+- **Watchlist Manager**: Simpan konten favorit Anda ke daftar tontonan untuk dinikmati nanti.
+- **Continue Watching**: Fitur cerdas yang mencatat progres tontonan Anda sehingga Anda bisa melanjutkan dari detik terakhir Anda berhenti.
+- **User Preference**: Sistem yang mengingat preferensi tampilan dan interaksi Anda.
 
-Follow these steps to set up CineWatch locally on your machine.
+### 🛡️ Keamanan & Optimasi
+- **Anti-Inspect System**: Perlindungan tingkat lanjut untuk mencegah akses ke source code melalui klik kanan, F12, atau shortcut developer lainnya.
+- **SEO Optimized**: Struktur HTML semantik yang memastikan setiap konten mudah ditemukan oleh mesin pencari.
+- **PWA (Progressive Web App)**: Bisa diinstal di HP atau PC seperti aplikasi native dengan performa yang lebih ringan.
 
-### Prerequisites
-- Node.js 18.17 or later
-- pnpm (recommended package manager)
+## 💻 Teknologi yang Digunakan
 
-### Installation
+- **Frontend**: Next.js 16 (App Router) - Memberikan kecepatan rendering luar biasa.
+- **Styling**: Tailwind CSS v4 & Framer Motion - Untuk desain premium dan animasi yang halus.
+- **State & Data**: React Query & Nuqs - Menjamin sinkronisasi data yang cepat dan manajemen URL yang cerdas.
+- **Backend API**: Integrasi API TMDB, Anilist, dan Moli Provider.
+- **Deployment**: Vercel Edge Network - Untuk akses super cepat dari mana saja.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/saferill/CineWatch.git
-   cd CineWatch
-   ```
+## 🛠️ Cara Instalasi (Lokal)
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
+```bash
+# 1. Clone repository
+git clone https://github.com/saferill/CineWatch.git
 
-3. **Set up Environment Variables**
-   Create a `.env.local` file in the root directory:
-   ```env
-   # TMDB Configuration
-   TMDB_API_KEY=your_tmdb_api_key_here
-   
-   # Donghua Configuration
-   NEXT_PUBLIC_DONGHUA_API=https://api.moli.my.id/
-   ```
+# 2. Masuk ke folder
+cd CineWatch
 
-4. **Run the development server**
-   ```bash
-   pnpm dev
-   ```
+# 3. Install dependensi
+pnpm install
 
-## 📄 License
+# 4. Atur Environment Variables (.env.local)
+TMDB_API_KEY=your_key_here
+NEXT_PUBLIC_DONGHUA_API=https://api.moli.my.id/
 
-Distributed under the MIT License. See `LICENSE` for more information.
+# 5. Jalankan project
+pnpm dev
+```
+
+## 🤝 Kontribusi
+
+Kami sangat terbuka untuk kontribusi! Jika Anda memiliki ide fitur baru atau menemukan bug, silakan buka **Issue** atau kirimkan **Pull Request**.
 
 ---
+
 <div align="center">
-  <i>Developed with ❤️ for the Cinema Community.</i>
+  <i>CineWatch — Menghadirkan Bioskop ke Dalam Genggaman Anda.</i>
+  <br/>
+  <b>Dikembangkan dengan ❤️ oleh saferill</b>
 </div>
