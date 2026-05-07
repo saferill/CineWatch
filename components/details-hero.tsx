@@ -28,7 +28,7 @@ export const DetailsHero = ({
         <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
           <iframe
             className="absolute top-1/2 left-1/2 w-[300vw] h-[300vh] min-w-[100vw] min-h-[100vh] -translate-x-1/2 -translate-y-1/2 lg:w-[150vw] lg:h-[150vh] brightness-[1.15] contrast-[1.1]"
-            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&playsinline=1&loop=1&playlist=${trailerId}&enablejsapi=1`}
+            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&playsinline=1&loop=1&playlist=${trailerId}&enablejsapi=1`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             title={`${title} Trailer`}
