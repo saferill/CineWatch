@@ -1,3 +1,5 @@
+export type ItemType = 'movie' | 'tv' | 'person' | 'anime'
+
 export interface Movie {
   adult: boolean;
   backdrop_path: string;
@@ -18,18 +20,16 @@ export interface Movie {
   media_type?: ItemType;
 }
 
-interface MovieResponse {
+export interface MovieResponse {
   page: number
   results: Movie[]
   total_pages?: number
   total_results?: number
 }
 
-type Param = Record<string, string | number>
+export type Param = Record<string, string | number>
 
-type ItemType = 'movie' | 'tv' | 'person' | 'anime'
-
-interface MultiRequestProps {
+export interface MultiRequestProps {
   trendingMediaForHero: Movie[]
   latestTrendingMovies: Movie[]
   popularMovies: Movie[]
@@ -39,13 +39,5 @@ interface MultiRequestProps {
   allTimeTopRatedSeries: Movie[]
 }
 
-type PopularMediaAction<T> = (params?: Param) => Promise<T>
+export type PopularMediaAction<T> = (params?: Param) => Promise<T>
 
-export type {
-  Movie,
-  MovieResponse,
-  Param,
-  MultiRequestProps,
-  ItemType,
-  PopularMediaAction,
-}
