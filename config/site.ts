@@ -129,6 +129,11 @@ export const siteConfig = {
       scroll: true,
     },
     {
+      title: 'Anime',
+      href: '/anime',
+      scroll: true,
+    },
+    {
       title: 'Donghua',
       href: '/donghua',
       scroll: true,
