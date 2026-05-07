@@ -72,7 +72,7 @@ export const Card = ({
                 <div className="relative">
                   <BlurredImage
                     src={`${getPosterImageURL(item.poster_path)}`}
-                    alt={item.title || item.name || 'Movie'}
+                    alt={(item as any).title || (item as any).name || 'Movie'}
                     width={250}
                     height={375}
                     className={rank ? "w-[120px] lg:w-[150px] h-auto object-cover rounded-md shadow-lg transition-shadow group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] z-10 relative" : "w-[160px] lg:w-[200px] h-auto object-cover rounded-md shadow-lg transition-shadow group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] z-10 relative"}
@@ -90,7 +90,7 @@ export const Card = ({
               
               {/* Title under card */}
               <h3 className="text-sm font-medium text-slate-300 line-clamp-1 group-hover:text-white transition-colors px-1">
-                {item.title || item.name}
+                {(item as any).title || (item as any).name}
               </h3>
             </div>
           </motion.div>
@@ -120,7 +120,7 @@ export const Card = ({
           
           <div className="absolute bottom-6 left-8 right-8 flex items-end justify-between z-10">
             <h2 className="text-3xl font-extrabold max-w-[80%] drop-shadow-2xl tracking-tight">
-              {item.title || item.name}
+              {(item as any).title || (item as any).name}
             </h2>
           </div>
         </div>

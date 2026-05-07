@@ -1,23 +1,21 @@
-import { MediaType } from '@/types/media'
-
-type Movie = {
-  adult: boolean
-  backdrop_path: string
-  genre_ids: number[]
-  id: number
-  original_language: string
-  original_title: string
-
-  overview: string
-  popularity: number
-  poster_path: string
-  release_date: string
-  video: boolean
-  vote_average: number
-  vote_count: number
-  media_type?: ItemType
-  name?: string
-  first_air_date?: string
+export interface Movie {
+  adult: boolean;
+  backdrop_path: string;
+  genre_ids: number[];
+  id: number;
+  original_language: string;
+  original_title: string;
+  title?: string;
+  name?: string;
+  first_air_date?: string;
+  overview: string;
+  popularity: number;
+  poster_path: string;
+  release_date: string;
+  video: boolean;
+  vote_average: number;
+  vote_count: number;
+  media_type?: ItemType;
 }
 
 interface MovieResponse {
@@ -36,9 +34,9 @@ interface MultiRequestProps {
   latestTrendingMovies: Movie[]
   popularMovies: Movie[]
   allTimeTopRatedMovies: Movie[]
-  latestTrendingSeries: MediaType[]
-  popularSeries: MediaType[]
-  allTimeTopRatedSeries: MediaType[]
+  latestTrendingSeries: Movie[]
+  popularSeries: Movie[]
+  allTimeTopRatedSeries: Movie[]
 }
 
 type PopularMediaAction<T> = (params?: Param) => Promise<T>
