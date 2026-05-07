@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { NotificationToggle } from '@/components/media/notification-toggle'
 
 interface SeriesDetailsExtraInfoProps {
   series: SeriesDetails
@@ -65,6 +66,7 @@ export const SeriesDetailsExtraInfo = ({
             <Icons.playIcon className="mr-2 h-5 w-5" />
             Watch Series
           </Link>
+          <NotificationToggle id={series.id} title={series.name} type="tv" />
         </div>
       </div>
       <p className="prose-invert text-xs font-semibold lg:text-lg">

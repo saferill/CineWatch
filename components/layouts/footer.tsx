@@ -33,6 +33,8 @@ export function Footer() {
             <li><Link href="/series" className="hover:text-white transition-colors">Discover</Link></li>
             <li><Link href="/?type=series" className="hover:text-white transition-colors">Trending</Link></li>
             <li><Link href="/anime" className="hover:text-white transition-colors">Anime</Link></li>
+            <li><Link href="/donghua" className="hover:text-white transition-colors">Donghua</Link></li>
+            <li><Link href="/schedule" className="hover:text-white transition-colors">Release Schedule</Link></li>
             <li><Link href="/?type=series" className="hover:text-white transition-colors">Popular</Link></li>
             <li><Link href="/series" className="hover:text-white transition-colors">Airing Today</Link></li>
             <li><Link href="/series" className="hover:text-white transition-colors">On The Air</Link></li>

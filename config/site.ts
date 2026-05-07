@@ -144,6 +144,11 @@ export const siteConfig = {
       scroll: true,
     },
     {
+      title: 'Schedule',
+      href: '/schedule',
+      scroll: true,
+    },
+    {
       title: 'Watchlist',
       href: '/watchlist',
       scroll: true,

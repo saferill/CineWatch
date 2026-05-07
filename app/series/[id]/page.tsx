@@ -17,6 +17,7 @@ import {
 } from '@/lib/structured-data'
 import { SeriesDetailsContent } from '@/components/series/details-content'
 import { SeriesDetailsHero } from '@/components/series/details-hero'
+import { AmbientBackground } from '@/components/media/ambient-background'
 
 export async function generateMetadata(
   props: PageDetailsProps
@@ -138,6 +139,7 @@ const SeriesPage = async (props: PageDetailsProps) => {
           { name: seriesDetails.name, url: `/series/${seriesDetails.id}` },
         ])}
       />
+      <AmbientBackground imagePath={seriesDetails.backdrop_path || seriesDetails.poster_path} />
       <SeriesDetailsHero series={seriesDetails} trailerId={trailerId} />
       <SeriesDetailsContent
         series={seriesDetails}

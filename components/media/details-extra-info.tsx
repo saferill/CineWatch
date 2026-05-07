@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { NotificationToggle } from '@/components/media/notification-toggle'
 
 export const DetailsExtraInfo = ({
   movie,
@@ -66,6 +67,7 @@ export const DetailsExtraInfo = ({
             <Icons.playIcon className="mr-2 h-5 w-5" />
             Watch Movie
           </Link>
+          <NotificationToggle id={movie.id} title={movie.title} type="movie" />
         </div>
       </div>
       <p className="prose-invert text-xs font-semibold lg:text-lg">

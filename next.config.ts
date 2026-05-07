@@ -32,6 +32,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.sankavollerei.com",
       },
+      {
+        protocol: "https",
+        hostname: "anichin.cafe",
+      },
+      {
+        protocol: "https",
+        hostname: "*.wp.com",
+      },
     ],
   },
 };
