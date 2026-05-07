@@ -1,97 +1,110 @@
-<div align="center">
-  <img src="public/opengraph-image.png" alt="CineWatch Banner" width="100%" />
-  
-  <br />
-  <br />
+# 🎬 CineWatch — Premium Streaming Hub
 
-  <h1>🎬 CineWatch — Ultimate Streaming Hub</h1>
-  
-  <p>
-    <strong>A State-of-the-Art, Premium Streaming Platform for Global Entertainment</strong>
-  </p>
+![CineWatch Banner](https://images.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.svg)
 
-  <p>
-    <a href="https://github.com/saferill/CineWatch/stargazers"><img src="https://img.shields.io/github/stars/saferill/CineWatch?style=for-the-badge&color=06B6D4" alt="Stars" /></a>
-    <a href="https://github.com/saferill/CineWatch/network/members"><img src="https://img.shields.io/github/forks/saferill/CineWatch?style=for-the-badge&color=3B82F6" alt="Forks" /></a>
-    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
-    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" /></a>
-  </p>
-</div>
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![OneSignal](https://img.shields.io/badge/OneSignal-Push-orange?style=for-the-badge&logo=onesignal)](https://onesignal.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-<hr />
-
-## 🌟 Tentang CineWatch
-
-**CineWatch** adalah platform streaming premium yang dirancang untuk memberikan pengalaman menonton kelas dunia. Dengan antarmuka yang modern, elegan, dan sangat responsif, CineWatch menggabungkan teknologi web tercanggih untuk menghadirkan ribuan koleksi film, serial TV, anime, dan donghua langsung ke perangkat Anda tanpa gangguan.
-
-Dibuat dengan fokus pada **Estetika Visual** dan **Kecepatan Performa**, CineWatch bukan sekadar situs streaming biasa—ini adalah pusat hiburan digital pribadi Anda.
-
-## 🚀 Fitur Utama & Kapabilitas
-
-CineWatch dilengkapi dengan berbagai fitur canggih yang membedakannya dari platform lain:
-
-### 🎭 Katalog Konten Multi-Dimensi
-- **Movies & TV Series**: Akses ke database raksasa TMDB dengan update harian untuk film blockbuster dan serial populer.
-- **Anime Hub**: Katalog anime lengkap yang terintegrasi dengan metadata Anilist, lengkap dengan informasi musim, genre, dan rating.
-- **Donghua Exclusive**: Bagian khusus untuk animasi Tiongkok (Donghua) dengan update episode terbaru dan server streaming yang stabil.
-- **Dynamic Exploration**: Cari konten berdasarkan Trending, Populer, Top Rated, atau genre spesifik.
-
-### 🔍 Pengalaman Pencarian Pintar (Spotlight Search)
-- **Cinematic Overlay**: Fitur pencarian full-screen dengan desain glassmorphism yang mewah.
-- **Instant Preview**: Lihat hasil pencarian dalam bentuk grid poster cinematic secara real-time saat Anda mengetik.
-- **Smart Categorization**: Hasil pencarian dipisahkan secara cerdas antara film, serial, dan aktor untuk kemudahan navigasi.
-
-### 📺 Player & Streaming Premium
-- **Multi-Server Streaming**: Pilih dari berbagai server provider (VidSrc, OnlyFlix, Moli) untuk memastikan kelancaran menonton.
-- **Trailer Integration**: Tonton trailer resmi langsung di dalam aplikasi sebelum memutuskan untuk menonton.
-- **Episode Navigator**: Navigasi antar episode yang mulus untuk serial TV, anime, dan donghua.
-
-### 🛠️ Personalisasi & Tracking
-- **Watchlist Manager**: Simpan konten favorit Anda ke daftar tontonan untuk dinikmati nanti.
-- **Continue Watching**: Fitur cerdas yang mencatat progres tontonan Anda sehingga Anda bisa melanjutkan dari detik terakhir Anda berhenti.
-- **User Preference**: Sistem yang mengingat preferensi tampilan dan interaksi Anda.
-
-### 🛡️ Keamanan & Optimasi
-- **Anti-Inspect System**: Perlindungan tingkat lanjut untuk mencegah akses ke source code melalui klik kanan, F12, atau shortcut developer lainnya.
-- **SEO Optimized**: Struktur HTML semantik yang memastikan setiap konten mudah ditemukan oleh mesin pencari.
-- **PWA (Progressive Web App)**: Bisa diinstal di HP atau PC seperti aplikasi native dengan performa yang lebih ringan.
-
-## 💻 Teknologi yang Digunakan
-
-- **Frontend**: Next.js 16 (App Router) - Memberikan kecepatan rendering luar biasa.
-- **Styling**: Tailwind CSS v4 & Framer Motion - Untuk desain premium dan animasi yang halus.
-- **State & Data**: React Query & Nuqs - Menjamin sinkronisasi data yang cepat dan manajemen URL yang cerdas.
-- **Backend API**: Integrasi API TMDB, Anilist, dan Moli Provider.
-- **Deployment**: Vercel Edge Network - Untuk akses super cepat dari mana saja.
-
-## 🛠️ Cara Instalasi (Lokal)
-
-```bash
-# 1. Clone repository
-git clone https://github.com/saferill/CineWatch.git
-
-# 2. Masuk ke folder
-cd CineWatch
-
-# 3. Install dependensi
-pnpm install
-
-# 4. Atur Environment Variables (.env.local)
-TMDB_API_KEY=your_key_here
-NEXT_PUBLIC_DONGHUA_API=https://api.moli.my.id/
-
-# 5. Jalankan project
-pnpm dev
-```
-
-## 🤝 Kontribusi
-
-Kami sangat terbuka untuk kontribusi! Jika Anda memiliki ide fitur baru atau menemukan bug, silakan buka **Issue** atau kirimkan **Pull Request**.
+**CineWatch** is a state-of-the-art, immersive streaming platform designed for true cinema enthusiasts. Built with speed, security, and aesthetics in mind, it provides a seamless experience for discovering, tracking, and watching your favorite movies, TV series, and anime.
 
 ---
 
-<div align="center">
-  <i>CineWatch — Menghadirkan Bioskop ke Dalam Genggaman Anda.</i>
-  <br/>
-  <b>Dikembangkan dengan ❤️ oleh saferill</b>
-</div>
+## ✨ Premium Features
+
+### 🌌 Immersive Experience
+- **Ambient Mode**: Dynamic blurred backgrounds that sync with the media's color palette for a truly cinematic atmosphere.
+- **Glassmorphism UI**: A modern, sleek design with subtle transparency and high-end animations powered by Framer Motion.
+- **Hero Autoplay**: High-definition trailers that play automatically with a brightness/contrast boost for maximum clarity.
+
+### 🔔 Smart Notifications
+- **OneSignal Integration**: Real-time push notifications to keep you updated on new releases even when the browser is closed.
+- **Notification Hub**: A central place to manage all your subscribed movies and series.
+- **Release Schedule**: Dedicated daily tracking for Donghua and anime releases.
+
+### 🚀 Cutting-Edge Utility
+- **Floating Mini-Player**: Continue watching your content in a draggable, resizable mini-window while navigating the site.
+- **Speed Optimizer**: Real-time internet speed detection that recommends the optimal streaming quality (up to 4K).
+- **PWA Ready**: Install CineWatch directly on your mobile or desktop for a native-app experience.
+
+### 🛡️ Security & Support
+- **Content Protection**: Advanced anti-mirroring (frame-busting) and right-click protection to safeguard the platform.
+- **Discord Feedback Integration**: Automated reporting for broken links and general feedback sent directly to admin via webhooks.
+- **User Insights**: Personalized dashboard showing your total watch time and activity history.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **State Management**: [Context API](https://react.dev/learn/passing-data-deeply-with-context) & [Local Storage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- **Icons**: [Lucide React](https://lucide.dev/) & [Tabler Icons](https://tabler-icons.io/)
+- **Notifications**: [OneSignal](https://onesignal.com/)
+- **Infrastructure**: [Vercel](https://vercel.com/) / [Cloudflare](https://www.cloudflare.com/)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/saferill/CineWatch.git
+cd CineWatch
+```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+Create a `.env.local` file in the root directory and add the following:
+
+```env
+NEXT_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
+NEXT_PUBLIC_ONESIGNAL_APP_ID=your_onesignal_app_id
+NEXT_PUBLIC_DISCORD_WEBHOOK_URL=your_discord_webhook_url
+```
+
+### 4. Run the development server
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the magic.
+
+---
+
+## 📸 Screenshots
+
+| Home Page | Movie Details | Release Schedule |
+| :---: | :---: | :---: |
+| ![Home](https://via.placeholder.com/400x225?text=CineWatch+Home) | ![Details](https://via.placeholder.com/400x225?text=Ambient+Mode) | ![Schedule](https://via.placeholder.com/400x225?text=Schedule+Grid) |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! If you have a feature request or a bug report, please open an issue or submit a pull request.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/saferill">saferill</a>
+</p>
