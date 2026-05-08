@@ -120,8 +120,13 @@ export const FilteredMediaContent = ({
   return (
     <div className="space-y-6">
       {/* Header with Title and Filter Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {title && <h1 className="text-2xl font-bold">{title}</h1>}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+        {title && (
+          <div className="flex items-center gap-4">
+             <div className="w-1.5 h-8 bg-accent rounded-full shadow-[0_0_15px_rgba(6,182,212,0.4)]" />
+             <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase italic bg-linear-to-r from-white to-white/60 bg-clip-text text-transparent">{title}</h1>
+          </div>
+        )}
         <div className="flex items-center gap-4">
           {layout !== 'sidebar' && <FilterComponent />}
         </div>

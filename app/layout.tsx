@@ -22,6 +22,8 @@ import { FloatingPlayerProvider } from '@/context/floating-player-context'
 import { FloatingPlayer } from '@/components/media/floating-player'
 import { SpeedOptimizer } from '@/components/media/speed-optimizer'
 import { FeedbackForm } from '@/components/feedback-form'
+import { SpatialAudioDashboard } from '@/components/spatial-audio-dashboard'
+import CommandPalette from '@/app/components/CommandPalette'
 
 export const viewport: Viewport = {
   themeColor: [
@@ -84,6 +86,7 @@ import { AntiInspect } from '@/components/anti-inspect'
 import { SWRegister } from '@/components/sw-register'
 import { OneSignalInit } from '@/components/onesignal-init'
 import { ContentProtection } from '@/components/content-protection'
+import { AuthProvider } from '@/context/auth-context'
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -97,34 +100,46 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body
         className={cn(
-          'min-h-screen scroll-smooth bg-background font-sans antialiased',
+          'min-h-screen scroll-smooth bg-background font-sans antialiased relative',
           fontSans.variable
         )}
       >
+        {/* Premium Background Effects */}
+        <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
+          <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-cyan-600/5 blur-[100px] rounded-full animate-pulse [animation-delay:4s]" />
+          <div className="absolute inset-0 bg-[url('/grain.png')] opacity-[0.03] mix-blend-overlay" />
+        </div>
+        
         <SWRegister />
         <OneSignalInit />
         <ContentProtection />
         <AntiInspect />
         <SplashScreen />
-        <FloatingPlayerProvider>
-          <div className="flex flex-col pb-16 lg:pb-0"> {/* Added pb-16 for mobile bottom nav */}
-            <SiteHeader />
-            <div className="h-full flex-1 overflow-x-hidden">
-              <NuqsAdapter>
-                <QueryProvider>
-                  <CSPostHogProvider>{children}</CSPostHogProvider>
-                </QueryProvider>
-              </NuqsAdapter>
-              <ToastProvider />
-              <Footer />
-              <MobileBottomNav />
-              {GOOGLE_GTM_ID && <GoogleTagManager gtmId={GOOGLE_GTM_ID} />}
+        <AuthProvider>
+          <FloatingPlayerProvider>
+            <div className="flex flex-col pb-16 lg:pb-0"> {/* Added pb-16 for mobile bottom nav */}
+              <SiteHeader />
+              <div className="h-full flex-1 overflow-x-hidden">
+                <NuqsAdapter>
+                  <QueryProvider>
+                    <CSPostHogProvider>{children}</CSPostHogProvider>
+                  </QueryProvider>
+                </NuqsAdapter>
+                <ToastProvider />
+                <Footer />
+                <MobileBottomNav />
+                {GOOGLE_GTM_ID && <GoogleTagManager gtmId={GOOGLE_GTM_ID} />}
+              </div>
             </div>
-          </div>
-          <FloatingPlayer />
-          <SpeedOptimizer />
-          <FeedbackForm />
-        </FloatingPlayerProvider>
+            <FloatingPlayer />
+            <CommandPalette />
+            <SpeedOptimizer />
+            <FeedbackForm />
+            <SpatialAudioDashboard />
+          </FloatingPlayerProvider>
+        </AuthProvider>
       </body>
     </html>
   )

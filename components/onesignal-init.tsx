@@ -9,17 +9,16 @@ export function OneSignalInit() {
        const onesignalId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "PLACEHOLDER_ID"
 
        const script = document.createElement('script')
-       script.src = "https://cdn.onesignal.com/sdks/OneSignalSDK.js"
-       script.async = true
+       script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+       script.defer = true
        document.head.appendChild(script)
 
        script.onload = () => {
           // @ts-ignore
-          window.OneSignal = window.OneSignal || []
+          window.OneSignalDeferred = window.OneSignalDeferred || []
           // @ts-ignore
-          window.OneSignal.push(function() {
-             // @ts-ignore
-             window.OneSignal.init({
+          window.OneSignalDeferred.push(async (OneSignal) => {
+             await OneSignal.init({
                 appId: onesignalId,
                 safari_web_id: "",
                 notifyButton: {

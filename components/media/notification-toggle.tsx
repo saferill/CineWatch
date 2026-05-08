@@ -37,6 +37,22 @@ export function NotificationToggle({ id, title, type, iconOnly }: NotificationTo
     localStorage.setItem('cinewatch_subs', JSON.stringify(newSubs))
     setIsSubscribed(!isSubscribed)
     
+    // OneSignal Tag Integration
+    if (typeof window !== 'undefined' && (window as any).OneSignal) {
+      const oneSignal = (window as any).OneSignal;
+      oneSignal.push(() => {
+        if (!isSubscribed) {
+          // Subscribe: Add tag
+          oneSignal.sendTag(`notif_${type}_${id}`, "true");
+          console.log(`OneSignal: Tagged as notif_${type}_${id}`);
+        } else {
+          // Unsubscribe: Remove tag
+          oneSignal.deleteTag(`notif_${type}_${id}`);
+          console.log(`OneSignal: Removed tag notif_${type}_${id}`);
+        }
+      });
+    }
+    
     // Dispatch event for header to update
     window.dispatchEvent(new Event('cinewatch_subs_updated'))
   }

@@ -24,12 +24,12 @@ interface ListProps {
   itemType?: ItemType
 }
 
-export const List = ({ title, items, itemType = 'movie' }: ListProps) => {
+export const List = ({ title, items = [], itemType = 'movie' }: ListProps) => {
   const isTop10 = title.toLowerCase().includes('top rated') || title.toLowerCase().includes('top 10')
   const displayItems = isTop10 ? items.slice(0, 10) : items
 
   return (
-    <nav className="py-10">
+    <nav className="py-6 lg:py-8">
       <motion.div
         initial="rest"
         whileHover="hover"
@@ -41,23 +41,23 @@ export const List = ({ title, items, itemType = 'movie' }: ListProps) => {
           className="mb-4 flex w-fit items-center gap-2"
         >
           <motion.h2
-            className="flex items-center text-2xl font-bold transition md:text-3xl"
+            className="flex items-center text-xl font-bold transition md:text-2xl tracking-tight"
             variants={CHANGE_COLOR_VARIANT}
           >
-            <span className="mr-3 block h-8 w-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+            <span className="mr-3 block h-6 w-1.5 rounded-full bg-linear-to-b from-blue-500 to-purple-600 shadow-[0_0_20px_rgba(37,99,235,0.6)]" />
             {title}
           </motion.h2>
           <motion.div
-            className="mt-1 text-base text-cyan-200"
+            className="mt-1 text-xs text-zinc-500"
             variants={HIDDEN_TEXT_VARIANT}
           >
-            <span className="font-sans text-sm font-medium">Explore All</span>
+            <span className="font-sans font-medium uppercase tracking-tighter">View All</span>
           </motion.div>
           <motion.span
             variants={HIDDEN_TEXT_ARROW_VARIANT}
-            className="mt-1 text-base text-cyan-200"
+            className="mt-1 text-zinc-500"
           >
-            <Icons.arrowRight className="ml-1 inline-block h-4 w-4" />
+            <Icons.arrowRight className="ml-1 inline-block h-3 w-3" />
           </motion.span>
         </Link>
       </motion.div>
@@ -70,14 +70,20 @@ export const List = ({ title, items, itemType = 'movie' }: ListProps) => {
         <Splide
           options={{
             rewind: true,
-            gap: '1.5rem',
+            gap: '1rem',
             arrows: true,
             pagination: false,
             autoWidth: true,
+            breakpoints: {
+              768: {
+                gap: '0.5rem',
+                arrows: false,
+              },
+            },
           }}
         >
           {displayItems.map((item, index) => (
-            <SplideSlide key={`${item.id}-${index}`}>
+            <SplideSlide key={`${(item as any).id || (item as any).href || index}-${index}`}>
               <Card item={item} itemType={itemType} rank={isTop10 ? index + 1 : undefined} />
             </SplideSlide>
           ))}

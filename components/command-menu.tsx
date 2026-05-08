@@ -63,13 +63,13 @@ export function CommandMenu({ ...props }: CommandDialogProps) {
       <Button
         variant="outline"
         className={cn(
-          'relative w-full justify-start text-sm text-muted-foreground border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:text-white transition-all duration-300 rounded-2xl sm:pr-12 md:w-40 lg:w-64 group'
+          'relative h-9 w-9 p-0 sm:h-10 sm:w-full sm:justify-start sm:px-4 sm:pr-12 text-sm text-muted-foreground border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:text-white transition-all duration-300 rounded-full sm:rounded-2xl md:w-40 lg:w-64 group'
         )}
         onClick={() => setOpen(true)}
         {...props}
       >
-        <Search className="mr-2 h-4 w-4 text-zinc-500 group-hover:text-accent transition-colors" />
-        <span className="inline-flex font-medium">Cari sesuatu...</span>
+        <Search className="h-4 w-4 text-zinc-500 group-hover:text-accent transition-colors sm:mr-2" />
+        <span className="hidden sm:inline-flex font-medium">Cari sesuatu...</span>
         <kbd className="pointer-events-none absolute right-2.5 top-2.5 hidden h-5 select-none items-center gap-1 rounded-lg border border-white/[0.1] bg-white/[0.05] px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>

@@ -43,12 +43,14 @@ function getGenres(genres: number[] = [], defaultGenres: MovieGenre[] = []) {
 function itemRedirect(itemType: ItemType) {
   if (itemType === 'movie') return '/movies';
   if (itemType === 'anime') return '/anime';
+  if (itemType === 'donghua') return '/donghua';
   return '/series';
 }
 
 function itemDetailRedirect(itemType: ItemType) {
   if (itemType === 'movie') return '/movie';
   if (itemType === 'anime') return '/anime';
+  if (itemType === 'donghua') return '/donghua/detail';
   return '/series';
 }
 

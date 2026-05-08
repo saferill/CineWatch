@@ -25,6 +25,14 @@ export function NotificationHub() {
   useEffect(() => {
     loadSubs()
     window.addEventListener('cinewatch_subs_updated', loadSubs)
+    
+    // Request Browser Notification Permission on mount if not granted
+    if (typeof window !== 'undefined' && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+
     return () => window.removeEventListener('cinewatch_subs_updated', loadSubs)
   }, [])
 
@@ -102,12 +110,21 @@ export function NotificationHub() {
         </div>
         
         {subs.length > 0 && (
-           <div className="p-4 bg-white/5 border-t border-white/5">
-              <Link href="/schedule" onClick={() => setIsOpen(false)}>
+           <div className="p-4 bg-white/5 border-t border-white/5 space-y-2">
+              <Link href="/schedule" onClick={() => setIsOpen(false)} className="block">
                  <Button className="w-full bg-accent text-black font-black uppercase text-xs tracking-widest rounded-xl">
                     Cek Jadwal Rilis
                  </Button>
               </Link>
+              {Notification.permission !== 'granted' && (
+                <Button 
+                  variant="outline" 
+                  className="w-full text-[10px] border-white/10 text-zinc-500 uppercase font-bold"
+                  onClick={() => Notification.requestPermission()}
+                >
+                  Aktifkan Notifikasi Browser
+                </Button>
+              )}
            </div>
         )}
       </PopoverContent>

@@ -14,10 +14,12 @@ export default function MovieCard({
   movie,
   isTV = false,
   isAnime = false,
+  className = "",
 }: {
   movie: MediaItem;
   isTV?: boolean;
   isAnime?: boolean;
+  className?: string;
 }) {
   const isAL = isAnilistItem(movie);
   const title = (isAL
@@ -53,16 +55,16 @@ export default function MovieCard({
   return (
     <Link
       href={href}
-      className="group block shrink-0 w-[130px] sm:w-[150px] md:w-[160px] lg:w-[175px] snap-start"
+      className={`group block transition-all duration-300 ${className}`}
     >
       {/* Poster */}
-      <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-surface-2 border border-white/[0.05] transition-all duration-300 group-hover:border-white/[0.12] group-hover:scale-[1.02] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+      <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.05] transition-all duration-500 group-hover:border-accent/30 group-hover:scale-[1.05] group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
         <Image
           src={imageSrc}
           alt={title}
           fill
-          sizes="(max-width: 640px) 130px, (max-width: 768px) 150px, (max-width: 1024px) 160px, 175px"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 640px) 150px, (max-width: 768px) 180px, 200px"
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
 
         {/* Gradient overlay on hover */}
@@ -81,10 +83,9 @@ export default function MovieCard({
 
         {/* Rating badge */}
         {rating !== "N/A" && (
-          <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md rounded-lg px-1.5 py-0.5 text-[10px] font-semibold text-white flex items-center gap-0.5 border border-white/[0.08]">
+          <div className="absolute top-2.5 left-2.5 bg-accent text-black font-black rounded-lg px-2 py-0.5 text-[9px] flex items-center gap-1 shadow-lg">
             <IconStar
-              className="w-2.5 h-2.5 text-amber-400"
-              fill="currentColor"
+              className="w-2.5 h-2.5 fill-black"
               stroke={0}
             />
             {rating}
@@ -93,15 +94,15 @@ export default function MovieCard({
 
         {/* Year badge */}
         {year !== "—" && (
-          <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-lg px-1.5 py-0.5 text-[9px] font-medium text-zinc-400 border border-white/[0.05]">
+          <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md rounded-lg px-2 py-0.5 text-[9px] font-bold text-white border border-white/10">
             {year}
           </div>
         )}
       </div>
 
       {/* Info */}
-      <div className="mt-2.5 px-0.5">
-        <h3 className="font-semibold text-xs sm:text-[13px] truncate text-zinc-200 group-hover:text-white transition-colors leading-tight">
+      <div className="mt-3 px-1">
+        <h3 className="font-bold text-[11px] sm:text-[13px] uppercase tracking-tight line-clamp-1 text-zinc-400 group-hover:text-white transition-colors leading-tight">
           {title}
         </h3>
       </div>

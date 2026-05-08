@@ -59,10 +59,10 @@ export default function MovieGrid({
   return (
     <section className="group/section">
       {title && (
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-5 bg-accent rounded-full" />
-            <h2 className="text-base sm:text-lg font-bold tracking-tight">{title}</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-1.5 h-7 bg-accent rounded-full shadow-[0_0_15px_rgba(6,182,212,0.4)]" />
+            <h2 className="text-lg md:text-xl font-black uppercase tracking-tighter italic">{title}</h2>
           </div>
           <div className="flex items-center gap-2">
             {viewAllHref && (
@@ -98,6 +98,7 @@ export default function MovieGrid({
             movie={movie}
             isTV={isTV}
             isAnime={isAnime}
+            className="shrink-0 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px] snap-start"
           />
         ))}
       </div>

@@ -63,11 +63,27 @@ const EMBED_PROVIDERS = [
     }
   },
   {
-    name: "Embed.su (Multi-Sub)",
+    name: "NontonGo (Sub Indo)",
     requiresTmdb: true,
     getUrl: (title: string, ep: number, anilistId: number, tmdbId?: number, tmdbType?: "movie" | "tv") => {
-      if (tmdbType === "movie") return `https://embed.su/embed/movie/${tmdbId}`;
-      return `https://embed.su/embed/tv/${tmdbId}/1/${ep}`;
+      if (tmdbType === "movie") return `https://www.nontongo.win/embed/movie/${tmdbId}`;
+      return `https://www.nontongo.win/embed/tv/${tmdbId}/1/${ep}`;
+    }
+  },
+  {
+    name: "Vidsrc.to (Sub Indo)",
+    requiresTmdb: true,
+    getUrl: (title: string, ep: number, anilistId: number, tmdbId?: number, tmdbType?: "movie" | "tv") => {
+      if (tmdbType === "movie") return `https://vidsrc.to/embed/movie/${tmdbId}`;
+      return `https://vidsrc.to/embed/tv/${tmdbId}/1/${ep}`;
+    }
+  },
+  {
+    name: "SuperEmbed (Multi-Sub)",
+    requiresTmdb: true,
+    getUrl: (title: string, ep: number, anilistId: number, tmdbId?: number, tmdbType?: "movie" | "tv") => {
+      if (tmdbType === "movie") return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
+      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=1&e=${ep}`;
     }
   },
 ];
@@ -79,9 +95,6 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
   const currentProvider = availableProviders[providerIndex];
   const embedUrl = currentProvider?.getUrl(animeTitle, episode, anilistId ?? 0, tmdbId, tmdbType) || "";
 
-  const handleProviderChange = () => {
-    setProviderIndex((prev) => (prev + 1) % availableProviders.length);
-  };
 
   useEffect(() => {
     const STORAGE_KEY = "CineWatch_watch_progress";
@@ -137,12 +150,21 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
               <IconPlayerSkipForward className="w-4 h-4" stroke={2} />
             </a>
           </div>
-          <button
-            onClick={handleProviderChange}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg glass text-zinc-400 hover:text-white transition-colors"
-          >
-            {currentProvider.name}
-          </button>
+          <div className="flex items-center gap-1 overflow-x-auto max-w-[30vw] sm:max-w-[40vw] hide-scrollbar pb-0.5">
+            {availableProviders.map((p, idx) => (
+              <button
+                key={p.name}
+                onClick={() => setProviderIndex(idx)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                  providerIndex === idx 
+                    ? "bg-accent text-accent-foreground shadow-lg shadow-accent/20" 
+                    : "glass text-zinc-400 hover:text-white"
+                }`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

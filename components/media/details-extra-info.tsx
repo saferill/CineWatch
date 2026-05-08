@@ -13,7 +13,9 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle,
 } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { NotificationToggle } from '@/components/media/notification-toggle'
 
 export const DetailsExtraInfo = ({
@@ -48,6 +50,9 @@ export const DetailsExtraInfo = ({
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black border-none aspect-video">
+                <VisuallyHidden>
+                  <DialogTitle>Trailer {movie.title}</DialogTitle>
+                </VisuallyHidden>
                 <iframe
                   className="w-full h-full"
                   src={`https://www.youtube.com/embed/${trailerId}?autoplay=1`}

@@ -8,7 +8,7 @@ import { getMovieTrailer, getTVTrailer, getMovieLogo, getTVLogo } from '@/app/li
 import { HeroVideoPlayer } from '@/components/header/hero-video-player'
 
 export const HeroSlider = async ({ movies }: { movies: Movie[] }) => {
-  const topMovies = movies.slice(0, 50); // Expanded to 50 movies per user request
+  const topMovies = movies.slice(0, 15); // Optimized: Reduced to 15 to prevent TMDB API rate limiting and slow page load.
   
   const moviesWithExtras = await Promise.all(topMovies.map(async (movie) => {
     try {
@@ -29,7 +29,7 @@ export const HeroSlider = async ({ movies }: { movies: Movie[] }) => {
             className="relative min-h-[75vh] lg:min-h-[90vh] w-full overflow-hidden"
           >
             {movie.trailerId ? (
-               <HeroVideoPlayer trailerId={movie.trailerId} />
+               <HeroVideoPlayer trailerId={movie.trailerId} movie={movie} />
             ) : (
                <HeroImage movie={movie as unknown as HeroImageMedia} />
             )}
@@ -37,8 +37,8 @@ export const HeroSlider = async ({ movies }: { movies: Movie[] }) => {
             {/* Netflix-style Left Gradient Vignette (Hidden on mobile) */}
             <div className="absolute inset-y-0 left-0 z-10 hidden md:block w-[50%] bg-gradient-to-r from-background via-background/80 to-transparent pointer-events-none" />
             {/* Top/Bottom Gradient Vignette */}
-            <div className="absolute inset-x-0 bottom-0 z-10 h-[50vh] md:h-[30vh] bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 z-10 h-[15vh] bg-gradient-to-b from-background/60 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 z-10 h-[45vh] md:h-[40vh] bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 z-10 h-[15vh] md:h-[20vh] bg-gradient-to-b from-background/80 to-transparent pointer-events-none" />
 
             <div className="absolute inset-0 z-20 flex">
               <HeroSectionInfo movie={movie as Movie & { logoUrl?: string | null }} isTopOne={index === 0} />

@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, X, Send, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { toast } from 'sonner'
 
 export function FeedbackForm() {
@@ -57,7 +58,7 @@ export function FeedbackForm() {
       {/* Floating Toggle Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-[90] size-14 rounded-full bg-accent text-black shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group"
+        className="fixed bottom-24 left-4 sm:left-6 z-[90] size-12 sm:size-14 rounded-full bg-accent text-black shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group"
       >
         <MessageSquare className="size-6" />
         <span className="absolute left-16 bg-black/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
@@ -83,6 +84,10 @@ export function FeedbackForm() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-md bg-zinc-950 border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden p-8"
             >
+              <VisuallyHidden>
+                <h2>Formulir Laporan dan Feedback</h2>
+              </VisuallyHidden>
+              
               <button 
                 onClick={() => setIsOpen(false)}
                 className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"

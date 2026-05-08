@@ -3,6 +3,8 @@ import {
   getLatestTrendingSeries,
   getPopularSeries,
 } from '@/services/series'
+import { getTrendingAnime } from '@/app/lib/anilist'
+import { fetchDonghuaHome } from '@/services/donghua'
 
 import { Credit } from '@/types/credit'
 import { MediaResponse } from '@/types/media'
@@ -37,6 +39,11 @@ const getPopularMovies = async (params: Param = {}) => {
   'use server'
   const url = `movie/${movieType.popular}?language=en-US`
   return fetchClient.get<MediaResponse>(url, params, true)
+}
+
+const getMoviesByGenre = async (genreId: number, page: number = 1, params: Param = {}) => {
+  const url = `discover/movie?with_genres=${genreId}&page=${page}&language=en-US`
+  return fetchClient.get<MovieResponse>(url, params, true)
 }
 
 // New function to get trending media (movies and TV shows) for the week
@@ -77,6 +84,10 @@ const populateHomePageData = async (): Promise<MultiRequestProps> => {
       latestTrendingSeries,
       popularSeriesResponse,
       allTimeTopRatedSeries,
+      trendingAnime,
+      donghuaHome,
+      actionMovies,
+      moreTopRated,
     ] = await Promise.all([
       getTrendingMediaForHeroSlider(), // Replaced getNowPlayingMovies()
       getLatestTrendingMovies(),
@@ -85,16 +96,24 @@ const populateHomePageData = async (): Promise<MultiRequestProps> => {
       getLatestTrendingSeries(),
       getPopularSeries(),
       getAllTimeTopRatedSeries(),
+      getTrendingAnime(1, 20),
+      fetchDonghuaHome(),
+      getMoviesByGenre(28, 1), // Action movies
+      getAllTimeTopRatedMovies({ page: 2 }), // More top rated
     ])
 
     return {
-      trendingMediaForHero: trendingMediaHeroResponse || [], // Changed from nowPlayingMovies
+      trendingMediaForHero: trendingMediaHeroResponse || [],
       latestTrendingMovies: latestTrendingResponse?.results || [],
       popularMovies: popularMoviesResponse?.results || [],
       allTimeTopRatedMovies: allTimeTopRatedResponse?.results || [],
       latestTrendingSeries: latestTrendingSeries?.results || [],
       popularSeries: popularSeriesResponse?.results || [],
       allTimeTopRatedSeries: allTimeTopRatedSeries?.results || [],
+      trendingAnime: trendingAnime?.media || [],
+      latestDonghua: donghuaHome?.recent || [],
+      epicMasterpieces: moreTopRated?.results?.slice(0, 15) || [],
+      actionHits: actionMovies?.results?.slice(0, 15) || [],
     }
   } catch (error: any) {
     console.error(error, 'error')

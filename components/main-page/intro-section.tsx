@@ -1,4 +1,6 @@
+'use client'
 import React, { Suspense } from 'react'
+import { motion } from 'framer-motion'
 import { MediaType } from '@/types/media'
 import { Movie } from '@/types/movie-result'
 import { List } from '@/components/list'
@@ -6,12 +8,7 @@ import { SliderHorizontalListLoader } from '@/components/loaders/slider-horizont
 
 // Utility to shuffle an array (Fisher-Yates)
 const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
+  return array // No-op on client to maintain hydration stability
 }
 
 interface MoviesIntroSectionProps {
@@ -21,6 +18,10 @@ interface MoviesIntroSectionProps {
   latestTrendingSeries: MediaType[]
   popularSeries: MediaType[]
   allTimeTopRatedSeries: MediaType[]
+  trendingAnime: any[]
+  latestDonghua: any[]
+  epicMasterpieces: Movie[]
+  actionHits: Movie[]
 }
 
 export const MoviesIntroSection = ({
@@ -30,13 +31,25 @@ export const MoviesIntroSection = ({
   latestTrendingSeries,
   popularSeries,
   allTimeTopRatedSeries,
+  trendingAnime,
+  latestDonghua,
+  epicMasterpieces,
+  actionHits,
 }: MoviesIntroSectionProps) => {
-  // Shuffle top rated lists to vary on each render
-  const shuffledTopRatedMovies = shuffleArray(allTimeTopRatedMovies)
-  const shuffledTopRatedSeries = shuffleArray(allTimeTopRatedSeries)
+  // Shuffling is now handled on the server to prevent hydration mismatch
+  const shuffledTopRatedMovies = allTimeTopRatedMovies
+  const shuffledTopRatedSeries = allTimeTopRatedSeries
+  const shuffledEpicMasterpieces = epicMasterpieces
+  const shuffledActionHits = actionHits
 
   return (
-    <section className="container max-w-(--breakpoint-2xl)">
+    <motion.section 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+      className="max-w-(--breakpoint-2xl) space-y-4 md:space-y-8"
+    >
       <Suspense fallback={<SliderHorizontalListLoader />}
 >
         <List
@@ -77,7 +90,37 @@ export const MoviesIntroSection = ({
           itemType="tv"
         />
       </Suspense>
-    </section>
+      <Suspense fallback={<SliderHorizontalListLoader />}>
+        <List
+          title="Trending Anime"
+          items={trendingAnime as any}
+          itemType="anime"
+        />
+      </Suspense>
+      <Suspense fallback={<SliderHorizontalListLoader />}>
+        <List
+          title="Latest Donghua"
+          items={latestDonghua as any}
+          itemType="donghua"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SliderHorizontalListLoader />}>
+        <List
+          title="Epic Masterpieces (Must Watch)"
+          items={shuffledEpicMasterpieces}
+          itemType="movie"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SliderHorizontalListLoader />}>
+        <List
+          title="Martial Arts Universe"
+          items={shuffledActionHits}
+          itemType="movie"
+        />
+      </Suspense>
+    </motion.section>
   )
 }
 

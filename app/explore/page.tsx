@@ -24,7 +24,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const activeGenreId = g ? parseInt(g) : 28;
   const type = t === "tv" ? "tv" : "movie";
 
-  const data = type === "movie" 
+  const data = type === "movie"
     ? await getMoviesByGenre(activeGenreId)
     : await getTVByGenre(activeGenreId);
 
@@ -32,22 +32,22 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      
+
       <main className="mx-auto max-w-7xl px-6 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-4xl font-black tracking-tight mb-2">Explore</h1>
-            <p className="text-zinc-500 font-medium">Discover content by genre and category.</p>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-2 bg-linear-to-r from-white to-white/60 bg-clip-text text-transparent italic">Explore</h1>
+            <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Temukan tontonan berdasarkan genre</p>
           </div>
 
           <div className="flex items-center gap-2 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06] w-fit">
-            <a 
+            <a
               href={`/explore?g=${activeGenreId}&t=movie`}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${type === "movie" ? "bg-accent text-accent-foreground shadow-lg" : "text-zinc-500 hover:text-white"}`}
             >
               Movies
             </a>
-            <a 
+            <a
               href={`/explore?g=${activeGenreId}&t=tv`}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${type === "tv" ? "bg-accent text-accent-foreground shadow-lg" : "text-zinc-500 hover:text-white"}`}
             >
@@ -61,16 +61,15 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
           <aside className="lg:w-64 shrink-0">
             <div className="sticky top-24">
               <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2">Genres</h3>
-              <nav className="flex flex-wrap lg:flex-col gap-1.5">
+              <nav className="flex flex-nowrap lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-4 lg:pb-0">
                 {GENRES.map((genre) => (
                   <a
                     key={genre.id}
                     href={`/explore?g=${genre.id}&t=${type}`}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                      activeGenreId === genre.id 
-                        ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
-                        : "text-zinc-400 hover:text-white hover:bg-white/[0.05]"
-                    }`}
+                    className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeGenreId === genre.id
+                        ? "bg-accent text-black shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                        : "text-zinc-500 hover:text-white hover:bg-white/[0.05]"
+                      }`}
                   >
                     {genre.name}
                   </a>
@@ -81,28 +80,28 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
           {/* Main Grid */}
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-1 h-6 bg-accent rounded-full" />
-              <h2 className="text-2xl font-bold">{activeGenreName} {type === "movie" ? "Movies" : "Series"}</h2>
+            <div className="flex items-center gap-4 mb-10">
+              <div className="w-1.5 h-7 bg-accent rounded-full shadow-[0_0_15px_rgba(6,182,212,0.5)]" />
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter italic">{activeGenreName} {type === "movie" ? "Movies" : "Series"}</h2>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-10 sm:gap-6 md:gap-8">
               {data.map((item) => (
-                <MovieCard 
-                  key={item.id} 
-                  movie={item as any} 
-                  isTV={type === "tv"} 
+                <MovieCard
+                  key={item.id}
+                  movie={item as any}
+                  isTV={type === "tv"}
                 />
               ))}
             </div>
 
-            <LoadMore 
-              fetchAction={type === "movie" 
-                ? fetchMoviesByGenre.bind(null, activeGenreId) 
+            <LoadMore
+              fetchAction={type === "movie"
+                ? fetchMoviesByGenre.bind(null, activeGenreId)
                 : fetchTVByGenre.bind(null, activeGenreId)
-              } 
-              initialPage={1} 
-              isTV={type === "tv"} 
+              }
+              initialPage={1}
+              isTV={type === "tv"}
             />
           </div>
         </div>

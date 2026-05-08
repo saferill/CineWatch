@@ -18,7 +18,7 @@ export function FloatingPlayer() {
         exit={{ opacity: 0, scale: 0.8, y: 100 }}
         drag
         dragConstraints={{ left: -1000, right: 0, top: -1000, bottom: 0 }}
-        className="fixed bottom-24 right-6 z-[100] w-[320px] md:w-[400px] aspect-video bg-zinc-950 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden group cursor-grab active:cursor-grabbing"
+        className="fixed bottom-20 right-4 sm:right-6 z-[100] w-[calc(100vw-2rem)] sm:w-[320px] md:w-[400px] aspect-video bg-zinc-950 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden group cursor-grab active:cursor-grabbing"
       >
         {/* Header / Controls */}
         <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between px-4 z-10">

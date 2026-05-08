@@ -96,6 +96,19 @@ export function Carousel({
         minHeight: 'var(--carousel-height, auto)',
       }}
     >
+      {/* Immersive Dynamic Background Glow */}
+      <motion.div
+        className="absolute inset-0 z-0 pointer-events-none opacity-40 blur-[120px]"
+        animate={{
+          background: [
+            'radial-gradient(circle at 20% 30%, rgba(6,182,212,0.15) 0%, transparent 70%)',
+            'radial-gradient(circle at 80% 20%, rgba(139,92,246,0.15) 0%, transparent 70%)',
+            'radial-gradient(circle at 50% 80%, rgba(236,72,153,0.15) 0%, transparent 70%)',
+          ][currentIndex % 3]
+        }}
+        transition={{ duration: 2, ease: "easeInOut" }}
+      />
+
       {/* Instant placeholder background to prevent blank screen */}
       <motion.div
         className="absolute inset-0 z-0 bg-gradient-to-br from-gray-800/80 via-gray-900/90 to-black/95"
@@ -176,7 +189,7 @@ export function Carousel({
                 <motion.button
                   key={index}
                   onClick={() => handleDotClick(index)}
-                  className={`size-2.5 cursor-pointer rounded-full transition-all duration-300 hover:scale-110 sm:size-3 ${
+                  className={`size-1.5 cursor-pointer rounded-full transition-all duration-300 hover:scale-110 sm:size-3 ${
                     index === currentIndex
                       ? 'scale-110 bg-white shadow-lg ring-2 ring-white/30 sm:scale-125'
                       : 'bg-white/40 hover:bg-white/70'
@@ -234,7 +247,7 @@ export function Carousel({
                   <motion.button
                     key={index}
                     onClick={() => handleDotClick(index)}
-                    className={`size-2.5 cursor-pointer rounded-full transition-all duration-300 hover:scale-110 sm:size-3 ${
+                    className={`size-1.5 cursor-pointer rounded-full transition-all duration-300 hover:scale-110 sm:size-3 ${
                       index === currentIndex
                         ? 'scale-110 bg-white shadow-lg ring-2 ring-white/30 sm:scale-125'
                         : 'bg-white/40 hover:bg-white/70'
@@ -275,7 +288,7 @@ export function Carousel({
 
           {/* Current position indicator with enhanced animation */}
           <motion.div
-            className="my-2 text-center"
+            className="my-2 text-center hidden sm:block"
             {...CAROUSEL_POSITION_INDICATOR_VARIANTS}
           >
             <motion.span

@@ -15,7 +15,7 @@ import { useFloatingPlayer } from "@/context/floating-player-context";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-type Source = "vidsrc" | "vidking" | "autoembed" | "vidlink" | "vidsrcrip" | "embedsu";
+type Source = "vidsrc" | "vidking" | "autoembed" | "vidlink" | "vidsrcrip" | "embedsu" | "nontongo" | "superembed" | "vidsrcto";
 
 interface SeasonInfo {
   season_number: number;
@@ -205,6 +205,24 @@ export default function Player({
       return `https://embed.su/embed/tv/${movieId}/1/1`;
     }
 
+    if (src === "nontongo") {
+      if (type === "movie") return `https://www.nontongo.win/embed/movie/${movieId}`;
+      if (type === "tv" && season && episode) return `https://www.nontongo.win/embed/tv/${movieId}/${season}/${episode}`;
+      return `https://www.nontongo.win/embed/tv/${movieId}/1/1`;
+    }
+
+    if (src === "superembed") {
+      if (type === "movie") return `https://multiembed.mov/?video_id=${movieId}&tmdb=1`;
+      if (type === "tv" && season && episode) return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=${season}&e=${episode}`;
+      return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=1&e=1`;
+    }
+
+    if (src === "vidsrcto") {
+      if (type === "movie") return `https://vidsrc.to/embed/movie/${movieId}`;
+      if (type === "tv" && season && episode) return `https://vidsrc.to/embed/tv/${movieId}/${season}/${episode}`;
+      return `https://vidsrc.to/embed/tv/${movieId}/1/1`;
+    }
+
     if (type === "anime") {
       return `https://vidsrc.me/embed/anime/${movieId}`;
     }
@@ -223,10 +241,13 @@ export default function Player({
     { id: "vidlink", label: "VidLink" },
     { id: "vidsrcrip", label: "VidSrc.rip" },
     { id: "embedsu", label: "Embed.su" },
+    { id: "nontongo", label: "NontonGo" },
+    { id: "superembed", label: "SuperEmbed" },
+    { id: "vidsrcto", label: "VidSrc.to" },
   ];
 
   return (
-    <div className="legacy-theme fixed inset-0 bg-black flex flex-col z-[9999]">
+    <div className="legacy-theme fixed inset-0 bg-black flex flex-col z-[9999] pb-8 sm:pb-0">
       <div className="flex items-center justify-between h-14 px-4 sm:px-6 bg-black/80 backdrop-blur-xl border-b border-glass-border shrink-0">
         <Link
           href={

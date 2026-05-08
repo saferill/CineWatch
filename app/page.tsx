@@ -55,7 +55,26 @@ async function IndexPage() {
     latestTrendingSeries,
     popularSeries,
     allTimeTopRatedSeries,
+    trendingAnime,
+    latestDonghua,
+    epicMasterpieces,
+    actionHits,
   } = await populateHomePageData()
+
+  // Shuffle arrays on server to prevent hydration mismatch
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+
+  const shuffledTopRatedMovies = shuffleArray(allTimeTopRatedMovies)
+  const shuffledTopRatedSeries = shuffleArray(allTimeTopRatedSeries)
+  const shuffledEpicMasterpieces = shuffleArray(epicMasterpieces)
+  const shuffledActionHits = shuffleArray(actionHits)
 
   // Combine multiple sources to get 50 unique items for the Hero Slider
   const combinedHeroMovies = [
@@ -84,16 +103,20 @@ async function IndexPage() {
       <Suspense fallback={<FullScreenLoader />}>
         <HeroSlider movies={uniqueHeroMovies as any} />
       </Suspense>
-      <div className="container max-w-(--breakpoint-2xl) pt-8 pb-4">
+      <div className="container max-w-(--breakpoint-2xl) pt-4 md:pt-8 pb-4">
         <ContinueWatching />
         
         <MoviesIntroSection
           latestTrendingMovies={latestTrendingMovies}
-          allTimeTopRatedMovies={allTimeTopRatedMovies}
+          allTimeTopRatedMovies={shuffledTopRatedMovies}
           popularMovies={popularMovies}
           latestTrendingSeries={latestTrendingSeries}
           popularSeries={popularSeries}
-          allTimeTopRatedSeries={allTimeTopRatedSeries}
+          allTimeTopRatedSeries={shuffledTopRatedSeries}
+          trendingAnime={trendingAnime}
+          latestDonghua={latestDonghua}
+          epicMasterpieces={shuffledEpicMasterpieces}
+          actionHits={shuffledActionHits}
         />
       </div>
     </section>

@@ -1,4 +1,4 @@
-export type ItemType = 'movie' | 'tv' | 'person' | 'anime'
+export type ItemType = 'movie' | 'tv' | 'person' | 'anime' | 'donghua'
 
 export interface Movie {
   adult: boolean;
@@ -37,6 +37,10 @@ export interface MultiRequestProps {
   latestTrendingSeries: Movie[]
   popularSeries: Movie[]
   allTimeTopRatedSeries: Movie[]
+  trendingAnime: any[]
+  latestDonghua: any[]
+  epicMasterpieces: Movie[]
+  actionHits: Movie[]
 }
 
 export type PopularMediaAction<T> = (params?: Param) => Promise<T>

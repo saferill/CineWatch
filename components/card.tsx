@@ -15,7 +15,7 @@ import {
 } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { BlurredImage } from '@/components/blurred-image'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog'
 import { getTrailerAction } from '@/actions/media'
 
 interface CardProps {
@@ -35,21 +35,27 @@ export const Card = ({
   const [trailerId, setTrailerId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isOpen && !trailerId) {
+    if (isOpen && !trailerId && (itemType === 'movie' || itemType === 'tv')) {
       getTrailerAction(item.id, itemType as 'movie' | 'tv').then((key) => {
         if (key) setTrailerId(key)
       })
     }
   }, [isOpen, item.id, itemType, trailerId])
 
-  const year = item?.release_date?.slice(0, 4) || item?.first_air_date?.slice(0, 4) || 'N/A'
+  const rawTitle = (item as any).title?.romaji || (item as any).title?.english || (item as any).title || (item as any).name || 'Unknown Title'
+  const title = rawTitle.replace(/Episode \d+.*$/i, '').trim()
+  const poster = (item as any).coverImage?.large || (item as any).poster || item.poster_path
+  const backdrop = (item as any).bannerImage || item.backdrop_path || poster
+
+  const year = item?.release_date?.slice(0, 4) || item?.first_air_date?.slice(0, 4) || (item as any).seasonYear?.toString() || 'N/A'
   // Netflix-style match percentage (fake formula for visual effect based on rating)
   const matchScore = item.vote_average ? Math.round(item.vote_average * 10) : 0
+  const finalHref = (item as any).href || `${itemDetailRedirect(itemType)}/${item.id}`
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {item?.poster_path && (
+        {poster && (
           <motion.div
             className="relative cursor-pointer group w-full h-full"
             initial="rest"
@@ -58,28 +64,28 @@ export const Card = ({
           >
             <div className="space-y-2">
               <motion.div 
-                className="relative overflow-visible rounded-md transition-all duration-300 z-10 hover:z-50 flex items-end"
-                whileHover={{ scale: 1.10, y: -5 }}
+                className="relative overflow-visible rounded-2xl transition-all duration-300 z-10 hover:z-50 flex items-end"
+                whileHover={{ scale: 1.05, y: -8 }}
               >
                 {rank && (
                   <div 
-                    className="text-[100px] lg:text-[140px] font-black leading-none tracking-tighter text-black flex-shrink-0 -mr-6 lg:-mr-10 z-0 drop-shadow-lg"
-                    style={{ WebkitTextStroke: '3px #555', WebkitTextFillColor: 'black' }}
+                    className="text-[60px] sm:text-[90px] lg:text-[140px] font-black leading-none tracking-tighter text-black flex-shrink-0 -mr-4 sm:-mr-6 lg:-mr-10 z-0 drop-shadow-2xl"
+                    style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.2)', WebkitTextFillColor: 'black' }}
                   >
                     {rank}
                   </div>
                 )}
                 <div className="relative">
                   <BlurredImage
-                    src={`${getPosterImageURL(item.poster_path)}`}
-                    alt={(item as any).title || (item as any).name || 'Movie'}
+                    src={poster ? getPosterImageURL(poster) : '/placeholder.png'}
+                    alt={title}
                     width={250}
                     height={375}
-                    className={rank ? "w-[120px] lg:w-[150px] h-auto object-cover rounded-md shadow-lg transition-shadow group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] z-10 relative" : "w-[160px] lg:w-[200px] h-auto object-cover rounded-md shadow-lg transition-shadow group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] z-10 relative"}
+                    className={rank ? "w-[120px] lg:w-[150px] h-auto object-cover rounded-2xl shadow-2xl transition-all group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-10 relative border border-white/5" : "w-[160px] lg:w-[200px] h-auto object-cover rounded-2xl shadow-2xl transition-all group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-10 relative border border-white/5"}
                   />
                   
-                  {/* Overlay on Hover */}
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 rounded-md">
+                  {/* Overlay on Hover (Hidden on Mobile) */}
+                  <div className="absolute inset-0 z-10 hidden lg:flex flex-col items-center justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 rounded-2xl">
                      <div className="flex size-12 lg:size-14 items-center justify-center rounded-full border-2 border-white bg-black/40 hover:bg-white hover:text-black text-white transition-all transform scale-90 group-hover:scale-100 shadow-xl">
                        <Play className="ml-1 size-5 lg:size-6 fill-current" />
                      </div>
@@ -89,8 +95,8 @@ export const Card = ({
               </motion.div>
               
               {/* Title under card */}
-              <h3 className="text-sm font-medium text-slate-300 line-clamp-1 group-hover:text-white transition-colors px-1">
-                {(item as any).title || (item as any).name}
+              <h3 className="text-[9px] lg:text-[12px] font-bold text-zinc-500 line-clamp-1 group-hover:text-white transition-colors px-1 mt-1 leading-tight uppercase tracking-tighter opacity-70 group-hover:opacity-100">
+                {title}
               </h3>
             </div>
           </motion.div>
@@ -108,7 +114,7 @@ export const Card = ({
             />
           ) : (
             <img 
-              src={item.backdrop_path ? getImageURL(item.backdrop_path) : getPosterImageURL(item.poster_path)}
+              src={backdrop ? getImageURL(backdrop) : (poster ? getPosterImageURL(poster) : '/placeholder.png')}
               className="w-full h-full object-cover opacity-60"
               alt="Backdrop"
             />
@@ -119,9 +125,9 @@ export const Card = ({
           <div className="absolute inset-0 bg-gradient-to-r from-[#141414]/50 to-transparent" />
           
           <div className="absolute bottom-6 left-8 right-8 flex items-end justify-between z-10">
-            <h2 className="text-3xl font-extrabold max-w-[80%] drop-shadow-2xl tracking-tight">
-              {(item as any).title || (item as any).name}
-            </h2>
+            <DialogTitle className="text-3xl font-extrabold max-w-[80%] drop-shadow-2xl tracking-tight">
+              {title}
+            </DialogTitle>
           </div>
         </div>
 
@@ -139,7 +145,7 @@ export const Card = ({
           
           <div className="flex items-center gap-3 pt-4 border-t border-zinc-800/50 mt-4">
             <Link 
-              href={`${itemDetailRedirect(itemType)}/${item.id}`} 
+              href={finalHref} 
               className="flex items-center justify-center gap-2 rounded-md bg-white px-8 py-2.5 font-bold text-black transition-colors hover:bg-zinc-200"
               onClick={() => setIsOpen(false)}
             >
@@ -152,7 +158,7 @@ export const Card = ({
             </button>
             
             <Link 
-              href={`${itemDetailRedirect(itemType)}/${item.id}`} 
+              href={finalHref} 
               className="flex size-10 items-center justify-center rounded-full border-2 border-zinc-500 bg-zinc-900 hover:border-white transition-colors ml-auto group"
               onClick={() => setIsOpen(false)}
             >
