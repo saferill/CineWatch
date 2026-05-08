@@ -111,12 +111,6 @@ We welcome contributions! If you have ideas to make CineWatch even better:
 
 ---
 
-## 📜 License
-
-Distributed under the **MIT License**. See `LICENSE` for more information.
-
----
-
 ## 📞 Contact
 
 **Syaf** - [@Syafril123](https://t.me/Syafril123) - Project Lead
