@@ -2,6 +2,8 @@ import React from 'react';
 import { fetchDonghuaEpisode } from '@/services/donghua';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, List } from 'lucide-react';
+import { DonghuaServerPlayer } from '@/components/media/donghua-server-player';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -23,17 +25,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             <p className="text-zinc-500">{data.donghua.title}</p>
           </div>
 
-          {/* Video Player Section */}
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 shadow-2xl">
-            <iframe 
-              src={data.streamingUrl} 
-              className="w-full h-full" 
-              allowFullScreen 
-              scrolling="no"
-            />
-          </div>
+          {/* Video Player & Servers Section */}
+          <DonghuaServerPlayer 
+            initialUrl={data.streamingUrl} 
+            servers={data.servers} 
+          />
 
-          {/* Controls & Servers */}
+          {/* Controls Section */}
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 space-y-4">
               <div className="flex items-center gap-2">
@@ -62,23 +60,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
                     <ChevronRight className="size-5" />
                   </Link>
                 )}
-              </div>
-
-              <div className="p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
-                <h3 className="font-bold text-lg">Pilih Server</h3>
-                <div className="flex flex-wrap gap-2">
-                  {data.servers.map((server) => (
-                    <button 
-                      key={server.name}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors border border-zinc-700"
-                    >
-                      {server.name}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-zinc-500 italic">
-                  * Gunakan server lain jika video tidak bisa diputar.
-                </p>
               </div>
             </div>
 

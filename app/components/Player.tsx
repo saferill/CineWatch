@@ -285,37 +285,58 @@ export default function Player({
 
           <button
             onClick={async () => {
-              const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+              const displayTitle = movieTitle;
+              alert('Mencoba mengirim laporan untuk: ' + displayTitle);
               
-              if (webhookUrl) {
-                try {
-                  await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      embeds: [{
-                        title: "🚨 LAPORAN LINK MATI",
-                        color: 0xff0000,
-                        fields: [
-                          { name: "Judul", value: movieTitle, inline: true },
-                          { name: "ID", value: movieId.toString(), inline: true },
-                          { name: "Server", value: source, inline: true },
-                          { name: "Tipe", value: type, inline: true },
-                          { name: "Halaman", value: window.location.href }
-                        ],
-                        timestamp: new Date().toISOString()
-                      }]
-                    })
-                  });
-                } catch (e) {
-                  console.error("Failed to send report", e);
-                }
+              try {
+                // 1. Kirim ke API AI (Telegram & Discord Server-side)
+                const res = await fetch('/api/ai/repair-link', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    movieTitle: displayTitle,
+                    movieId: movieId,
+                    type,
+                    source,
+                    url: embedUrl
+                  }),
+                });
+                const data = await res.json();
+                console.log('Server response:', data);
+              } catch (e: any) {
+                console.error('Laporan gagal dikirim ke API:', e.message);
               }
 
-              toast.success("Laporan terkirim! Tim kami akan segera mengecek server ini.", {
-                description: `Server: ${source}`,
-                duration: 5000,
-              });
+              // 2. Kirim ke Telegram langsung dari Browser (Cara Discord)
+              const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+              const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+              if (tgToken && tgChatId) {
+                const tgText = `🚨 LAPORAN LINK MATI\n🎬 Judul: ${displayTitle}\n📂 Server: ${source}\n🔗 Halaman: ${window.location.href}`;
+                fetch(`https://api.telegram.org/bot${tgToken}/sendMessage?chat_id=${tgChatId}&text=${encodeURIComponent(tgText)}`).catch(() => {});
+              }
+
+              // 3. Tetap kirim ke Discord manual dari browser sebagai backup
+              const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+              if (webhookUrl) {
+                fetch(webhookUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    embeds: [{
+                      title: "🚨 LAPORAN LINK MATI (BACKUP)",
+                      color: 0xff0000,
+                      fields: [
+                        { name: "Judul", value: displayTitle, inline: true },
+                        { name: "Server", value: source, inline: true },
+                        { name: "Halaman", value: window.location.href }
+                      ],
+                      timestamp: new Date().toISOString()
+                    }]
+                  })
+                }).catch(() => {});
+              }
+
+              alert('Proses laporan selesai! Silakan cek Telegram dan Discord Anda.');
             }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500 hover:bg-red-500/20 transition-all"
             title="Lapor Link Mati"

@@ -103,7 +103,7 @@ export async function GET(request: Request) {
 
     // Send to Discord
     console.log('Sending to Discord Webhook...');
-    const response = await fetch(webhookUrl, {
+    await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -112,20 +112,37 @@ export async function GET(request: Request) {
       })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Discord API Error:', errorText);
-      return NextResponse.json({ 
-        error: 'Failed to send to Discord', 
-        status: response.status,
-        details: errorText 
-      }, { status: 500 });
+    // Send to Telegram (Hardcoded fix)
+    const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+    const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+
+    if (tgToken && tgChatId) {
+      console.log('Sending to Telegram...');
+      let tgText = "🔥 *RINGKASAN CINEWATCH HARI INI*\n\n";
+      
+      if (topMovie) tgText += `🎬 *FILM:* [${topMovie.title}](https://cinewatch.vercel.app/movie/${topMovie.id})\n`;
+      if (topSeries) tgText += `📺 *SERIES:* [${topSeries.name}](https://cinewatch.vercel.app/series/${topSeries.id})\n`;
+      if (topAnime) tgText += `🍥 *ANIME:* [${topAnime.title.english || topAnime.title.romaji}](https://cinewatch.vercel.app/anime/${topAnime.id})\n`;
+      if (topDonghua) tgText += `🐉 *DONGHUA:* [${topDonghua.title}](https://cinewatch.vercel.app/donghua)\n`;
+      
+      tgText += "\n🚀 *Tonton sekarang di CineWatch!*";
+
+      await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: tgChatId,
+          text: tgText,
+          parse_mode: 'Markdown',
+          disable_web_page_preview: false
+        })
+      });
     }
 
     return NextResponse.json({ 
       success: true, 
       synced: embeds.length,
-      message: 'Check your Discord channel!' 
+      message: 'Check your Discord and Telegram channels!' 
     });
   } catch (error: any) {
     console.error('System Error:', error);

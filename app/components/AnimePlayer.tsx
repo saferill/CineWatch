@@ -165,6 +165,41 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
               </button>
             ))}
           </div>
+          
+          <button
+            onClick={async () => {
+              alert('Mencoba lapor Anime: ' + animeTitle);
+              
+              // Kirim ke Telegram (Cara Browser)
+              const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+              const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+              if (tgToken && tgChatId) {
+                const tgText = `🍥 ANIME MATI\n🎬 Judul: ${animeTitle}\n📂 Server: ${currentProvider.name}\n🔗 Halaman: ${window.location.href}`;
+                fetch(`https://api.telegram.org/bot${tgToken}/sendMessage?chat_id=${tgChatId}&text=${encodeURIComponent(tgText)}`).catch(() => {});
+              }
+
+              try {
+                await fetch('/api/ai/repair-link', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    movieTitle: animeTitle,
+                    movieId: animeId,
+                    type: 'anime',
+                    source: currentProvider.name,
+                    url: embedUrl
+                  }),
+                });
+                alert('Laporan terkirim ke Telegram!');
+              } catch (e) {
+                alert('Gagal lapor!');
+              }
+            }}
+            className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all"
+            title="Lapor Link Mati"
+          >
+            <span className="text-[10px] font-bold">LAPOR</span>
+          </button>
         </div>
       </div>
 

@@ -139,6 +139,11 @@ export const siteConfig = {
       scroll: true,
     },
     {
+      title: 'Blog',
+      href: '/blog',
+      scroll: true,
+    },
+    {
       title: 'Explore',
       href: '/explore',
       scroll: true,

@@ -38,6 +38,14 @@ export function FeedbackForm() {
             }]
           })
         })
+        // 2. Kirim ke Telegram (Cara Browser)
+        const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN
+        const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID
+        if (tgToken && tgChatId) {
+          const tgText = `💬 FEEDBACK BARU\n\n📝 Pesan: ${message}\n🔗 Halaman: ${window.location.href}`
+          fetch(`https://api.telegram.org/bot${tgToken}/sendMessage?chat_id=${tgChatId}&text=${encodeURIComponent(tgText)}`).catch(() => {})
+        }
+
         setIsSuccess(true)
         setMessage('')
         setTimeout(() => {
