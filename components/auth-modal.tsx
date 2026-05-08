@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Mail, LogIn, Globe, Github } from 'lucide-react'
+import { Mail, LogIn, Globe } from 'lucide-react'
+import { Icons } from '@/components/icons'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
