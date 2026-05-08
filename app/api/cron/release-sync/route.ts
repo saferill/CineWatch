@@ -82,12 +82,15 @@ export async function GET(request: Request) {
 
     // Donghua Embed
     if (topDonghua) {
+      // Extract slug from href if needed, or just use the href
+      const donghuaUrl = topDonghua.href ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app'}${topDonghua.href}` : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app'}/donghua`;
+
       embeds.push({
         title: `🐉 DONGHUA TERBARU: ${topDonghua.title || 'Unknown Title'}`,
         description: `Update episode terbaru dari ${topDonghua.title || 'donghua ini'} kini sudah tersedia!`,
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app'}/donghua/detail/${topDonghua.slug}`,
+        url: donghuaUrl,
         color: 0xff0000,
-        image: topDonghua.image ? { url: topDonghua.image } : undefined,
+        image: topDonghua.poster ? { url: topDonghua.poster } : undefined,
         fields: [
           { name: "🔖 Status", value: "Baru Rilis", inline: true }
         ]
