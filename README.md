@@ -1,81 +1,76 @@
-# 🎬 CineWatch: The Ultimate Cinematic Experience
+# <p align="center">🎬 CineWatch — The Ultimate Media Streaming Experience</p>
 
+<p align="center">
+  <img src="./cinewatch_banner.png" alt="CineWatch Banner" width="100%">
+</p>
 
-<div align="center">
-
-[![Next.js](https://img.shields.io/badge/Framework-Next.js%2015-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-blue?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![OneSignal](https://img.shields.io/badge/Push-OneSignal-orange?style=for-the-badge&logo=onesignal)](https://onesignal.com/)
-[![PWA](https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge)](https://web.dev/progressive-web-apps/)
-
-**CineWatch** adalah platform streaming modern yang dirancang khusus untuk penggemar Film, TV Series, Anime, dan **Donghua**. Nikmati pengalaman menonton premium dengan fitur kelas dunia dan UI yang memanjakan mata.
-
-</div>
-
----
-
-## 🌟 Fitur Unggulan
-
-### 🎨 Visual & UI Premium
-*   **Ambient Background Mode**: Background yang berubah warna secara dinamis mengikuti poster film, memberikan efek *cinematic blur* yang mewah.
-*   **Hero Cinema Trailers**: Trailer berkualitas tinggi yang berputar otomatis dengan peningkatan kontras dan kecerahan tanpa gangguan tombol play.
-*   **Ultra-Minimalist Interface**: Desain bersih tanpa iklan yang mengganggu dan navigasi bawah yang responsif untuk pengguna mobile.
-
-### ⛩️ Spesialisasi Donghua & Anime
-*   **Jadwal Rilis Harian**: Pantau update terbaru setiap hari dari Senin sampai Minggu khusus untuk Donghua dan Anime favorit Anda.
-*   **Multi-Provider Streaming**: Dukungan server streaming dari berbagai provider handal (VidSrc, VidKing, AutoEmbed, dll).
-
-### 🔔 Notifikasi & Tracking Canggih
-*   **OneSignal Push Notification**: Dapatkan pengingat rilis langsung ke layar HP Anda meskipun browser sedang ditutup.
-*   **Floating Mini-Player**: Lanjut menonton sambil menjelajahi koleksi film lain dengan jendela video yang bisa digeser (Drag & Drop).
-*   **Internet Speed Optimizer**: Deteksi kecepatan internet real-time dan rekomendasi kualitas video terbaik (hingga 4K).
-
-### 📊 Dashboard & Keamanan
-*   **User Watch Statistics**: Pantau berapa banyak waktu yang Anda habiskan untuk menonton dan lihat riwayat aktivitas Anda.
-*   **Discord Reporting System**: Lapor link mati atau kirim feedback langsung ke admin via integrasi Discord Webhook.
-*   **Advanced Content Protection**: Keamanan tingkat tinggi untuk mencegah mirroring dan pencurian aset website.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-blue?style=for-the-badge&logo=tailwind-css" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase" alt="Supabase">
+  <img src="https://img.shields.io/badge/AI_Powered-Automation-purple?style=for-the-badge&logo=openai" alt="AI">
+</p>
 
 ---
 
-## 🛠️ Arsitektur Teknologi
+## 🌟 Overview
 
-*   **Core**: Next.js 15 (App Router), TypeScript
-*   **Animations**: Framer Motion
-*   **APIs**: TMDB (Movies/Series), Anilist (Anime), Moli API (Donghua)
-*   **Communication**: OneSignal (Push), Discord (Webhooks)
-*   **PWA**: Web App Manifest & Service Workers
+**CineWatch** is a next-generation media tracking and streaming platform designed for true cinema enthusiasts. Whether it's the latest Hollywood blockbusters, trending TV series, or the hottest Anime and Donghua, CineWatch brings everything into one immersive, cinematic ecosystem.
 
----
+## ✨ Premium Features
 
-## 🚀 Cara Instalasi
+### 🤖 AI-Powered Automation
+- **AI Blog System**: Automatically generates 20+ high-quality news articles daily using advanced AI models.
+- **Smart Link Repair**: AI-driven analysis of broken streaming links to provide instant suggestions.
 
-### 1. Persiapan Environment
-Buat file `.env.local` di root direktori:
+### 🔔 Multi-Channel Notifications
+Stay updated wherever you are. Integrated with **Telegram** and **Discord** for:
+- **New Releases**: Instant alerts for movies, series, and anime.
+- **System Health**: Real-time reports for broken links and server status.
+- **Feedback**: Direct communication line from users to administrators.
 
-```env
-NEXT_PUBLIC_TMDB_API_KEY=kode_api_tmdb_anda
-NEXT_PUBLIC_ONESIGNAL_APP_ID=kode_app_id_onesignal
-NEXT_PUBLIC_DISCORD_WEBHOOK_URL=url_webhook_discord
-```
+### 🎧 Spatial Audio Dashboard
+Experience sound like never before with our **Virtual 7.1 Surround Sound** engine. Customize your audio profile for maximum immersion.
 
-### 2. Jalankan Project
-```bash
-npm install
-npm run dev
-```
+### 🍱 Multi-Category Media
+- **Movies & TV Shows**: Powered by TMDB metadata.
+- **Anime**: Deep integration with Anilist and specialized streaming providers.
+- **Donghua**: Dedicated support for Chinese animation enthusiasts.
 
 ---
 
-## 📸 Tampilan Platform
+## 🚀 Tech Stack
 
-| Dashboard Utama | Player Mode | Release Schedule |
-| :---: | :---: | :---: |
-| ![Home](https://via.placeholder.com/400x225?text=Minimalist+Home) | ![Player](https://via.placeholder.com/400x225?text=Floating+Mini+Player) | ![Schedule](https://via.placeholder.com/400x225?text=Daily+Update+Grid) |
+- **Frontend**: Next.js 15 (App Router), React, Tailwind CSS
+- **Backend**: Next.js API Routes, Node.js
+- **Database**: Supabase (PostgreSQL)
+- **AI**: 9Router API (Gemini/GPT Models)
+- **Notifications**: Telegram Bot API, Discord Webhooks, OneSignal
 
 ---
 
-<div align="center">
-  
-  Dibuat dengan ❤️ untuk komunitas pecinta film oleh [saferill](https://github.com/saferill)
-  
-</div>
+## 🛠️ Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/saferill/CineWatch.git
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables:**
+   Create a `.env.local` file and add your credentials (TMDB API, Supabase, Telegram Bot, etc).
+
+4. **Run development server:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+<p align="center">
+  Developed with ❤️ by <b>Syaf</b> & the <b>CineWatch Team</b>
+</p>
