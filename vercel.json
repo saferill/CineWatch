@@ -1,8 +1,12 @@
 {
   "crons": [
     {
+      "path": "/api/ai/generate-news",
+      "schedule": "0 0 * * *"
+    },
+    {
       "path": "/api/cron/release-sync",
-      "schedule": "0 22 * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
