@@ -6,13 +6,11 @@ import { fetchDonghuaHome } from '@/services/donghua';
 
 // This function can be called by a CRON job (e.g., Vercel Cron or GitHub Actions)
 export async function GET(request: Request) {
-  // TEMPORARY: Disabled for final test
-  /*
+  // Check for authorization (optional but recommended for Cron jobs)
   const authHeader = request.headers.get('authorization');
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response('Unauthorized', { status: 401 });
   }
-  */
 
   const webhookUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL;
   if (!webhookUrl) {
