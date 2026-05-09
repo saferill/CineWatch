@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/release-sync",
-      "schedule": "0 1 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
