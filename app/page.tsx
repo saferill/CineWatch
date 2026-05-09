@@ -129,7 +129,7 @@ async function IndexPage() {
                 <IconNews className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-black tracking-tight">CineWatch Insider (Sync Test)</h2>
+                <h2 className="text-2xl font-black tracking-tight">CineWatch Insider</h2>
                 <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">AI Generated Updates</p>
               </div>
             </div>
