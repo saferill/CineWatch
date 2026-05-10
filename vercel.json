@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/ai/cron-master",
-      "schedule": "0 * * * *"
-    }
-  ]
-}
