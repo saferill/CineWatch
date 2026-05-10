@@ -12,10 +12,12 @@ export const DetailsHero = ({
   movie,
   series,
   trailerId,
+  aiInsights,
 }: {
   movie?: MovieDetails
   series?: SeriesDetails
   trailerId?: string | null
+  aiInsights?: { insight: string; mood: string } | null
 }) => {
   const media = (movie || series) as MovieDetails & SeriesDetails
   const title = media?.title || media?.name
@@ -33,6 +35,24 @@ export const DetailsHero = ({
             allowFullScreen
             title={`${title} Trailer`}
           />
+        </div>
+      )}
+
+      {/* AI Smart Insight Overlay */}
+      {aiInsights && (
+        <div className="absolute top-28 left-6 md:left-12 z-40 max-w-sm animate-fade-up">
+           <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                 <div className="px-2 py-0.5 rounded bg-accent/20 border border-accent/30 backdrop-blur-md text-[10px] font-black text-accent uppercase tracking-widest">
+                    AI MOOD: {aiInsights.mood}
+                 </div>
+              </div>
+              <div className="glass rounded-2xl p-4 border border-white/10 shadow-2xl backdrop-blur-xl">
+                 <p className="text-sm md:text-base font-medium text-white leading-relaxed italic">
+                    "{aiInsights.insight}"
+                 </p>
+              </div>
+           </div>
         </div>
       )}
 

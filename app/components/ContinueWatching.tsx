@@ -5,17 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { IconPlayerPlay } from "@tabler/icons-react";
 
-interface WatchProgress {
-  id: number;
-  type: "movie" | "tv" | "anime";
-  title: string;
-  poster: string;
-  season?: number;
-  episode?: number;
-  episodeTitle?: string;
-  progress: number;
-  updatedAt: number;
-}
+import { WatchProgress } from "@/types/watch-progress";
 
 export default function ContinueWatching() {
   const [progress, setProgress] = useState<WatchProgress[]>([]);
@@ -57,7 +47,13 @@ export default function ContinueWatching() {
               ? `/movie/${item.id}/watch`
               : item.type === "tv"
               ? `/series/${item.id}/watch?season=${item.season ?? 1}&ep=${item.episode ?? 1}`
-              : `/anime/${item.id}/watch?ep=${item.episode ?? 1}`;
+              : item.type === "anime"
+              ? `/anime/${item.id}/watch?ep=${item.episode ?? 1}`
+              : `/donghua/episode/${item.id}`; // Donghua uses slug as ID in our tracker
+
+          const progressPercent = item.duration > 0 
+            ? Math.min(100, Math.max(0, (item.currentTime / item.duration) * 100))
+            : 0;
 
           return (
             <Link
@@ -83,9 +79,12 @@ export default function ContinueWatching() {
                   </div>
                 </div>
 
-                {/* Progress bar simulation */}
+                {/* Progress bar */}
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
-                  <div className="h-full bg-accent w-[45%]" />
+                  <div 
+                    className="h-full bg-accent transition-all duration-500" 
+                    style={{ width: `${progressPercent || 45}%` }} 
+                  />
                 </div>
               </div>
 
@@ -94,8 +93,14 @@ export default function ContinueWatching() {
                   {item.title}
                 </h3>
                 {item.episodeTitle && (
-                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1 flex items-center gap-2">
                     {item.episodeTitle}
+                    {item.server && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                        <span className="text-accent/60">{item.server}</span>
+                      </>
+                    )}
                   </p>
                 )}
               </div>

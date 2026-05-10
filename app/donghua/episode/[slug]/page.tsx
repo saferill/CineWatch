@@ -29,6 +29,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <DonghuaServerPlayer 
             initialUrl={data.streamingUrl} 
             servers={data.servers} 
+            mediaInfo={{
+              id: data.donghua.slug,
+              title: data.donghua.title,
+              poster: data.donghua.poster,
+              episodeTitle: data.title,
+              slug: data.donghua.slug
+            }}
           />
 
           {/* Controls Section */}

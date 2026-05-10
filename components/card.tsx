@@ -61,6 +61,16 @@ export const Card = ({
             initial="rest"
             whileHover="hover"
             animate="rest"
+            onMouseEnter={() => {
+              // Smart Pre-loading
+              const prefetch = document.createElement('link');
+              prefetch.rel = 'prefetch';
+              prefetch.href = finalHref;
+              document.head.appendChild(prefetch);
+              
+              // Dynamic Background Effect
+              window.dispatchEvent(new CustomEvent('cardHover', { detail: { poster: getPosterImageURL(poster) } }));
+            }}
           >
             <div className="space-y-2">
               <motion.div 

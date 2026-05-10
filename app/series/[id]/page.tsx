@@ -32,11 +32,14 @@ export async function generateMetadata(
   }
   if (!seriesDetails?.id) notFound()
 
+  // Fetch AI insights for better metadata
+  const aiInsights = await getMovieAIInsights(seriesDetails.name, seriesDetails.overview)
+
   const year = seriesDetails.first_air_date?.slice(0, 4)
   const title = year
     ? `${seriesDetails.name} (${year})`
     : seriesDetails.name
-  const description =
+  const description = aiInsights?.insight ||
     seriesDetails.overview?.slice(0, 200) ||
     `Details, cast, and streaming info for ${seriesDetails.name} on CineWatch.`
   const canonicalPath = `/series/${id}`
@@ -84,6 +87,8 @@ export async function generateMetadata(
   }
 }
 
+import { getMovieAIInsights } from '@/services/ai'
+
 const SeriesPage = async (props: PageDetailsProps) => {
   const { id } = await props.params
   const searchParams = await props.searchParams
@@ -113,6 +118,9 @@ const SeriesPage = async (props: PageDetailsProps) => {
     // ignore
   }
 
+  // AI SMART INSIGHTS
+  const aiInsights = await getMovieAIInsights(seriesDetails.name, seriesDetails.overview)
+
   const jsonLd = tvSeriesJsonLd({
     id: seriesDetails.id,
     name: seriesDetails.name,
@@ -140,7 +148,7 @@ const SeriesPage = async (props: PageDetailsProps) => {
         ])}
       />
       <AmbientBackground imagePath={seriesDetails.backdrop_path || seriesDetails.poster_path} />
-      <SeriesDetailsHero series={seriesDetails} trailerId={trailerId} />
+      <SeriesDetailsHero series={seriesDetails} trailerId={trailerId} aiInsights={aiInsights} />
       <SeriesDetailsContent
         series={seriesDetails}
         seriesCredits={seriesCredits}

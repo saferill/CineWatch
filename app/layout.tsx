@@ -21,9 +21,10 @@ import { SiteHeader } from '@/components/layouts/site-header'
 import { FloatingPlayerProvider } from '@/context/floating-player-context'
 import { FloatingPlayer } from '@/components/media/floating-player'
 import { SpeedOptimizer } from '@/components/media/speed-optimizer'
-import { FeedbackForm } from '@/components/feedback-form'
-import { SpatialAudioDashboard } from '@/components/spatial-audio-dashboard'
 import CommandPalette from '@/app/components/CommandPalette'
+import AIAssistantOverlay from '@/components/ai/assistant-overlay'
+import { AtmosphereBG } from '@/components/media/atmosphere-bg'
+import { DiscoveryOrb } from '@/components/media/discovery-orb'
 
 export const viewport: Viewport = {
   themeColor: [
@@ -104,13 +105,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable
         )}
       >
-        {/* Premium Background Effects */}
-        <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
-          <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-cyan-600/5 blur-[100px] rounded-full animate-pulse [animation-delay:4s]" />
-          <div className="absolute inset-0 bg-[url('/grain.png')] opacity-[0.03] mix-blend-overlay" />
-        </div>
+        <AtmosphereBG />
         
         <SWRegister />
         <OneSignalInit />
@@ -136,8 +131,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <FloatingPlayer />
             <CommandPalette />
             <SpeedOptimizer />
-            <FeedbackForm />
-            <SpatialAudioDashboard />
+            <AIAssistantOverlay />
+            <DiscoveryOrb />
           </FloatingPlayerProvider>
         </AuthProvider>
       </body>

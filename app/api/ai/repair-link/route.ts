@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const ROUTER_ENDPOINT = 'http://localhost:20128/v1/chat/completions';
+import { askAI } from '@/services/ai';
 
 export async function POST(request: Request) {
   const { movieTitle, movieId, type, source, url } = await request.json();
@@ -15,28 +15,13 @@ export async function POST(request: Request) {
     .then(() => console.log('✅ Telegram Terkirim!'))
     .catch(err => console.error('❌ Gagal Telegram:', err.message));
 
-  // 2. PROSES AI (9Router)
+  // 2. PROSES AI (Centralized Service)
   try {
     const prompt = `Laporan link mati untuk ${movieTitle}. Berikan saran perbaikan singkat. Format JSON: { "suggestion": "...", "messageToUser": "..." }`;
     
-    const aiRes = await fetch(ROUTER_ENDPOINT, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be'
-      },
-      body: JSON.stringify({
-        model: 'gemini/gemini-3.1-flash-lite-preview',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-        stream: false
-      }),
-    });
+    const result = await askAI(prompt);
 
-    if (!aiRes.ok) throw new Error('AI Down');
-
-    const aiData = await aiRes.json();
-    const result = JSON.parse(aiData.choices[0].message.content);
+    if (!result) throw new Error('AI Error');
 
     return NextResponse.json(result);
   } catch (error: any) {

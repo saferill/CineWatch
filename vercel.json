@@ -2,11 +2,23 @@
   "crons": [
     {
       "path": "/api/ai/generate-news",
-      "schedule": "0 0 * * *"
+      "schedule": "0 5 * * *"
     },
     {
-      "path": "/api/cron/release-sync",
-      "schedule": "0 3 * * *"
+      "path": "/api/ai/release-alert",
+      "schedule": "0 0,12 * * *"
+    },
+    {
+      "path": "/api/ai/admin-intel",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/ai/weekly-hype",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/ai/health-check",
+      "schedule": "0 */4 * * *"
     }
   ]
 }

@@ -14,46 +14,11 @@ import {
 import { useFloatingPlayer } from "@/context/floating-player-context";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ReportButton } from "@/components/media/report-button";
+
+import { useWatchTracker } from "@/hooks/use-watch-tracker";
 
 type Source = "vidsrc" | "vidking" | "autoembed" | "vidlink" | "vidsrcrip" | "embedsu" | "nontongo" | "superembed" | "vidsrcto";
-
-interface SeasonInfo {
-  season_number: number;
-  name: string;
-  episode_count: number;
-}
-
-interface PlayerProps {
-  movieId: number;
-  movieTitle: string;
-  type: "movie" | "tv" | "anime";
-  season?: number;
-  episode?: number;
-  seasons?: SeasonInfo[];
-  poster?: string;
-}
-
-function saveWatch(item: {
-  id: number;
-  type: string;
-  title: string;
-  poster: string;
-  season?: number;
-  episode?: number;
-  episodeTitle?: string;
-}) {
-  const STORAGE_KEY = "CineWatch_watch_progress";
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    const filtered = stored.filter(
-      (p: typeof item) => !(p.id === item.id && p.type === item.type && p.season === item.season && p.episode === item.episode)
-    );
-    const updated = [{ ...item, progress: 0, updatedAt: Date.now() }, ...filtered].slice(0, 20);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  } catch {
-    // ignore
-  }
-}
 
 export default function Player({
   movieId,
@@ -66,14 +31,46 @@ export default function Player({
 }: PlayerProps) {
   const { openPlayer } = useFloatingPlayer();
   const router = useRouter();
+  
+  const currentSeason = season ?? 1;
+  const currentEpisode = episode ?? 1;
+  
+  const episodeTitle = type === "tv" 
+    ? `S${currentSeason}E${currentEpisode}` 
+    : type === "anime" 
+      ? `Episode ${currentEpisode}` 
+      : undefined;
+
+  const { progress, saveProgress } = useWatchTracker({
+    id: movieId,
+    type,
+    title: movieTitle,
+    poster,
+    season: currentSeason,
+    episode: currentEpisode,
+    episodeTitle,
+  });
+
   const [source, setSource] = useState<Source>("vidsrc");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showNextModal, setShowNextModal] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isResumed, setIsResumed] = useState(false);
 
-  const currentSeason = season ?? 1;
-  const currentEpisode = episode ?? 1;
+  // Initialize source and handle resume
+  useEffect(() => {
+    if (progress?.server) {
+      setSource(progress.server as Source);
+    }
+  }, [progress?.server]);
+
+  // Save initial/updated progress
+  useEffect(() => {
+    saveProgress({
+      server: source,
+    });
+  }, [source, saveProgress]);
 
   const activeSeason = seasons.find((s) => s.season_number === currentSeason);
   const totalEpisodes = activeSeason?.episode_count ?? 0;
@@ -114,24 +111,6 @@ export default function Player({
     return { prev: prevEp, next: nextEp };
   }, [type, season, episode, seasons, currentSeason, currentEpisode, totalEpisodes, watchBase]);
 
-  const episodeTitle = type === "tv" 
-    ? `S${currentSeason}E${currentEpisode}` 
-    : type === "anime" 
-      ? `Episode ${currentEpisode}` 
-      : undefined;
-
-  // Save initial watch entry
-  useEffect(() => {
-    saveWatch({
-      id: movieId,
-      type,
-      title: movieTitle,
-      poster: poster,
-      season: type === "tv" ? currentSeason : undefined,
-      episode: episode ? currentEpisode : undefined,
-      episodeTitle,
-    });
-  }, [type, movieId, movieTitle, poster, currentSeason, currentEpisode, episode, episodeTitle]);
 
   const cancelCountdown = useCallback(() => {
     setShowNextModal(false);
@@ -188,9 +167,21 @@ export default function Player({
     }
 
     if (src === "vidlink") {
-      if (type === "movie") return `https://vidlink.pro/movie/${movieId}?primaryColor=06b6d4&secondaryColor=18181b&iconColor=ffffff`;
-      if (type === "tv" && season && episode) return `https://vidlink.pro/tv/${movieId}/${season}/${episode}?primaryColor=06b6d4&secondaryColor=18181b&iconColor=ffffff`;
-      return `https://vidlink.pro/tv/${movieId}/1/1?primaryColor=06b6d4&secondaryColor=18181b&iconColor=ffffff`;
+      const baseUrl = type === "movie" 
+        ? `https://vidlink.pro/movie/${movieId}`
+        : `https://vidlink.pro/tv/${movieId}/${season}/${episode}`;
+      
+      const params = new URLSearchParams({
+        primaryColor: "06b6d4",
+        secondaryColor: "18181b",
+        iconColor: "ffffff"
+      });
+
+      if (progress?.currentTime && !isResumed) {
+        params.append("start", Math.floor(progress.currentTime).toString());
+      }
+
+      return `${baseUrl}?${params.toString()}`;
     }
 
     if (src === "vidsrcrip") {
@@ -283,67 +274,13 @@ export default function Player({
             <span className="hidden lg:inline">Mini Player</span>
           </button>
 
-          <button
-            onClick={async () => {
-              const displayTitle = movieTitle;
-              alert('Mencoba mengirim laporan untuk: ' + displayTitle);
-              
-              try {
-                // 1. Kirim ke API AI (Telegram & Discord Server-side)
-                const res = await fetch('/api/ai/repair-link', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    movieTitle: displayTitle,
-                    movieId: movieId,
-                    type,
-                    source,
-                    url: embedUrl
-                  }),
-                });
-                const data = await res.json();
-                console.log('Server response:', data);
-              } catch (e: any) {
-                console.error('Laporan gagal dikirim ke API:', e.message);
-              }
-
-              // 2. Kirim ke Telegram langsung dari Browser (Cara Discord)
-              const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-              const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-              if (tgToken && tgChatId) {
-                const tgText = `🚨 LAPORAN LINK MATI\n🎬 Judul: ${displayTitle}\n📂 Server: ${source}\n🔗 Halaman: ${window.location.href}`;
-                fetch(`https://api.telegram.org/bot${tgToken}/sendMessage?chat_id=${tgChatId}&text=${encodeURIComponent(tgText)}`).catch(() => {});
-              }
-
-              // 3. Tetap kirim ke Discord manual dari browser sebagai backup
-              const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-              if (webhookUrl) {
-                fetch(webhookUrl, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    embeds: [{
-                      title: "🚨 LAPORAN LINK MATI (BACKUP)",
-                      color: 0xff0000,
-                      fields: [
-                        { name: "Judul", value: displayTitle, inline: true },
-                        { name: "Server", value: source, inline: true },
-                        { name: "Halaman", value: window.location.href }
-                      ],
-                      timestamp: new Date().toISOString()
-                    }]
-                  })
-                }).catch(() => {});
-              }
-
-              alert('Proses laporan selesai! Silakan cek Telegram dan Discord Anda.');
-            }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500 hover:bg-red-500/20 transition-all"
-            title="Lapor Link Mati"
-          >
-            <IconFlag className="w-4 h-4" />
-            <span className="hidden lg:inline">Lapor Mati</span>
-          </button>
+          <ReportButton 
+            mediaTitle={movieTitle}
+            mediaId={movieId}
+            mediaType={type}
+            episode={episodeTitle}
+            serverName={source}
+          />
 
           {type === "tv" && episodeLinks && (
             <div className="flex items-center gap-1">
@@ -419,7 +356,41 @@ export default function Player({
         </div>
       </div>
 
-      <iframe src={embedUrl} className="flex-1 w-full h-full" key={`${source}-${currentSeason}-${currentEpisode}`} allowFullScreen />
+      <iframe 
+        src={embedUrl} 
+        className="flex-1 w-full h-full" 
+        key={`${source}-${currentSeason}-${currentEpisode}`} 
+        allowFullScreen 
+        title="CineWatch Player"
+      />
+
+      {progress?.currentTime && progress.currentTime > 30 && !isResumed && (
+        <div className="absolute bottom-20 left-6 z-[10000] animate-fade-in-up">
+           <div className="glass rounded-2xl p-4 flex items-center gap-4 shadow-2xl border border-white/10 backdrop-blur-2xl">
+              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                 <IconPlayerPlay className="w-5 h-5" fill="currentColor" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Resume Watching</p>
+                <p className="text-xs font-bold text-white">Lanjut nonton dari {Math.floor(progress.currentTime / 60)}:{String(Math.floor(progress.currentTime % 60)).padStart(2, '0')}?</p>
+              </div>
+              <div className="flex gap-2 ml-2">
+                <button 
+                  onClick={() => setIsResumed(true)}
+                  className="px-4 py-1.5 rounded-lg bg-accent text-accent-foreground text-[10px] font-black uppercase tracking-widest hover:bg-accent-hover transition-colors"
+                >
+                  RESUME
+                </button>
+                <button 
+                  onClick={() => setIsResumed(true)}
+                  className="px-3 py-1.5 rounded-lg glass text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-colors"
+                >
+                  SKIP
+                </button>
+              </div>
+           </div>
+        </div>
+      )}
 
       {showNextModal && episodeLinks?.next && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80">

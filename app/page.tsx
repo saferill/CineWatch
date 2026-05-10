@@ -14,7 +14,8 @@ import { FullScreenLoader } from '@/components/loaders/intro-pages-loader'
 import { MoviesIntroSection } from '@/components/main-page/intro-section'
 import ContinueWatching from '@/app/components/ContinueWatching'
 import Link from 'next/link'
-import { IconNews, IconChevronRight } from '@tabler/icons-react'
+import { IconNews, IconChevronRight, IconArrowRight } from '@tabler/icons-react'
+import { DiscoveryDashboard } from '@/components/main-page/discovery-dashboard'
 
 export const dynamic = 'force-dynamic'
 
@@ -107,6 +108,11 @@ async function IndexPage() {
       </Suspense>
       <div className="container max-w-(--breakpoint-2xl) pt-4 md:pt-8 pb-4">
         <ContinueWatching />
+
+        <DiscoveryDashboard 
+          movies={latestTrendingMovies} 
+          popularMovies={popularMovies} 
+        />
         
         <MoviesIntroSection
           latestTrendingMovies={latestTrendingMovies}
@@ -130,11 +136,11 @@ async function IndexPage() {
               </div>
               <div>
                 <h2 className="text-2xl font-black tracking-tight">CineWatch Insider</h2>
-                <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">AI Generated Updates</p>
               </div>
             </div>
-            <Link href="/blog" className="text-xs font-bold text-accent hover:underline">
-              LIHAT SEMUA BERITA →
+            <Link href="/blog" className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors flex items-center gap-2 group">
+              Lihat Semua Berita
+              <IconArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
@@ -144,6 +150,8 @@ async function IndexPage() {
     </section>
   )
 }
+
+import { BlogCard } from '@/components/main-page/blog-card';
 
 // Sub-component to fetch blog data separately to not block home page if table is missing
 async function LatestBlogSection() {
@@ -158,40 +166,8 @@ async function LatestBlogSection() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {posts.map((post: any) => (
-        <Link 
-          key={post.id} 
-          href={`/blog/${post.slug}`}
-          className="group relative flex flex-col rounded-2xl overflow-hidden bg-white/[0.03] border border-white/5 hover:border-accent/40 hover:bg-white/[0.06] transition-all duration-300"
-        >
-          <div className="aspect-[16/9] overflow-hidden relative">
-            <img 
-              src={post.image} 
-              alt={post.title} 
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-            <div className="absolute top-2 left-2">
-              <span className="text-[8px] font-black uppercase tracking-widest bg-accent text-accent-foreground px-1.5 py-0.5 rounded">
-                {post.type}
-              </span>
-            </div>
-          </div>
-          <div className="p-4 flex flex-col flex-1">
-            <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-              {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-              <span className="w-1 h-1 rounded-full bg-zinc-700" />
-              AI INSIDER
-            </div>
-            <h3 className="font-bold text-sm text-white line-clamp-2 group-hover:text-accent transition-colors leading-snug">
-              {post.title}
-            </h3>
-            <div className="mt-4 flex items-center text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">
-              BACA BERITA
-              <IconChevronRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </Link>
+      {posts.map((post: any, index: number) => (
+        <BlogCard key={post.id} post={post} index={index} />
       ))}
     </div>
   );

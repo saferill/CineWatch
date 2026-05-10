@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { IconArrowLeft, IconPlayerSkipBack, IconPlayerSkipForward } from "@tabler/icons-react";
+import { IconArrowLeft, IconPlayerSkipBack, IconPlayerSkipForward, IconPlayerPlay } from "@tabler/icons-react";
+import { useWatchTracker } from "@/hooks/use-watch-tracker";
+import { ReportButton } from "@/components/media/report-button";
 
 interface AnimePlayerProps {
   animeId: number;
@@ -90,36 +91,40 @@ const EMBED_PROVIDERS = [
 
 export default function AnimePlayer({ animeId, animeTitle, episodes, episode, anilistId, poster, tmdbId, tmdbType }: AnimePlayerProps) {
   const availableProviders = EMBED_PROVIDERS.filter((p) => !p.requiresTmdb || (p.requiresTmdb && tmdbId));
+  
+  const { progress, saveProgress } = useWatchTracker({
+    id: animeId,
+    type: "anime",
+    title: animeTitle,
+    poster: poster || "",
+    episode: episode,
+    episodeTitle: `Episode ${episode}`,
+  });
+
   const [providerIndex, setProviderIndex] = useState(0);
+  const [isResumed, setIsResumed] = useState(false);
+
+  // Initialize provider from history
+  useEffect(() => {
+    if (progress?.server) {
+      const idx = availableProviders.findIndex(p => p.name === progress.server);
+      if (idx !== -1) setProviderIndex(idx);
+    }
+  }, [progress?.server, availableProviders]);
+
+  // Save current provider
+  useEffect(() => {
+    saveProgress({ server: availableProviders[providerIndex]?.name });
+  }, [providerIndex, availableProviders, saveProgress]);
 
   const currentProvider = availableProviders[providerIndex];
-  const embedUrl = currentProvider?.getUrl(animeTitle, episode, anilistId ?? 0, tmdbId, tmdbType) || "";
+  
+  let embedUrl = currentProvider?.getUrl(animeTitle, episode, anilistId ?? 0, tmdbId, tmdbType) || "";
 
-
-  useEffect(() => {
-    const STORAGE_KEY = "CineWatch_watch_progress";
-    const progress = {
-      id: animeId,
-      type: "anime" as const,
-      title: animeTitle,
-      poster: poster || "",
-      episode: episode,
-      episodeTitle: `Episode ${episode}`,
-      progress: 0,
-      updatedAt: Date.now(),
-    };
-
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      const filtered = stored.filter(
-        (p: typeof progress) => !(p.id === animeId && p.type === "anime")
-      );
-      const updated = [progress, ...filtered].slice(0, 20);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      // ignore
-    }
-  }, [animeId, animeTitle, episode, poster]);
+  // Add resume parameter for VidLink
+  if (currentProvider?.name.includes("VidLink") && progress?.currentTime && !isResumed) {
+    embedUrl += `&start=${Math.floor(progress.currentTime)}`;
+  }
 
   return (
     <div className="legacy-theme fixed inset-0 bg-black flex flex-col z-50">
@@ -166,40 +171,13 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
             ))}
           </div>
           
-          <button
-            onClick={async () => {
-              alert('Mencoba lapor Anime: ' + animeTitle);
-              
-              // Kirim ke Telegram (Cara Browser)
-              const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-              const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-              if (tgToken && tgChatId) {
-                const tgText = `🍥 ANIME MATI\n🎬 Judul: ${animeTitle}\n📂 Server: ${currentProvider.name}\n🔗 Halaman: ${window.location.href}`;
-                fetch(`https://api.telegram.org/bot${tgToken}/sendMessage?chat_id=${tgChatId}&text=${encodeURIComponent(tgText)}`).catch(() => {});
-              }
-
-              try {
-                await fetch('/api/ai/repair-link', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    movieTitle: animeTitle,
-                    movieId: animeId,
-                    type: 'anime',
-                    source: currentProvider.name,
-                    url: embedUrl
-                  }),
-                });
-                alert('Laporan terkirim ke Telegram!');
-              } catch (e) {
-                alert('Gagal lapor!');
-              }
-            }}
-            className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all"
-            title="Lapor Link Mati"
-          >
-            <span className="text-[10px] font-bold">LAPOR</span>
-          </button>
+          <ReportButton 
+            mediaTitle={animeTitle}
+            mediaId={animeId.toString()}
+            mediaType="anime"
+            episode={episode}
+            serverName={currentProvider.name}
+          />
         </div>
       </div>
 
@@ -208,7 +186,37 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
           src={embedUrl}
           className="w-full h-full"
           allowFullScreen
+          key={embedUrl}
+          title="CineWatch Anime Player"
         />
+
+        {progress?.currentTime && progress.currentTime > 30 && !isResumed && (
+          <div className="absolute bottom-10 left-6 z-[10000] animate-fade-in-up">
+            <div className="glass rounded-2xl p-4 flex items-center gap-4 shadow-2xl border border-white/10 backdrop-blur-2xl">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                  <IconPlayerPlay className="w-5 h-5" fill="currentColor" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Resume Watching</p>
+                  <p className="text-xs font-bold text-white">Lanjut nonton dari {Math.floor(progress.currentTime / 60)}:{String(Math.floor(progress.currentTime % 60)).padStart(2, '0')}?</p>
+                </div>
+                <div className="flex gap-2 ml-2">
+                  <button 
+                    onClick={() => setIsResumed(true)}
+                    className="px-4 py-1.5 rounded-lg bg-accent text-accent-foreground text-[10px] font-black uppercase tracking-widest hover:bg-accent-hover transition-colors"
+                  >
+                    RESUME
+                  </button>
+                  <button 
+                    onClick={() => setIsResumed(true)}
+                    className="px-3 py-1.5 rounded-lg glass text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-colors"
+                  >
+                    SKIP
+                  </button>
+                </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

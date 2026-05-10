@@ -32,11 +32,14 @@ export async function generateMetadata(
   }
   if (!movieDetails?.id) notFound()
 
+  // Fetch AI insights for better metadata
+  const aiInsights = await getMovieAIInsights(movieDetails.title, movieDetails.overview)
+
   const year = movieDetails.release_date?.slice(0, 4)
   const title = year
     ? `${movieDetails.title} (${year})`
     : movieDetails.title
-  const description =
+  const description = aiInsights?.insight || 
     movieDetails.overview?.slice(0, 200) ||
     `Details, cast, and streaming info for ${movieDetails.title} on CineWatch.`
   const canonicalPath = `/movie/${id}`
@@ -84,6 +87,8 @@ export async function generateMetadata(
   }
 }
 
+import { getMovieAIInsights } from '@/services/ai'
+
 const MoviePage = async (props: PageDetailsProps) => {
   const { id } = await props.params
   let result
@@ -103,6 +108,9 @@ const MoviePage = async (props: PageDetailsProps) => {
   } catch (e) {
     // ignore
   }
+
+  // AI SMART INSIGHTS
+  const aiInsights = await getMovieAIInsights(movieDetails.title, movieDetails.overview)
 
   const jsonLd = movieJsonLd({
     id: movieDetails.id,
@@ -132,7 +140,7 @@ const MoviePage = async (props: PageDetailsProps) => {
         ])}
       />
       <AmbientBackground imagePath={movieDetails.backdrop_path || movieDetails.poster_path} />
-      <MovieDetailsHero movie={movieDetails} trailerId={trailerId} />
+      <MovieDetailsHero movie={movieDetails} trailerId={trailerId} aiInsights={aiInsights} />
       <MoviesDetailsContent
         movie={movieDetails}
         movieCredits={movieCredits}
