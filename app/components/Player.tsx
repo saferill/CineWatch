@@ -20,6 +20,16 @@ import { useWatchTracker } from "@/hooks/use-watch-tracker";
 
 type Source = "vidsrc" | "vidking" | "autoembed" | "vidlink" | "vidsrcrip" | "embedsu" | "nontongo" | "superembed" | "vidsrcto";
 
+interface PlayerProps {
+  movieId: string;
+  movieTitle: string;
+  type: "movie" | "tv" | "anime";
+  season?: number;
+  episode?: number;
+  seasons?: any[];
+  poster?: string;
+}
+
 export default function Player({
   movieId,
   movieTitle,
@@ -72,7 +82,7 @@ export default function Player({
     });
   }, [source, saveProgress]);
 
-  const activeSeason = seasons.find((s) => s.season_number === currentSeason);
+  const activeSeason = seasons.find((s: any) => s.season_number === currentSeason);
   const totalEpisodes = activeSeason?.episode_count ?? 0;
 
   const watchBase = `/series/${movieId}/watch`;
@@ -86,9 +96,9 @@ export default function Player({
         ? (() => {
             const prevSeasonNum = [...seasons]
               .reverse()
-              .find((s) => s.season_number < currentSeason)?.season_number;
+              .find((s: any) => s.season_number < currentSeason)?.season_number;
             const prevSeason = seasons.find(
-              (s) => s.season_number === prevSeasonNum
+              (s: any) => s.season_number === prevSeasonNum
             );
             return prevSeasonNum
               ? `${watchBase}?season=${prevSeasonNum}&ep=${prevSeason?.episode_count ?? 1}`
@@ -101,7 +111,7 @@ export default function Player({
         ? `${watchBase}?season=${currentSeason}&ep=${currentEpisode + 1}`
         : (() => {
             const nextSeasonNum = seasons.find(
-              (s) => s.season_number > currentSeason
+              (s: any) => s.season_number > currentSeason
             )?.season_number;
             return nextSeasonNum
               ? `${watchBase}?season=${nextSeasonNum}&ep=1`
@@ -304,7 +314,7 @@ export default function Player({
 
                 {pickerOpen && (
                   <div className="absolute right-0 top-full mt-1 w-64 max-h-72 overflow-y-auto glass rounded-lg p-2 z-50">
-                    {seasons.map((s) => (
+                    {seasons.map((s: any) => (
                       <div key={s.season_number} className="mb-2">
                         <p className="text-xs font-semibold text-zinc-500 px-2 mb-1">{s.name}</p>
                         <div className="grid grid-cols-6 gap-1">

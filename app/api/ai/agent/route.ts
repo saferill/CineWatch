@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     
     // 1. Fetch real-time context
     const trending = await getTrending();
-    const trendingList = trending.slice(0, 10).map(m => `${m.title} (${m.vote_average})`).join(', ');
+    const trendingList = trending.slice(0, 10).map((m: any) => `${m.title || m.name} (${m.vote_average})`).join(', ');
 
     // 2. Format history for the AI
     const historyContext = history?.map((m: any) => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n') || '';
@@ -24,12 +24,12 @@ export async function POST(request: Request) {
       const allResults = [...mResults.slice(0, 5), ...sResults.slice(0, 5)];
       if (allResults.length > 0) {
         searchContext = `\n\nDATABASE CINEWATCH (Real-time):\n` + 
-          allResults.map(m => {
-            const id = (m as any).id;
-            const type = (m as any).title ? 'movie' : 'tv';
-            const title = m.title || (m as any).name;
-            const poster = (m as any).poster_path;
-            return `- [ID:${id}] ${title} (${(m as any).release_date || (m as any).first_air_date}): ${m.overview} (Poster: ${poster})`;
+          allResults.map((m: any) => {
+            const id = m.id;
+            const type = m.title ? 'movie' : 'tv';
+            const title = m.title || m.name;
+            const poster = m.poster_path;
+            return `- [ID:${id}] ${title} (${m.release_date || m.first_air_date}): ${m.overview} (Poster: ${poster})`;
           }).join('\n');
       }
     }

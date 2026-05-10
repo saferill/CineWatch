@@ -39,7 +39,7 @@ export default async function WatchPage({
 
   return (
     <Player
-      movieId={tvId}
+      movieId={tvId.toString()}
       movieTitle={title}
       type="tv"
       season={seasonNum}

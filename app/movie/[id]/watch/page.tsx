@@ -22,5 +22,5 @@ export default async function WatchPage({
   const title = movie?.title ?? "Movie";
   const poster = movie?.poster_path ? posterUrl(movie.poster_path, "w342") : "";
 
-  return <Player movieId={movieId} movieTitle={title} type="movie" poster={poster} />;
+  return <Player movieId={movieId.toString()} movieTitle={title} type="movie" poster={poster} />;
 }
