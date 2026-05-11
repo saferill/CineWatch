@@ -17,35 +17,48 @@ export async function POST(req: Request) {
 
     // 1. Handle Callback Queries (Button Clicks)
     if (callbackData) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
+
       if (callbackData === "trending") {
         const { getLatestTrendingMovies } = await import('@/services/movies');
         const trending = await getLatestTrendingMovies();
-        const top = trending.results.slice(0, 5);
-        let msg = "🔥 <b>TRENDING HARI INI</b>\n\n";
-        top.forEach((m: any, i: number) => { msg += `${i+1}. 🎬 <b>${m.title}</b> (⭐ ${m.vote_average.toFixed(1)})\n`; });
-        await sendToTelegramWithButtons(chatId, msg, [[{ text: "« Kembali", callback_data: "start" }]]);
+        let msg = "🔥 <b>TOP TRENDING NEXUS</b> 🔥\n\n";
+        trending.results.slice(0, 5).forEach((m: any, i: number) => { 
+          msg += `<b>${i+1}.</b> 🎬 <b>${m.title}</b>\n└ ⭐ ${m.vote_average.toFixed(1)} | 📅 ${(m.release_date || '').split('-')[0]}\n\n`; 
+        });
+        await sendToTelegramWithButtons(chatId, msg, [[{ text: "« Back to Nexus", callback_data: "start" }]]);
       }
       
-      if (callbackData === "upcoming") {
-        const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${process.env.TMDB_API_KEY}&language=id-ID&page=1`);
+      if (callbackData === "news") {
+        const { supabase } = await import('@/lib/supabase');
+        const { data: posts } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(3);
+        let msg = "📰 <b>CINEWATCH LATEST NEWS</b>\n\n";
+        posts?.forEach(p => { msg += `🔹 <b>${p.title}</b>\n└ <a href="${siteUrl}/blog/${p.slug}">Baca Selengkapnya...</a>\n\n`; });
+        await sendToTelegramWithButtons(chatId, msg, [[{ text: "« Back to Nexus", callback_data: "start" }]]);
+      }
+
+      if (callbackData === "random") {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY}&language=id-ID&page=${Math.floor(Math.random() * 10) + 1}`);
         const data = await res.json();
-        let msg = "🗓️ <b>SEGERA TAYANG</b>\n\n";
-        data.results.slice(0, 5).forEach((m: any) => { msg += `• 🎬 <b>${m.title}</b> (${m.release_date})\n`; });
-        await sendToTelegramWithButtons(chatId, msg, [[{ text: "« Kembali", callback_data: "start" }]]);
+        const m = data.results[Math.floor(Math.random() * data.results.length)];
+        const posterUrl = `https://image.tmdb.org/t/p/w780${m.poster_path}`;
+        const caption = `🎲 <b>HIDDEN GEM FOUND!</b>\n\n🎬 <b>${m.title}</b>\n⭐ Rating: ${m.vote_average.toFixed(1)}\n\n<i>${m.overview.slice(0, 150)}...</i>`;
+        await sendPhotoWithButtons(chatId, posterUrl, caption, [[{ text: "🍿 Tonton Sekarang", url: `${siteUrl}/movie/${m.id}` }], [{ text: "« Back", callback_data: "start" }]]);
       }
 
       if (callbackData === "genres") {
-        await sendToTelegramWithButtons(chatId, "🎭 <b>PILIH GENRE FAVORIT</b>", [
+        await sendToTelegramWithButtons(chatId, "🎭 <b>PILIH REALM SINEMATIK</b>\nSilakan pilih genre favorit Anda:", [
           [{ text: "Action 💥", callback_data: "genre_28" }, { text: "Horror 👻", callback_data: "genre_27" }],
-          [{ text: "Comedy 😂", callback_data: "genre_35" }, { text: "Sci-Fi 🚀", callback_data: "genre_878" }],
+          [{ text: "Sci-Fi 🚀", callback_data: "genre_878" }, { text: "Anime ⛩️", callback_data: "genre_16" }],
           [{ text: "« Kembali", callback_data: "start" }]
         ]);
       }
 
       if (callbackData === "start") {
-        await sendToTelegramWithButtons(chatId, "<b>Pusat Kendali CineWatch AI</b>", [
+        await sendToTelegramWithButtons(chatId, "<b>CINEWATCH AI - NEXUS COMMAND</b>", [
           [{ text: "🔥 Trending", callback_data: "trending" }, { text: "🗓️ Upcoming", callback_data: "upcoming" }],
-          [{ text: "🎭 Genres", callback_data: "genres" }]
+          [{ text: "📰 Berita Terbaru", callback_data: "news" }, { text: "🎲 Hidden Gem", callback_data: "random" }],
+          [{ text: "🎭 Jelajah Genre", callback_data: "genres" }]
         ]);
       }
 
@@ -55,31 +68,29 @@ export async function POST(req: Request) {
     // 2. Handle Commands with Buttons
     if (text.startsWith('/start') || text.startsWith('/help')) {
       await sendToTelegramWithButtons(chatId, 
-        "<b>CINEWATCH AI PRO - NEXUS COMMAND</b> 🛸\n\n" +
-        "Selamat datang di pusat kendali sinematik Anda. Saya adalah AI Elite yang akan memandu Anda menemukan mahakarya layar lebar.\n\n" +
-        "Pilih salah satu menu di bawah ini untuk memulai:",
+        "<b>SYSTEM ONLINE: CINEWATCH NEXUS PRO</b> 🛸\n\n" +
+        "Selamat datang, Komandan. Saya adalah unit AI tercanggih yang dirancang untuk mengoptimalkan pengalaman menonton Anda.\n\n" +
+        "Pilih perintah di bawah atau ketik judul film apa pun:",
         [
-          [{ text: "🔥 Trending Sekarang", callback_data: "trending" }, { text: "🗓️ Segera Tayang", callback_data: "upcoming" }],
+          [{ text: "🔥 Trending", callback_data: "trending" }, { text: "🗓️ Upcoming", callback_data: "upcoming" }],
+          [{ text: "📰 Berita Terbaru", callback_data: "news" }, { text: "🎲 Hidden Gem", callback_data: "random" }],
           [{ text: "🎭 Jelajah Genre", callback_data: "genres" }],
-          [{ text: "🌐 Buka Website", url: "https://cinewatchh.vercel.app" }]
+          [{ text: "🌐 Website Utama", url: "https://cinewatchh.vercel.app" }]
         ]
       );
       return NextResponse.json({ ok: true });
     }
 
-    // 2. Handle Genre Selection (Simplified for now)
-    if (text === '/genres' || text === 'genres') {
-      await sendToTelegramWithButtons(chatId, "Pilih genre yang Anda sukai:", [
-        [{ text: "Action 💥", callback_data: "genre_28" }, { text: "Horror 👻", callback_data: "genre_27" }],
-        [{ text: "Comedy 😂", callback_data: "genre_35" }, { text: "Sci-Fi 🚀", callback_data: "genre_878" }],
-        [{ text: "« Kembali", callback_data: "start" }]
-      ]);
+    if (text === '/news') {
+      // Trigger news logic
       return NextResponse.json({ ok: true });
     }
 
-    // 3. Search Logic (Enhanced)
+    // 3. Search Logic (Deep AI Intelligence)
     if (!text.startsWith('/')) {
       const query = text;
+      
+      // Use AI to extract key terms if complex
       const [movies, series] = await Promise.all([
         searchMovies(query),
         searchTVShows(query)
@@ -89,31 +100,31 @@ export async function POST(req: Request) {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
 
       if (results.length === 0) {
-        await sendToTelegram(chatId, "⚠️ <b>DATA NOT FOUND</b>\n\nMaaf, radar kami tidak menemukan sinyal untuk <i>\"" + query + "\"</i>. Coba gunakan judul yang berbeda!");
+        await sendToTelegram(chatId, "⚠️ <b>SIGNAL LOST</b>\n\nMaaf, radar CineWatch tidak menemukan apa pun untuk <i>\"" + query + "\"</i>.\n\nTips: Gunakan judul asli atau kata kunci populer.");
       } else {
         const bestResult = results[0] as any;
         const posterUrl = `https://image.tmdb.org/t/p/w780${bestResult.poster_path}`;
         
-        // AI Curation with Robust Fallback
         let recommendation = "";
         try {
           recommendation = await chatWithAgent(
-            'CineWatch Master Intelligence',
-            `User mencari "${query}". Film terbaik: ${bestResult.title || bestResult.name}. Berikan 1 kalimat promosi yang sangat eksklusif dan mewah.`,
-            'High-End, Futuristic, and Compelling'
+            'CineWatch Elite Intel',
+            `User mencari: "${query}". Film utama: ${bestResult.title || bestResult.name}. Berikan ulasan singkat yang SANGAT cerdas, mewah, dan membuat orang kagum. Gunakan gaya bahasa kritikus film kelas dunia.`,
+            'World-Class, Sophisticated, Intelligence'
           );
           if (recommendation.includes("gangguan")) throw new Error("AI Busy");
         } catch (e) {
-          recommendation = `Film "${bestResult.title || bestResult.name}" adalah pilihan luar biasa untuk tontonan Anda malam ini.`;
+          recommendation = `Analisis AI: Film "${bestResult.title || bestResult.name}" adalah mahakarya yang wajib masuk dalam daftar tontonan Anda minggu ini.`;
         }
 
-        let caption = `💎 <b>CINEWATCH SELECTION</b> 💎\n\n`;
-        caption += `✨ ${recommendation}\n\n`;
+        const caption = `📽️ <b>INTELLIGENCE REPORT</b> 📽️\n\n${recommendation}\n\n🔍 <i>Hasil lainnya di bawah ini:</i>`;
         
-        const buttons = results.map((r: any) => ([{
+        const buttons = results.map(r => ([{
           text: `🎬 ${r.title || r.name} (${(r.release_date || r.first_air_date || '').split('-')[0]})`,
           url: `${r.title ? siteUrl + '/movie/' + r.id : siteUrl + '/series/' + r.id}`
         }]));
+        
+        buttons.push([{ text: "« Kembali ke Menu", callback_data: "start" }]);
 
         if (bestResult.poster_path) {
           await sendPhotoWithButtons(chatId, posterUrl, caption, buttons);
