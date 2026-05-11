@@ -5,9 +5,10 @@ import { searchMovies } from '@/app/lib/tmdb';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const querySecret = searchParams.get('secret');
+  const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && querySecret !== cronSecret) {
+  if (cronSecret && (authHeader !== `Bearer ${cronSecret}` && querySecret !== cronSecret)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
