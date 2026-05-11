@@ -110,9 +110,9 @@ export async function POST(req: Request) {
         let caption = `💎 <b>CINEWATCH SELECTION</b> 💎\n\n`;
         caption += `✨ ${recommendation}\n\n`;
         
-        const buttons = results.map(r => ([{
+        const buttons = results.map((r: any) => ([{
           text: `🎬 ${r.title || r.name} (${(r.release_date || r.first_air_date || '').split('-')[0]})`,
-          url: `${siteUrl}/${r.title ? 'movie' : 'series'}/${r.id}`
+          url: `${r.title ? siteUrl + '/movie/' + r.id : siteUrl + '/series/' + r.id}`
         }]));
 
         if (bestResult.poster_path) {
