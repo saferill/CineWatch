@@ -1,17 +1,27 @@
 import { NextResponse } from 'next/server';
 
 // Import the logic or just fetch the internal APIs
-async function triggerTask(path: string) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app';
-  const baseUrl = process.env.NODE_ENV === 'production' ? siteUrl : 'http://localhost:3000';
+async function triggerTask(path: string, request: Request) {
+  // 1. Determine Base URL dynamically
+  const host = request.headers.get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const dynamicBase = `${protocol}://${host}`;
+  
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || dynamicBase;
   
   try {
-    console.log(`CRON-MASTER: Triggering ${path}...`);
-    const res = await fetch(`${baseUrl}${path}`, {
+    console.log(`CRON-MASTER: Triggering ${siteUrl}${path}...`);
+    const res = await fetch(`${siteUrl}${path}`, {
       headers: { 'Authorization': `Bearer ${process.env.CRON_SECRET}` }
     });
-    const data = await res.json();
-    return data;
+    
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await res.json();
+    } else {
+      const text = await res.text();
+      return { error: `Expected JSON but got ${contentType}`, preview: text.slice(0, 100) };
+    }
   } catch (err: any) {
     console.error(`CRON-MASTER ERROR [${path}]:`, err.message);
     return { error: err.message };
@@ -26,7 +36,7 @@ export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   
-  // 1. Authorization Check (Header or Query Param)
+  // 1. Authorization Check
   const isAuthorized = (cronSecret && (authHeader === `Bearer ${cronSecret}` || querySecret === cronSecret));
   
   if (!isAuthorized && process.env.NODE_ENV === 'production') {
@@ -41,7 +51,7 @@ export async function GET(req: Request) {
 
   // 2. Task Triggering Logic
   const runTask = async (name: string, path: string) => {
-    results[name] = await triggerTask(path);
+    results[name] = await triggerTask(path, req);
   };
 
   // Manual Trigger via ?task=...
