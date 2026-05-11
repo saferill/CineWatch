@@ -64,7 +64,9 @@ export async function GET(req: Request) {
       'intel': '/api/ai/admin-intel',
       'weekly': '/api/ai/weekly-hype',
       'health': '/api/ai/health-check',
-      'sync': '/api/cron/release-sync'
+      'sync': '/api/cron/release-sync',
+      'mood': '/api/ai/mood-recommendation',
+      'digest': '/api/ai/editorial-digest'
     };
     
     const targetPath = taskPaths[forcedTask] || `/api/ai/${forcedTask}`;
@@ -73,24 +75,31 @@ export async function GET(req: Request) {
     // Standard Time-based Logic
     console.log(`CRON-MASTER: Running at ${now.toISOString()} (Hour: ${hour}, Day: ${day})`);
 
-    // Blog generation (05:00 UTC)
+    // 1. Daily Mood (02:00 UTC / 09:00 WIB)
+    if (hour === 2) await runTask('mood', '/api/ai/mood-recommendation');
+
+    // 2. Daily Blog (05:00 UTC)
     if (hour === 5) await runTask('blog', '/api/ai/generate-news');
 
-    // Release Alerts (00:00 & 12:00 UTC)
+    // 3. Release Alerts (00:00 & 12:00 UTC)
     if (hour === 0 || hour === 12) await runTask('releases', '/api/ai/release-alert');
 
-    // Admin Intel (08:00 UTC)
+    // 4. Admin Intel (08:00 UTC)
     if (hour === 8) await runTask('intel', '/api/ai/admin-intel');
 
-    // Weekly Hype (Monday 09:00 UTC)
+    // 5. Weekly Hype (Monday 09:00 UTC)
     if (hour === 9 && day === 1) await runTask('weekly', '/api/ai/weekly-hype');
 
-    // Health Check (Every 4 hours)
+    // 6. Editorial Digest (Sunday 10:00 UTC)
+    if (hour === 10 && day === 0) await runTask('digest', '/api/ai/editorial-digest');
+
+    // 7. Health Check (Every 4 hours)
     if (hour % 4 === 0) await runTask('health', '/api/ai/health-check');
 
-    // Release Sync (01:00 UTC)
+    // 8. Release Sync (01:00 UTC)
     if (hour === 1) await runTask('sync', '/api/cron/release-sync');
   }
+
 
   return NextResponse.json({
     status: 'Cron Master Executed',
