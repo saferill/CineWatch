@@ -189,18 +189,18 @@ export default function Player({
     if (src === "vidking") {
       const color = "ffffff";
       if (type === "movie") {
-        return `https://www.vidking.net/embed/movie/${movieId}?autoPlay=true&color=${color}`;
+        return `https://www.vidking.net/embed/movie/${movieId}?autoPlay=true&color=${color}&sub_indo=1`;
       }
       if (type === "tv" && season && episode) {
-        return `https://www.vidking.net/embed/tv/${movieId}/${season}/${episode}?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true`;
+        return `https://www.vidking.net/embed/tv/${movieId}/${season}/${episode}?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true&sub_indo=1`;
       }
-      return `https://www.vidking.net/embed/tv/${movieId}/1/1?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true`;
+      return `https://www.vidking.net/embed/tv/${movieId}/1/1?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true&sub_indo=1`;
     }
 
     if (src === "autoembed") {
-      if (type === "movie") return `https://autoembed.co/movie/tmdb/${movieId}`;
-      if (type === "tv" && season && episode) return `https://autoembed.co/tv/tmdb/${movieId}-${season}-${episode}`;
-      return `https://autoembed.co/tv/tmdb/${movieId}-1-1`;
+      if (type === "movie") return `https://autoembed.co/movie/tmdb/${movieId}?sub_indo=1`;
+      if (type === "tv" && season && episode) return `https://autoembed.co/tv/tmdb/${movieId}-${season}-${episode}?sub_indo=1`;
+      return `https://autoembed.co/tv/tmdb/${movieId}-1-1?sub_indo=1`;
     }
 
     if (src === "vidlink") {
@@ -211,7 +211,8 @@ export default function Player({
       const params = new URLSearchParams({
         primaryColor: "06b6d4",
         secondaryColor: "18181b",
-        iconColor: "ffffff"
+        iconColor: "ffffff",
+        subTitle: "indonesia" // Force Indo Subs
       });
 
       if (progress?.currentTime && !isResumed) {
@@ -222,9 +223,9 @@ export default function Player({
     }
 
     if (src === "vidsrcrip") {
-      if (type === "movie") return `https://vidsrc.rip/embed/movie/${movieId}`;
-      if (type === "tv" && season && episode) return `https://vidsrc.rip/embed/tv/${movieId}/${season}/${episode}`;
-      return `https://vidsrc.rip/embed/tv/${movieId}/1/1`;
+      if (type === "movie") return `https://vidsrc.rip/embed/movie/${movieId}?sub.indo=1`;
+      if (type === "tv" && season && episode) return `https://vidsrc.rip/embed/tv/${movieId}/${season}/${episode}?sub.indo=1`;
+      return `https://vidsrc.rip/embed/tv/${movieId}/1/1?sub.indo=1`;
     }
 
     if (src === "embedsu") {
@@ -240,24 +241,24 @@ export default function Player({
     }
 
     if (src === "superembed") {
-      if (type === "movie") return `https://multiembed.mov/?video_id=${movieId}&tmdb=1`;
-      if (type === "tv" && season && episode) return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=${season}&e=${episode}`;
-      return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=1&e=1`;
+      if (type === "movie") return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&sub_indo=1`;
+      if (type === "tv" && season && episode) return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=${season}&e=${episode}&sub_indo=1`;
+      return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=1&e=1&sub_indo=1`;
     }
 
     if (src === "vidsrcto") {
-      if (type === "movie") return `https://vidsrc.to/embed/movie/${movieId}`;
-      if (type === "tv" && season && episode) return `https://vidsrc.to/embed/tv/${movieId}/${season}/${episode}`;
-      return `https://vidsrc.to/embed/tv/${movieId}/1/1`;
+      if (type === "movie") return `https://vidsrc.to/embed/movie/${movieId}?sub.indo=1`;
+      if (type === "tv" && season && episode) return `https://vidsrc.to/embed/tv/${movieId}/${season}/${episode}?sub.indo=1`;
+      return `https://vidsrc.to/embed/tv/${movieId}/1/1?sub.indo=1`;
     }
 
     if (type === "anime") {
-      return `https://vidsrc.me/embed/anime/${movieId}`;
+      return `https://vidsrc.me/embed/anime/${movieId}?sub.indo=1`;
     }
     if (type === "tv" && season && episode) {
-      return `https://vidsrc.me/embed/tv/${movieId}/${season}/${episode}`;
+      return `https://vidsrc.me/embed/tv/${movieId}/${season}/${episode}?sub.indo=1`;
     }
-    return `https://vidsrc.me/embed/${type}/${movieId}`;
+    return `https://vidsrc.me/embed/${type}/${movieId}?sub.indo=1`;
   }
 
   const embedUrl = getEmbedUrl(source);
