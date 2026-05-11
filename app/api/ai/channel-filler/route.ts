@@ -21,72 +21,86 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Telegram config missing' }, { status: 500 });
     }
 
-    // 1. Pick a Random Trending Category
-    const categories = ['movie', 'tv', 'anime', 'donghua'];
-    const type = categories[Math.floor(Math.random() * categories.length)];
     const today = new Date().toISOString().split('T')[0];
-    
-    // 2. Fetch Items (Released only, Sorted by Popularity)
-    const page = Math.floor(Math.random() * 3) + 1; // Pick from top 3 pages for quality
-    let endpoint = "";
-    
-    if (type === 'movie') {
-      endpoint = `/discover/movie?primary_release_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&with_release_type=2|3|4&language=id-ID&page=${page}`;
-    } else if (type === 'tv') {
-      endpoint = `/discover/tv?first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&language=id-ID&page=${page}`;
-    } else if (type === 'anime') {
-      endpoint = `/discover/tv?with_genres=16&first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&language=id-ID&page=${page}`;
-    } else if (type === 'donghua') {
-      endpoint = `/discover/tv?with_origin_country=CN&first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&language=id-ID&page=${page}`;
+    const results = [];
+
+    // Loop 3 times to send 3 movies
+    for (let i = 0; i < 3; i++) {
+      const categories = ['movie', 'tv', 'anime', 'donghua'];
+      const type = categories[Math.floor(Math.random() * categories.length)];
+      const page = Math.floor(Math.random() * 5) + 1;
+      
+      let endpoint = "";
+      if (type === 'movie') {
+        endpoint = `/discover/movie?primary_release_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=6&with_release_type=2|3|4&language=id-ID&page=${page}`;
+      } else {
+        const genreParam = type === 'anime' ? '&with_genres=16' : type === 'donghua' ? '&with_origin_country=CN' : '';
+        endpoint = `/discover/tv?first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=6${genreParam}&language=id-ID&page=${page}`;
+      }
+
+      const res = await fetch(`https://api.themoviedb.org/3${endpoint}&api_key=${process.env.TMDB_API_KEY}`);
+      const data = await res.json();
+      let items = data.results || [];
+      
+      if (items.length === 0) continue;
+      
+      const item = items[Math.floor(Math.random() * items.length)];
+      const title = item.title || item.name;
+      const year = (item.release_date || item.first_air_date || '').split('-')[0];
+      const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
+      
+      // Get Genres names (Simplified)
+      const genreMap: any = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi', 10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western' };
+      const genres = item.genre_ids?.slice(0, 2).map((id: number) => genreMap[id] || 'General').join(', ') || 'Sinema';
+
+      // 3. AI Hype Generation with Silent Fallback
+      let hype = "";
+      try {
+        hype = await chatWithAgent(
+          'Luxury Critic',
+          `Promosikan film "${title}" (${year}) genre ${genres}. Berikan 1 kalimat mewah yang mengundang orang menonton.`,
+          'Sophisticated and High-End'
+        );
+        // Clean up if AI gives error message
+        if (hype.includes("gangguan") || hype.includes("Maaf")) throw new Error("AI Error");
+      } catch (e) {
+        hype = item.overview ? item.overview.slice(0, 150) + "..." : "Saksikan mahakarya sinematik ini hanya di CineWatch.";
+      }
+
+      const message = `🎬 <b>CINEWATCH PREMIER</b> 🎬\n` +
+                      `━━━━━━━━━━━━━━━━━━\n\n` +
+                      `🔥 <b>${title.toUpperCase()}</b> (${year})\n\n` +
+                      `🌟 <b>Rating:</b> ${rating}\n` +
+                      `🎭 <b>Genre:</b> ${genres}\n` +
+                      `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
+                      `🎥 <b>Kualitas:</b> 1080p Full HD\n\n` +
+                      `📝 <i>"${hype}"</i>\n\n` +
+                      `━━━━━━━━━━━━━━━━━━\n` +
+                      `🚀 <a href="${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch">MULAI NONTON SEKARANG</a>`;
+
+      const posterUrl = `https://image.tmdb.org/t/p/w780${item.poster_path}`;
+
+      // Send to Telegram
+      await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: tgChannelId,
+          photo: posterUrl,
+          caption: message,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[{ text: "🍿 Tonton / Download Sub Indo", url: `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch` }]]
+          }
+        })
+      });
+      
+      results.push(title);
+      // Small delay between posts to look more natural
+      await new Promise(r => setTimeout(r, 2000));
     }
 
-    const res = await fetch(`https://api.themoviedb.org/3${endpoint}&api_key=${process.env.TMDB_API_KEY}`);
-    const data = await res.json();
-    let items = data.results || [];
-    
-    // Safety check: Filter out anything with a future release date just in case
-    items = items.filter((i: any) => {
-      const rDate = i.release_date || i.first_air_date;
-      return rDate && rDate <= today;
-    });
-
-    if (items.length === 0) throw new Error('No playable items found');
-    
-    const item = items[Math.floor(Math.random() * Math.min(items.length, 10))]; // Pick from top 10 for better quality
-    const title = item.title || item.name;
-
-    // 3. AI Hype Generation (Unique Every Time)
-    const hype = await chatWithAgent(
-      'Channel Growth Manager',
-      `Buat pesan singkat (max 200 karakter) untuk channel Telegram yang mempromosikan film "${title}" (${type}). Katakan bahwa film ini sudah tersedia dengan SUBTITLE INDONESIA di CineWatch. Gunakan banyak emoji dan gaya bahasa yang bikin orang mau klik.`,
-      'Viral, Menarik, dan High-Conversion'
-    );
-
-    const message = `🎬 <b>REKOMENDASI NEXUS</b> 🎬\n\n` +
-                    `🔥 <b>${title}</b>\n\n` +
-                    `${hype}\n\n` +
-                    `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
-                    `🎥 <b>Kualitas:</b> 1080p Full HD\n\n` +
-                    `🚀 <a href="${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch">MULAI NONTON SEKARANG</a>`;
-
-    const posterUrl = `https://image.tmdb.org/t/p/w780${item.poster_path}`;
-
-    // 4. Send to Telegram
-    await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: tgChannelId,
-        photo: posterUrl,
-        caption: message,
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [[{ text: "🍿 Tonton / Download Sub Indo", url: `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch` }]]
-        }
-      })
-    });
-
-    return NextResponse.json({ success: true, item: title, type });
+    return NextResponse.json({ success: true, posted: results });
 
   } catch (error: any) {
     console.error('Channel Filler Error:', error.message);
