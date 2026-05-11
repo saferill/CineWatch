@@ -68,7 +68,8 @@ export async function GET(req: Request) {
       'mood': '/api/ai/mood-recommendation',
       'digest': '/api/ai/editorial-digest',
       'search-hype': '/api/ai/search-hype',
-      'milestones': '/api/ai/milestones'
+      'milestones': '/api/ai/milestones',
+      'channel-filler': '/api/ai/channel-filler'
     };
     
     const targetPath = taskPaths[forcedTask] || `/api/ai/${forcedTask}`;
@@ -76,6 +77,9 @@ export async function GET(req: Request) {
   } else {
     // Standard Time-based Logic
     console.log(`CRON-MASTER: Running at ${now.toISOString()} (Hour: ${hour}, Day: ${day})`);
+
+    // 11. Channel Filler (Setiap Jam) - Selalu jalankan saat cron-master dipanggil
+    await runTask('channel-filler', '/api/ai/channel-filler');
 
     // 1. Daily Mood (02:00 UTC / 09:00 WIB)
     if (hour === 2) await runTask('mood', '/api/ai/mood-recommendation');
