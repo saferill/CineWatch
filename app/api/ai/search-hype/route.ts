@@ -40,6 +40,7 @@ export async function GET(request: Request) {
     if (trending.length === 0) return NextResponse.json({ success: true });
 
     // 3. AI Analysis
+    const list = trending.map(([q, count]) => `${q} (${count}x)`).join(', ');
     let analysis = "";
     try {
       analysis = await chatWithAgent(
