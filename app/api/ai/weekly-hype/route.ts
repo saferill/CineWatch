@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
@@ -19,6 +20,18 @@ export async function GET(request: Request) {
 
   try {
     const today = new Date();
+    // Get week number to prevent duplication
+    const weekNumber = Math.ceil(today.getDate() / 7);
+    const month = today.getMonth() + 1;
+    const yearNum = today.getFullYear();
+    const historySlug = `weekly-hype-${yearNum}-${month}-${weekNumber}`;
+
+    // ANTI-DUPLICATE CHECK
+    const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
+    if (existing) {
+      return NextResponse.json({ success: true, message: 'Weekly Hype already sent for this week' });
+    }
+
     const nextWeek = new Date();
     nextWeek.setDate(today.getDate() + 7);
     const inTwoWeeks = new Date();
@@ -27,7 +40,6 @@ export async function GET(request: Request) {
     const dateStart = nextWeek.toISOString().split('T')[0];
     const dateEnd = inTwoWeeks.toISOString().split('T')[0];
 
-    // Fetch movies releasing in the next 7-14 days
     const data = await fetchTMDB(`/discover/movie?primary_release_date.gte=${dateStart}&primary_release_date.lte=${dateEnd}&sort_by=popularity.desc&language=id-ID`);
     const upcoming = data.results?.slice(0, 5) || [];
 
@@ -40,35 +52,39 @@ export async function GET(request: Request) {
     const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
 
-    const title = "🗓️ **CINEWATCH WEEKLY HYPEx CALENDAR**";
-    let tgMessage = `🗓️ <b>CINEWATCH WEEKLY HYPEx CALENDAR</b>\n\n`;
-    tgMessage += `<i>Bersiaplah! Ini adalah film-film besar yang akan segera hadir di CineWatch minggu depan:</i>\n\n`;
+    let tgMessage = `🗓️ <b>CINEWATCH WEEKLY HYPEx</b>\n` +
+                    `━━━━━━━━━━━━━━━━━━\n\n` +
+                    `<i>Film-film besar yang akan segera hadir di CineWatch minggu depan:</i>\n\n`;
     
-    let discordDescription = `Bersiaplah! Ini adalah film-film besar yang akan segera hadir di CineWatch minggu depan:\n\n`;
+    let discordDescription = `### 🗓️ CINEWATCH WEEKLY HYPEx\n*Film-film besar yang akan segera hadir minggu depan:*\n\n`;
 
     upcoming.forEach((m: any, i: number) => {
       const movieUrl = `${siteUrl}/movie/${m.id}/watch`;
       const dateStr = new Date(m.release_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
+      const rating = m.vote_average ? `⭐ ${m.vote_average.toFixed(1)}` : '⭐ TBD';
       
-      tgMessage += `${i+1}. 🎬 <b><a href="${movieUrl}">${m.title}</a></b> (Sub Indo)\n`;
-      tgMessage += `   📅 Rilis: ${dateStr}\n\n`;
+      tgMessage += `${i+1}. 🎬 <b><a href="${movieUrl}">${m.title.toUpperCase()}</a></b>\n` +
+                    `   📅 <b>Rilis:</b> ${dateStr}\n` +
+                    `   🌟 <b>Hype:</b> ${rating}\n\n`;
       
-      discordDescription += `${i+1}. 🎬 **[${m.title}](${movieUrl})** (Sub Indo)\n`;
-      discordDescription += `   📅 Rilis: ${dateStr}\n\n`;
+      discordDescription += `${i+1}. 🎬 **[${m.title}](${movieUrl})**\n` +
+                            `   📅 **Rilis:** ${dateStr} | 🌟 **Hype:** ${rating}\n\n`;
     });
 
-    tgMessage += `🚀 <b>Pantau terus CineWatch untuk update terbaru!</b>`;
+    tgMessage += `━━━━━━━━━━━━━━━━━━\n` +
+                  `🚀 <b>Pantau terus CineWatch untuk update terbaru!</b>`;
 
     // Dispatch to Telegram
     if (tgToken && tgChatId) {
-      await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+      const poster = `https://image.tmdb.org/p/w780${upcoming[0].backdrop_path || upcoming[0].poster_path}`;
+      await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           chat_id: tgChatId, 
-          text: tgMessage, 
-          parse_mode: 'HTML',
-          disable_web_page_preview: false
+          photo: poster,
+          caption: tgMessage, 
+          parse_mode: 'HTML'
         })
       }).catch(e => console.error('Weekly Hype TG Error:', e));
     }
@@ -80,9 +96,9 @@ export async function GET(request: Request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           embeds: [{
-            title: "🗓️ CINEWATCH WEEKLY HYPEx CALENDAR",
+            title: "🗓️ WEEKLY HYPEx CALENDAR",
             description: discordDescription,
-            color: 0xFACC15, // Yellow/Amber
+            color: 0xFACC15,
             image: upcoming[0].backdrop_path ? { url: `https://image.tmdb.org/t/p/w1280${upcoming[0].backdrop_path}` } : undefined,
             footer: { text: "CineWatch Future Intelligence" },
             timestamp: new Date().toISOString()
@@ -90,6 +106,14 @@ export async function GET(request: Request) {
         })
       }).catch(e => console.error('Weekly Hype Discord Error:', e));
     }
+
+    // SAVE TO HISTORY
+    await supabase.from('posts').insert([{
+      title: `Weekly Hype: ${month}/${yearNum}`,
+      slug: historySlug,
+      content: `Weekly calendar sent at ${new Date().toISOString()}`,
+      type: 'Bot History'
+    }]);
 
     return NextResponse.json({ success: true, count: upcoming.length });
   } catch (error: any) {

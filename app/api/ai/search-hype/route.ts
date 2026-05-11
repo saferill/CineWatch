@@ -40,28 +40,33 @@ export async function GET(request: Request) {
     if (trending.length === 0) return NextResponse.json({ success: true });
 
     // 3. AI Analysis
-    const list = trending.map(([q, count]) => `${q} (${count}x)`).join(', ');
-    const analysis = await chatWithAgent(
-      'Search Analyst',
-      `Berikut adalah kata kunci yang paling banyak dicari user dalam 24 jam terakhir: ${list}. Berikan ulasan singkat (1-2 kalimat) tentang tren apa yang sedang terjadi dan apa yang harus dilakukan Admin.`,
-      'Profesional & Strategis'
-    );
+    let analysis = "";
+    try {
+      analysis = await chatWithAgent(
+        'Search Analyst',
+        `Berikut adalah kata kunci yang paling banyak dicari user dalam 24 jam terakhir: ${list}. Berikan ulasan singkat (1-2 kalimat) tentang tren apa yang sedang terjadi dan apa yang harus dilakukan Admin.`,
+        'Profesional & Strategis'
+      );
+      if (analysis.includes("gangguan") || analysis.includes("Maaf")) throw new Error("AI Error");
+    } catch (e) {
+      analysis = "Tren pencarian hari ini didominasi oleh judul-judul populer. Admin disarankan untuk memantau ketersediaan link pada judul-judul di atas.";
+    }
 
     // 4. Dispatch to Admin
     const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL;
     const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
     const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
-    const message = `🔥 **TRENDING SEARCH ALERT**\n\n` +
+    const message = `🔥 <b>TRENDING SEARCH ALERT</b>\n\n` +
                     `Top Kata Kunci:\n` + 
-                    trending.map(([q, count], i) => `${i+1}. **${q}** (${count} pencarian)`).join('\n') +
-                    `\n\n💡 **AI Insight:**\n${analysis}`;
+                    trending.map(([q, count], i) => `${i+1}. <b>${q}</b> (${count} pencarian)`).join('\n') +
+                    `\n\n💡 <b>AI Insight:</b>\n<i>${analysis}</i>`;
 
     if (tgToken && tgChatId) {
       await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: tgChatId, text: message.replace(/\*\*/g, ''), parse_mode: 'Markdown' })
+        body: JSON.stringify({ chat_id: tgChatId, text: message, parse_mode: 'HTML' })
       });
     }
 
