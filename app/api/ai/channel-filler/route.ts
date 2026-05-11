@@ -86,16 +86,19 @@ export async function GET(request: Request) {
         hype = item.overview ? item.overview.slice(0, 150) + "..." : "Saksikan mahakarya sinematik ini hanya di CineWatch.";
       }
 
-      const message = `🎬 <b>CINEWATCH PREMIER</b> 🎬\n` +
-                      `━━━━━━━━━━━━━━━━━━\n\n` +
+      const message = `✨ <b>CINEWATCH PREMIER</b> ✨\n` +
+                      `━━━━━━━━━━━━━━━━━━━━\n\n` +
                       `🔥 <b>${title.toUpperCase()}</b> (${year})\n\n` +
+                      `🏆 <b>Status:</b> <code>VERIFIED QUALITY</code> ✅\n` +
                       `🌟 <b>Rating:</b> ${rating}\n` +
                       `🎭 <b>Genre:</b> ${genres}\n` +
                       `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
                       `🎥 <b>Kualitas:</b> 1080p Full HD\n\n` +
-                      `📝 <i>"${hype}"</i>\n\n` +
-                      `━━━━━━━━━━━━━━━━━━\n` +
-                      `🚀 <a href="${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch">MULAI NONTON SEKARANG</a>`;
+                      `📝 <b>SINOPSIS:</b>\n` +
+                      `<i>"${hype}"</i>\n\n` +
+                      `━━━━━━━━━━━━━━━━━━━━\n` +
+                      `🎬 <b>CineWatch Intelligence Protocol v2.0</b>\n` +
+                      `🚀 <a href="${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch">KLIK UNTUK MULAI NONTON</a>`;
 
       const posterUrl = `https://image.tmdb.org/t/p/w780${item.poster_path}`;
 
@@ -109,7 +112,10 @@ export async function GET(request: Request) {
           caption: message,
           parse_mode: 'HTML',
           reply_markup: {
-            inline_keyboard: [[{ text: "🍿 Tonton / Download Sub Indo", url: `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch` }]]
+            inline_keyboard: [
+              [{ text: "🍿 NONTON SEKARANG (SUB INDO)", url: `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch` }],
+              [{ text: "🌐 Website Utama", url: siteUrl }]
+            ]
           }
         })
       });

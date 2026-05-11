@@ -24,15 +24,18 @@ async function sendNotifications(item: any, teaser: string, type: string) {
   // 1. Telegram
   if (tgToken && tgChatId) {
     const message = `🚀 <b>RILIS BARU: ${title.toUpperCase()}</b>\n` +
-                    `━━━━━━━━━━━━━━━━━━\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                    `🏆 <b>Status:</b> <code>VERIFIED QUALITY</code> ✅\n` +
                     `📅 <b>Tahun:</b> ${year}\n` +
                     `🌟 <b>Rating:</b> ${rating}\n` +
                     `🎭 <b>Genre:</b> ${genres}\n` +
                     `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
                     `🎥 <b>Kualitas:</b> Full HD 1080p\n\n` +
-                    `📝 <i>"${teaser}"</i>\n\n` +
-                    `━━━━━━━━━━━━━━━━━━\n` +
-                    `🔗 <a href="${siteUrl}">TONTON SEKARANG</a>`;
+                    `📝 <b>SINOPSIS:</b>\n` +
+                    `<i>"${teaser}"</i>\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━\n` +
+                    `🎬 <b>CineWatch Intelligence Protocol v2.0</b>\n` +
+                    `🔗 <a href="${siteUrl}">KLIK UNTUK MULAI NONTON</a>`;
     try {
       await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
         method: 'POST',
@@ -43,7 +46,10 @@ async function sendNotifications(item: any, teaser: string, type: string) {
           caption: message, 
           parse_mode: 'HTML',
           reply_markup: {
-            inline_keyboard: [[{ text: "🍿 Mulai Nonton (Sub Indo)", url: siteUrl }]]
+            inline_keyboard: [
+              [{ text: "🍿 NONTON SEKARANG (SUB INDO)", url: siteUrl }],
+              [{ text: "🌐 Website Utama", url: process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app' }]
+            ]
           }
         })
       });
