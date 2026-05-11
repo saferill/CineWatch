@@ -50,10 +50,10 @@ export async function GET(request: Request) {
       const movieUrl = `${siteUrl}/movie/${m.id}`;
       const dateStr = new Date(m.release_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
       
-      tgMessage += `${i+1}. 🎬 <b><a href="${movieUrl}">${m.title}</a></b>\n`;
+      tgMessage += `${i+1}. 🎬 <b><a href="${movieUrl}">${m.title}</a></b> (Sub Indo)\n`;
       tgMessage += `   📅 Rilis: ${dateStr}\n\n`;
       
-      discordDescription += `${i+1}. 🎬 **[${m.title}](${movieUrl})**\n`;
+      discordDescription += `${i+1}. 🎬 **[${m.title}](${movieUrl})** (Sub Indo)\n`;
       discordDescription += `   📅 Rilis: ${dateStr}\n\n`;
     });
 

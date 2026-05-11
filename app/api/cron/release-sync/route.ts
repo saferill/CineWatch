@@ -140,12 +140,13 @@ export async function GET(request: Request) {
       console.log('CRON: Sending to Telegram...');
       let tgText = "<b>🔥 RINGKASAN CINEWATCH HARI INI</b>\n\n";
       
-      if (topMovie) tgText += `🎬 <b>FILM:</b> <a href="${siteUrl}/movie/${topMovie.id}">${topMovie.title}</a>\n`;
-      if (topSeries) tgText += `📺 <b>SERIES:</b> <a href="${siteUrl}/series/${topSeries.id}">${topSeries.name}</a>\n`;
-      if (topAnime) tgText += `🍥 <b>ANIME:</b> <a href="${siteUrl}/anime/${topAnime.id}">${topAnime.title.english || topAnime.title.romaji}</a>\n`;
-      if (topDonghua) tgText += `🐉 <b>DONGHUA:</b> <a href="${siteUrl}/donghua">${topDonghua.title}</a>\n`;
+      if (topMovie) tgText += `🎬 <b>FILM:</b> <a href="${siteUrl}/movie/${topMovie.id}">${topMovie.title}</a> (Sub Indo)\n`;
+      if (topSeries) tgText += `📺 <b>SERIES:</b> <a href="${siteUrl}/series/${topSeries.id}">${topSeries.name}</a> (Sub Indo)\n`;
+      if (topAnime) tgText += `🍥 <b>ANIME:</b> <a href="${siteUrl}/anime/${topAnime.id}">${topAnime.title.english || topAnime.title.romaji}</a> (Sub Indo)\n`;
+      if (topDonghua) tgText += `🐉 <b>DONGHUA:</b> <a href="${siteUrl}/donghua">${topDonghua.title}</a> (Sub Indo)\n`;
       
-      tgText += "\n🚀 <b>Tonton sekarang di CineWatch!</b>";
+      tgText += "\n🇮🇩 <b>Status:</b> Seluruh konten mendukung Subtitle Indonesia.\n";
+      tgText += "🚀 <b>Tonton sekarang di CineWatch!</b>";
 
       const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
         method: 'POST',

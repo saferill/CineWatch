@@ -16,12 +16,16 @@ async function sendNotifications(title: string, teaser: string, image: string, t
 
   // 1. Telegram
   if (tgToken && tgChatId) {
-    const message = `🚀 *RILIS BARU HARI INI!* (${type})\n\n🎬 *${title}*\n\n${teaser}\n\n🔗 [Tonton Sekarang](${siteUrl})`;
+    const message = `🚀 <b>RILIS BARU: ${title}</b> (${type})\n\n` +
+                    `📝 <i>${teaser}</i>\n\n` +
+                    `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
+                    `🎥 <b>Kualitas:</b> Full HD 1080p\n\n` +
+                    `🔗 <a href="${siteUrl}">TONTON SEKARANG</a>`;
     try {
       await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: tgChatId, text: message, parse_mode: 'Markdown' })
+        body: JSON.stringify({ chat_id: tgChatId, text: message, parse_mode: 'HTML' })
       });
     } catch (e) {
       console.error('Telegram notification failed:', e);
