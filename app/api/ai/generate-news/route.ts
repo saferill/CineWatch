@@ -64,6 +64,7 @@ export async function GET(request: Request) {
   const generatedArticles = [];
 
   try {
+    const mainChannelId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
     const [moviesData, tvData] = await Promise.all([
       fetchTMDB('/trending/movie/day?language=id-ID'),
       fetchTMDB('/trending/tv/day?language=id-ID'),
