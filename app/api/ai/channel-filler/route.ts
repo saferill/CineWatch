@@ -23,12 +23,15 @@ export async function GET(request: Request) {
 
     const today = new Date().toISOString().split('T')[0];
     const results = [];
+    let attempts = 0;
+    const maxItems = 3;
 
-    // Loop 3 times to send 3 movies
-    for (let i = 0; i < 3; i++) {
+    // Loop until we get 3 UNIQUE movies
+    while (results.length < maxItems && attempts < 15) {
+      attempts++;
       const categories = ['movie', 'tv', 'anime', 'donghua'];
       const type = categories[Math.floor(Math.random() * categories.length)];
-      const page = Math.floor(Math.random() * 5) + 1;
+      const page = Math.floor(Math.random() * 10) + 1; // Wider search to find unique items
       
       let endpoint = "";
       if (type === 'movie') {
@@ -45,6 +48,22 @@ export async function GET(request: Request) {
       if (items.length === 0) continue;
       
       const item = items[Math.floor(Math.random() * items.length)];
+      const mediaId = item.id;
+      const historySlug = `bot-history-${mediaId}-${type}`;
+
+      // --- ANTI-DUPLICATE CHECK ---
+      const { data: existing } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('slug', historySlug)
+        .single();
+
+      if (existing) {
+        console.log(`⏭️ Skipping duplicate: ${item.title || item.name}`);
+        continue;
+      }
+      // ----------------------------
+
       const title = item.title || item.name;
       const year = (item.release_date || item.first_air_date || '').split('-')[0];
       const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
@@ -61,7 +80,6 @@ export async function GET(request: Request) {
           `Promosikan film "${title}" (${year}) genre ${genres}. Berikan 1 kalimat mewah yang mengundang orang menonton.`,
           'Sophisticated and High-End'
         );
-        // Clean up if AI gives error message
         if (hype.includes("gangguan") || hype.includes("Maaf")) throw new Error("AI Error");
       } catch (e) {
         hype = item.overview ? item.overview.slice(0, 150) + "..." : "Saksikan mahakarya sinematik ini hanya di CineWatch.";
@@ -94,10 +112,18 @@ export async function GET(request: Request) {
           }
         })
       });
+
+      // --- SAVE TO HISTORY ---
+      await supabase.from('posts').insert([{
+        title: `History: ${title}`,
+        slug: historySlug,
+        content: `Sent to Telegram at ${new Date().toISOString()}`,
+        type: 'Bot History',
+        image: posterUrl
+      }]);
       
       results.push(title);
-      // Small delay between posts to look more natural
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 3000)); // Delay between posts
     }
 
     return NextResponse.json({ success: true, posted: results });
