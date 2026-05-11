@@ -37,12 +37,12 @@ export async function POST(req: Request) {
         // 2. AI Presentation
         const recommendation = await chatWithAgent(
           'Telegram Concierge',
-          `User mencari "${query}". Kami menemukan: ${results.map(r => r.title || r.name).join(', ')}. Berikan jawaban singkat dan ramah dengan link berikut.`,
+          `User mencari "${query}". Kami menemukan: ${results.map((r: any) => r.title || r.name).join(', ')}. Berikan jawaban singkat dan ramah dengan link berikut.`,
           'Ramah dan Membantu'
         );
 
         let responseText = `${recommendation}\n\n`;
-        results.forEach(r => {
+        results.forEach((r: any) => {
           const type = r.title ? 'movie' : 'series';
           const url = `${siteUrl}/${type}/${r.id}`;
           responseText += `🎬 <b><a href="${url}">${r.title || r.name}</a></b>\n`;
