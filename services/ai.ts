@@ -231,7 +231,7 @@ export async function getBlogSummary(content: string) {
 export async function trackSearch(query: string) {
   if (!query) return;
   const { supabase } = await import('@/lib/supabase');
-  await supabase.from('search_history').insert({ query: query.toLowerCase() }).catch(() => null);
+  supabase.from('search_history').insert({ query: query.toLowerCase() }).then();
 }
 
 /**
