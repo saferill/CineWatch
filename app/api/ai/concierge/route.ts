@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { query, userName } = await req.json();
 
     // 1. AI Analysis: What is the user looking for?
-    const searchTerms = await chatDevAgent('Search Strategist', `Ekstrak kata kunci pencarian film dari permintaan ini: "${query}". Kembalikan hanya kata kuncinya saja.`);
+    const searchTerms = await chatWithAgent('Search Strategist', `Ekstrak kata kunci pencarian film dari permintaan ini: "${query}". Kembalikan hanya kata kuncinya saja.`);
     
     // 2. Fetch from TMDB
     const searchRes = await fetch(`https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(searchTerms)}&api_key=${TMDB_API_KEY}&language=id-ID`);
