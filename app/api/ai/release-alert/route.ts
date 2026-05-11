@@ -78,18 +78,28 @@ export async function GET(request: Request) {
     ]);
 
     // Pick 1 from each category for high-quality alerts
-    const alerts = [
-      ...(movies.results?.slice(0, 1).map((i: any) => ({ ...i, category: 'Movie' })) || []),
-      ...(tv.results?.slice(0, 1).map((i: any) => ({ ...i, category: 'Series' })) || []),
-      ...(anime.results?.slice(0, 1).map((i: any) => ({ ...i, category: 'Anime' })) || []),
-      ...(donghua.results?.slice(0, 1).map((i: any) => ({ ...i, category: 'Donghua' })) || []),
+    let alerts = [
+      ...(movies.results?.map((i: any) => ({ ...i, category: 'Movie' })) || []),
+      ...(tv.results?.map((i: any) => ({ ...i, category: 'Series' })) || []),
+      ...(anime.results?.map((i: any) => ({ ...i, category: 'Anime' })) || []),
+      ...(donghua.results?.map((i: any) => ({ ...i, category: 'Donghua' })) || []),
     ];
 
-    if (alerts.length === 0) {
-      return NextResponse.json({ success: true, message: 'No releases found today' });
+    // Filter: Released, Today or Past, and Decent Rating
+    alerts = alerts.filter((i: any) => {
+      const rDate = i.release_date || i.first_air_date;
+      return rDate && rDate <= today && (i.vote_average || 0) >= 4;
+    });
+
+    // Take top 1 from each category for the daily blast
+    const uniqueCategories = ['Movie', 'Series', 'Anime', 'Donghua'];
+    const finalAlerts = uniqueCategories.map(cat => alerts.find(a => a.category === cat)).filter(Boolean);
+
+    if (finalAlerts.length === 0) {
+      return NextResponse.json({ success: true, message: 'No high-quality releases found today' });
     }
 
-    for (const item of alerts) {
+    for (const item of finalAlerts as any[]) {
       const name = item.title || item.name;
       const overview = item.overview || 'Rilis baru yang sangat dinantikan di CineWatch.';
 

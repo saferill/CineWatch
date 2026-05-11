@@ -24,24 +24,35 @@ export async function GET(request: Request) {
     // 1. Pick a Random Trending Category
     const categories = ['movie', 'tv', 'anime', 'donghua'];
     const type = categories[Math.floor(Math.random() * categories.length)];
+    const today = new Date().toISOString().split('T')[0];
     
-    // 2. Fetch Trending Items (Random Page to keep it fresh)
-    const page = Math.floor(Math.random() * 5) + 1;
-    let endpoint = `/trending/${type === 'movie' ? 'movie' : 'tv'}/week?language=id-ID&page=${page}`;
+    // 2. Fetch Items (Released only, Sorted by Popularity)
+    const page = Math.floor(Math.random() * 3) + 1; // Pick from top 3 pages for quality
+    let endpoint = "";
     
-    if (type === 'anime') {
-      endpoint = `/discover/tv?with_genres=16&sort_by=popularity.desc&language=id-ID&page=${page}`;
+    if (type === 'movie') {
+      endpoint = `/discover/movie?primary_release_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&with_release_type=2|3|4&language=id-ID&page=${page}`;
+    } else if (type === 'tv') {
+      endpoint = `/discover/tv?first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&language=id-ID&page=${page}`;
+    } else if (type === 'anime') {
+      endpoint = `/discover/tv?with_genres=16&first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&language=id-ID&page=${page}`;
     } else if (type === 'donghua') {
-      endpoint = `/discover/tv?with_origin_country=CN&sort_by=popularity.desc&language=id-ID&page=${page}`;
+      endpoint = `/discover/tv?with_origin_country=CN&first_air_date.lte=${today}&sort_by=popularity.desc&vote_average.gte=5&language=id-ID&page=${page}`;
     }
 
     const res = await fetch(`https://api.themoviedb.org/3${endpoint}&api_key=${process.env.TMDB_API_KEY}`);
     const data = await res.json();
-    const items = data.results || [];
+    let items = data.results || [];
     
-    if (items.length === 0) throw new Error('No items found');
+    // Safety check: Filter out anything with a future release date just in case
+    items = items.filter((i: any) => {
+      const rDate = i.release_date || i.first_air_date;
+      return rDate && rDate <= today;
+    });
+
+    if (items.length === 0) throw new Error('No playable items found');
     
-    const item = items[Math.floor(Math.random() * items.length)];
+    const item = items[Math.floor(Math.random() * Math.min(items.length, 10))]; // Pick from top 10 for better quality
     const title = item.title || item.name;
 
     // 3. AI Hype Generation (Unique Every Time)
