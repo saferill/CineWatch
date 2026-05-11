@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
   // 1. KIRIM KE TELEGRAM (TANPA AWAIT AGAR TIDAK MENGGANGGU)
   // 1. KIRIM KE TELEGRAM
-  const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+  const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
   
   if (tgToken && tgChatId) {

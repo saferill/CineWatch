@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     }
 
     const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL;
-    const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+    const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
     const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
     const celebrationMsg = await chatWithAgent(

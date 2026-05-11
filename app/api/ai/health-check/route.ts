@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     // 4. Alert if issues found
     if (issues.length > 0) {
       const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL;
-      const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+      const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
       const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
       const alertMsg = `🚨 *SYSTEM HEALTH ALERT!*\n\nMasalah ditemukan:\n${issues.join('\n')}\n\n⏱️ Latency: ${duration}ms\n📅 Waktu: ${new Date().toLocaleString()}`;

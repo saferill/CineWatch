@@ -20,7 +20,7 @@ export async function GET() {
 
     // 2. Build the Intelligence Report (ChatDev Style)
     const discordWebhook = process.env.DISCORD_RELEASE_WEBHOOK_URL;
-    const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+    const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
     const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
     const reportTitle = `📊 DAILY ADMIN INTELLIGENCE [${new Date().toLocaleDateString('id-ID')}]`;

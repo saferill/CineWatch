@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
     // 3. Notify Admin (Discord & Telegram)
     const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL;
-    const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+    const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
     const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
     const adminMessage = `📥 *PERMINTAAN KONTEN BARU!*\n\n🎬 *Judul:* ${title}\n👤 *Peminta:* ${requesterName} (${platform})\n📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n*Instruksi:* Segera periksa ketersediaan link streaming untuk film ini.`;

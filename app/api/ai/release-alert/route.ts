@@ -9,7 +9,7 @@ async function fetchTMDB(endpoint: string) {
 }
 
 async function sendNotifications(title: string, teaser: string, image: string, type: string, id: string) {
-  const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+  const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
   const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL || process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
   const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${id}`;
