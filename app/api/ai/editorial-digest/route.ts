@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     // 2. Prepare Messages
     const discordUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL || process.env.DISCORD_RELEASE_WEBHOOK_URL;
     const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-    const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+    const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
     let tgMessage = `📚 <b>CINEWATCH EDITORIAL DIGEST</b> 📚\n\n`;
     tgMessage += `<i>Minggu yang produktif! Berikut adalah ulasan pilihan tim redaksi CineWatch minggu ini:</i>\n\n`;

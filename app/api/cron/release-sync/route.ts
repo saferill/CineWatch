@@ -134,7 +134,7 @@ export async function GET(request: Request) {
 
     // Send to Telegram
     const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-    const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+    const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
     if (tgToken && tgChatId) {
       console.log('CRON: Sending to Telegram...');
