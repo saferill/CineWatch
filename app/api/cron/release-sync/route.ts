@@ -48,21 +48,21 @@ export async function GET(request: Request) {
       
       if (topMovie) {
         const rating = topMovie.vote_average ? `⭐ ${topMovie.vote_average.toFixed(1)}` : '⭐ N/A';
-        tgText += `🎬 <b>FILM: <a href="${siteUrl}/movie/${topMovie.id}/watch">${topMovie.title.toUpperCase()}</a></b>\n` +
+        tgText += `🎬 <b>FILM: <a href="${siteUrl}/movie/${topMovie.id}/watch">${(topMovie.title || '').toUpperCase()}</a></b>\n` +
                   `   Rating: ${rating} | Sub Indo\n\n`;
       }
       if (topSeries) {
         const rating = topSeries.vote_average ? `⭐ ${topSeries.vote_average.toFixed(1)}` : '⭐ N/A';
-        tgText += `📺 <b>SERIES: <a href="${siteUrl}/series/${topSeries.id}/watch">${topSeries.name.toUpperCase()}</a></b>\n` +
+        tgText += `📺 <b>SERIES: <a href="${siteUrl}/series/${topSeries.id}/watch">${(topSeries.name || '').toUpperCase()}</a></b>\n` +
                   `   Rating: ${rating} | Sub Indo\n\n`;
       }
       if (topAnime) {
-        const aTitle = topAnime.title.english || topAnime.title.romaji;
+        const aTitle = topAnime.title.english || topAnime.title.romaji || '';
         tgText += `🍥 <b>ANIME: <a href="${siteUrl}/anime/${topAnime.id}/watch">${aTitle.toUpperCase()}</a></b>\n` +
                   `   Score: ⭐ ${topAnime.averageScore}% | Sub Indo\n\n`;
       }
       if (topDonghua) {
-        tgText += `🐉 <b>DONGHUA: <a href="${siteUrl}/donghua/watch">${topDonghua.title.toUpperCase()}</a></b>\n` +
+        tgText += `🐉 <b>DONGHUA: <a href="${siteUrl}/donghua/watch">${(topDonghua.title || '').toUpperCase()}</a></b>\n` +
                   `   Status: Update Terbaru | Sub Indo\n\n`;
       }
       
