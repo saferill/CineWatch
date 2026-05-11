@@ -117,6 +117,32 @@ export default function AnimePlayer({ animeId, animeTitle, episodes, episode, an
     saveProgress({ server: availableProviders[providerIndex]?.name });
   }, [providerIndex, availableProviders, saveProgress]);
 
+  // Live Watch Pulse (Discord Notification)
+  useEffect(() => {
+    const triggerPulse = async () => {
+      try {
+        await fetch('/api/watch/pulse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: animeTitle,
+            type: 'anime',
+            episode: episode
+          })
+        });
+      } catch (e) {
+        console.error("Pulse error:", e);
+      }
+    };
+    
+    // Only trigger once per session to avoid spam
+    const sessionKey = `pulse_anime_${animeId}_${episode}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      triggerPulse();
+      sessionStorage.setItem(sessionKey, 'true');
+    }
+  }, [animeId, animeTitle, episode]);
+
   const currentProvider = availableProviders[providerIndex];
   
   let embedUrl = currentProvider?.getUrl(animeTitle, episode, anilistId ?? 0, tmdbId, tmdbType) || "";

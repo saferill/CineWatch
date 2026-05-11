@@ -82,6 +82,33 @@ export default function Player({
     });
   }, [source, saveProgress]);
 
+  // Live Watch Pulse (Discord Notification)
+  useEffect(() => {
+    const triggerPulse = async () => {
+      try {
+        await fetch('/api/watch/pulse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: movieTitle,
+            type,
+            season: currentSeason,
+            episode: currentEpisode
+          })
+        });
+      } catch (e) {
+        console.error("Pulse error:", e);
+      }
+    };
+    
+    // Only trigger once per session to avoid spam
+    const sessionKey = `pulse_${movieId}_${currentSeason}_${currentEpisode}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      triggerPulse();
+      sessionStorage.setItem(sessionKey, 'true');
+    }
+  }, [movieId, movieTitle, type, currentSeason, currentEpisode]);
+
   const activeSeason = seasons.find((s: any) => s.season_number === currentSeason);
   const totalEpisodes = activeSeason?.episode_count ?? 0;
 

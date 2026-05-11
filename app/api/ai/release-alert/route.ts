@@ -1,74 +1,67 @@
 import { NextResponse } from 'next/server';
+import { chatWithAgent } from '@/services/ai';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const ROUTER_ENDPOINT = 'http://localhost:20128/v1/chat/completions';
-const ROUTER_API_KEY = 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
 
 async function fetchTMDB(endpoint: string) {
-  const res = await fetch(`https://api.themoviedb.org/3${endpoint}&api_key=${TMDB_API_KEY}`);
+  const res = await fetch(`https://api.themoviedb.org/3${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`);
   return res.json();
-}
-
-async function chatDevAgent(role: string, prompt: string, style?: string) {
-  const res = await fetch(ROUTER_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ROUTER_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gemini/gemini-3.1-flash-lite-preview',
-      messages: [
-        { 
-          role: 'system', 
-          content: `You are a member of the CineWatch ChatDev Release Team. Role: ${role}. Style: ${style || 'Professional'}. Language: Bahasa Indonesia.` 
-        },
-        { role: 'user', content: prompt }
-      ],
-      stream: false,
-    }),
-  });
-  const data = await res.json();
-  return data.choices[0].message.content;
 }
 
 async function sendNotifications(title: string, teaser: string, image: string, type: string, id: string) {
   const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-  const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL;
-  const siteUrl = `https://cinewatch.vercel.app/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${id}`;
+  const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL || process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${id}`;
 
   // 1. Telegram
   if (tgToken && tgChatId) {
     const message = `🚀 *RILIS BARU HARI INI!* (${type})\n\n🎬 *${title}*\n\n${teaser}\n\n🔗 [Tonton Sekarang](${siteUrl})`;
-    await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: tgChatId, text: message, parse_mode: 'Markdown' })
-    });
+    try {
+      await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: tgChatId, text: message, parse_mode: 'Markdown' })
+      });
+    } catch (e) {
+      console.error('Telegram notification failed:', e);
+    }
   }
 
   // 2. Discord
   if (discordUrl) {
-    await fetch(discordUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        embeds: [{
-          title: `🚀 NEW RELEASE: ${title}`,
-          description: teaser,
-          url: siteUrl,
-          color: 0x00FF7F,
-          image: { url: image },
-          footer: { text: `CineWatch ${type} Sentinel` },
-          timestamp: new Date().toISOString()
-        }]
-      })
-    });
+    try {
+      await fetch(discordUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embeds: [{
+            title: `🚀 NEW RELEASE: ${title}`,
+            description: teaser,
+            url: siteUrl,
+            color: 0x00FF7F,
+            image: { url: image },
+            footer: { text: `CineWatch ${type} Sentinel` },
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch (e) {
+      console.error('Discord notification failed:', e);
+    }
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const querySecret = searchParams.get('secret');
+  const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (cronSecret && (authHeader !== `Bearer ${cronSecret}` && querySecret !== cronSecret)) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   try {
     const today = new Date().toISOString().split('T')[0];
     
@@ -88,19 +81,23 @@ export async function GET() {
       ...(donghua.results?.slice(0, 1).map((i: any) => ({ ...i, category: 'Donghua' })) || []),
     ];
 
+    if (alerts.length === 0) {
+      return NextResponse.json({ success: true, message: 'No releases found today' });
+    }
+
     for (const item of alerts) {
       const name = item.title || item.name;
       const overview = item.overview || 'Rilis baru yang sangat dinantikan di CineWatch.';
 
       // CHATDEV MULTI-AGENT WORKFLOW FOR TEASER
-      // Phase 1: Hype Draft (Romanticism)
-      const hypeDraft = await chatDevAgent('Hype Agent', `Buat teaser super seru dan emosional untuk rilis baru: ${name}. Deskripsi: ${overview}`, 'Eksklusif, Seru, Penuh Emosi');
+      // Phase 1: Hype Draft
+      const hypeDraft = await chatWithAgent('Hype Agent', `Buat teaser super seru dan emosional untuk rilis baru: ${name}. Deskripsi: ${overview}`, 'Eksklusif, Seru, Penuh Emosi');
       
-      // Phase 2: Fact Check & Value (Realism)
-      const factReview = await chatDevAgent('Analyst Agent', `Berikan 2 alasan objektif kenapa orang harus menonton ${name}. Dasar: ${overview}`, 'Lugas dan Faktual');
+      // Phase 2: Fact Check
+      const factReview = await chatWithAgent('Analyst Agent', `Berikan 2 alasan objektif kenapa orang harus menonton ${name}. Dasar: ${overview}`, 'Lugas dan Faktual');
       
-      // Phase 3: Final Social Post (Chief Editor)
-      const finalTeaser = await chatDevAgent('Social Media Manager', `Gabungkan teaser ini: "${hypeDraft}" dengan ulasan ini: "${factReview}". Buat satu paragraf pendek (max 300 karakter) yang sangat menarik untuk Telegram/Discord.`, 'Viral dan Catchy');
+      // Phase 3: Final Social Post
+      const finalTeaser = await chatWithAgent('Social Media Manager', `Gabungkan teaser ini: "${hypeDraft}" dengan ulasan ini: "${factReview}". Buat satu paragraf pendek (max 300 karakter) yang sangat menarik untuk Telegram/Discord.`, 'Viral dan Catchy');
 
       // 3. Send Notifications
       const img = `https://image.tmdb.org/t/p/w1280${item.backdrop_path || item.poster_path}`;
@@ -110,6 +107,8 @@ export async function GET() {
     return NextResponse.json({ success: true, alerted: alerts.length });
 
   } catch (error: any) {
+    console.error('Release Alert Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

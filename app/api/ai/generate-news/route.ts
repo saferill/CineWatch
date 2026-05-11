@@ -1,81 +1,75 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { chatWithAgent } from '@/services/ai';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const ROUTER_ENDPOINT = 'http://localhost:20128/v1/chat/completions';
-const ROUTER_API_KEY = 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
 
 async function fetchTMDB(endpoint: string) {
-  const res = await fetch(`https://api.themoviedb.org/3${endpoint}&api_key=${TMDB_API_KEY}`);
+  const res = await fetch(`https://api.themoviedb.org/3${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`);
   return res.json();
 }
 
 // Notification Helper
 async function notifyAll(title: string, slug: string) {
-  const url = `https://cinewatch.vercel.app/blog/${slug}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app';
+  const url = `${siteUrl}/blog/${slug}`;
   const tgToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-  const discordUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+  const discordUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL || process.env.DISCORD_RELEASE_WEBHOOK_URL;
 
   // 1. Telegram
   if (tgToken && tgChatId) {
     const tgText = `📰 *ARTIKEL ELIT BARU!* \n\n🔥 *${title}* \n\n🚀 Ditulis oleh CineWatch ChatDev Team. \n🔗 [Baca Selengkapnya](${url})`;
-    await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: tgChatId, text: tgText, parse_mode: 'Markdown' })
-    }).catch(() => {});
+    try {
+      await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: tgChatId, text: tgText, parse_mode: 'Markdown' })
+      });
+    } catch (e) {
+      console.error('Telegram notification error:', e);
+    }
   }
 
   // 2. Discord
   if (discordUrl) {
-    await fetch(discordUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        embeds: [{
-          title: "📰 CineWatch Insider: New Article Published",
-          description: `🔥 **${title}**\n\nSebuah mahakarya kolaborasi multi-agen ChatDev baru saja diterbitkan.`,
-          url: url,
-          color: 0x00BFFF,
-          footer: { text: "CineWatch Intelligence System" },
-          timestamp: new Date().toISOString()
-        }]
-      })
-    }).catch(() => {});
+    try {
+      await fetch(discordUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embeds: [{
+            title: "📰 CineWatch Insider: New Article Published",
+            description: `🔥 **${title}**\n\nSebuah mahakarya kolaborasi multi-agen ChatDev baru saja diterbitkan.`,
+            url: url,
+            color: 0x00BFFF,
+            footer: { text: "CineWatch Intelligence System" },
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch (e) {
+      console.error('Discord notification error:', e);
+    }
   }
 }
 
-// ChatDev Inspired Multi-Agent Agent Call
-async function chatDevAgent(role: string, prompt: string, style?: string) {
-  const res = await fetch(ROUTER_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ROUTER_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gemini/gemini-3.1-flash-lite-preview',
-      messages: [
-        { 
-          role: 'system', 
-          content: `You are a professional member of the CineWatch ChatDev Editorial Team. Role: ${role}. Style Strategy: ${style || 'Professional and Cinematic'}. Always write in Bahasa Indonesia.` 
-        },
-        { role: 'user', content: prompt }
-      ],
-      stream: false,
-    }),
-  });
-  const data = await res.json();
-  return data.choices[0].message.content;
-}
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const querySecret = searchParams.get('secret');
+  const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
 
-export async function GET() {
+  if (cronSecret && (authHeader !== `Bearer ${cronSecret}` && querySecret !== cronSecret)) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const generatedArticles = [];
   const errors = [];
-  const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   try {
+    console.log('📰 AI: Starting News Generation...');
+    
     // 1. DATA GATHERING (Scout Agent)
     const [moviesData, tvData, animeData, donghuaData] = await Promise.all([
       fetchTMDB('/trending/movie/day?language=id-ID'),
@@ -84,13 +78,17 @@ export async function GET() {
       fetchTMDB('/discover/tv?with_origin_country=CN&sort_by=popularity.desc&language=id-ID'),
     ]);
 
-    // Create 10 Individual Tasks
+    // Create Individual Tasks
     const items = [
-      ...(moviesData.results?.slice(0, 3) || []).map((i: any) => ({ ...i, type: 'Movie' })),
-      ...(tvData.results?.slice(0, 3) || []).map((i: any) => ({ ...i, type: 'Series' })),
-      ...(animeData.results?.slice(0, 2) || []).map((i: any) => ({ ...i, type: 'Anime' })),
-      ...(donghuaData.results?.slice(0, 2) || []).map((i: any) => ({ ...i, type: 'Donghua' })),
+      ...(moviesData.results?.slice(0, 2) || []).map((i: any) => ({ ...i, type: 'Movie' })),
+      ...(tvData.results?.slice(0, 2) || []).map((i: any) => ({ ...i, type: 'Series' })),
+      ...(animeData.results?.slice(0, 1) || []).map((i: any) => ({ ...i, type: 'Anime' })),
+      ...(donghuaData.results?.slice(0, 1) || []).map((i: any) => ({ ...i, type: 'Donghua' })),
     ];
+
+    if (items.length === 0) {
+      return NextResponse.json({ success: true, message: 'No items to process' });
+    }
 
     for (const item of items) {
       try {
@@ -98,27 +96,27 @@ export async function GET() {
         const overview = item.overview || 'Trending content on CineWatch.';
         console.log(`🎬 ChatDev Deep-Dive: ${title} (${item.type})`);
 
-        // PHASE 1: Parallel Drafting (Romanticism vs Realism vs Magical Realism)
+        // PHASE 1: Parallel Drafting
         const [romanticDraft, realismDraft, magicalDraft] = await Promise.all([
-          chatDevAgent(
+          chatWithAgent(
             'Romanticism Writer', 
             `Tulis ulasan mendalam tentang ${item.type} berjudul "${title}". Fokus pada sisi emosional, sinematografi, dan keindahan ceritanya.`,
             'Emosional, puitis, dan menyentuh.'
           ),
-          chatDevAgent(
+          chatWithAgent(
             'Realism Writer', 
             `Tulis ulasan mendalam tentang ${item.type} berjudul "${title}". Fokus pada fakta produksi, performa aktor, dan ulasan kritikus.`,
             'Objektif, tajam, dan informatif.'
           ),
-          chatDevAgent(
+          chatWithAgent(
             'Magical Realism Writer', 
             `Tulis ulasan mendalam tentang ${item.type} berjudul "${title}". Hubungkan dengan tema teknologi masa depan atau keajaiban sinematik.`,
             'Futuristik dan penuh imajinasi.'
           )
         ]);
 
-        // PHASE 2: Synthesis (The Chief Editor)
-        const finalArticle = await chatDevAgent(
+        // PHASE 2: Synthesis
+        const finalArticle = await chatWithAgent(
           'Chief Editor',
           `Sintesiskan tiga ulasan berikut tentang "${title}" menjadi satu artikel blog elit yang kohesif.
           
@@ -147,14 +145,19 @@ export async function GET() {
             created_at: new Date().toISOString(),
           }]);
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Supabase Insert Error:', insertError);
+          throw insertError;
+        }
         
         // Trigger Notifications
         await notifyAll(`${item.type} Spotlight: ${title}`, slug);
         
         generatedArticles.push(title);
+        console.log(`✅ AI: Article generated for ${title}`);
 
       } catch (err: any) {
+        console.error(`Workflow Error [${item.title || item.name}]:`, err.message);
         errors.push(`Workflow Error [${item.title || item.name}]: ${err.message}`);
       }
     }
@@ -167,6 +170,8 @@ export async function GET() {
     });
 
   } catch (error: any) {
+    console.error('Generate News System Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

@@ -1,27 +1,7 @@
 import { NextResponse } from 'next/server';
+import { chatWithAgent } from '@/services/ai';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const ROUTER_ENDPOINT = 'http://localhost:20128/v1/chat/completions';
-const ROUTER_API_KEY = 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
-
-async function chatDevAgent(role: string, prompt: string) {
-  const res = await fetch(ROUTER_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ROUTER_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gemini/gemini-3.1-flash-lite-preview',
-      messages: [
-        { role: 'system', content: `You are the CineWatch AI Concierge, a high-end cinematic advisor. Role: ${role}. Always recommend movies with elegance. Language: Bahasa Indonesia.` },
-        { role: 'user', content: prompt }
-      ]
-    })
-  });
-  const data = await res.json();
-  return data.choices[0].message.content;
-}
 
 export async function POST(req: Request) {
   try {
@@ -42,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     // 3. AI Presentation: Create an elegant recommendation
-    const recommendation = await chatDevAgent('Chief Concierge', `Halo ${userName}, user mencari "${query}". Kami menemukan: ${results.map((r: any) => r.title || r.name).join(', ')}. Berikan rekomendasi yang sangat menarik dan jelaskan kenapa ini cocok untuk mereka.`);
+    const recommendation = await chatWithAgent('Chief Concierge', `Halo ${userName}, user mencari "${query}". Kami menemukan: ${results.map((r: any) => r.title || r.name).join(', ')}. Berikan rekomendasi yang sangat menarik dan jelaskan kenapa ini cocok untuk mereka.`);
 
     return NextResponse.json({ 
       success: true, 

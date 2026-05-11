@@ -14,11 +14,22 @@ export async function GET() {
     const { error: sbError } = await supabase.from('posts').select('id').limit(1);
     if (sbError) issues.push(`❌ Supabase DB: ${sbError.message}`);
 
-    // 3. Check AI Router
-    const aiRes = await fetch('http://localhost:20128/v1/models', {
-      headers: { 'Authorization': `Bearer sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be` }
+    // 3. Check AI Engine (NVIDIA or Router)
+    const aiEndpoint = process.env.NODE_ENV === 'production' 
+      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/models')
+      : 'http://localhost:20128/v1/models';
+    
+    const aiRes = await fetch(aiEndpoint, {
+      headers: { 'Authorization': `Bearer ${process.env.AI_ROUTER_KEY || 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be'}` }
     }).catch(() => null);
-    if (!aiRes || !aiRes.ok) issues.push(`❌ AI Engine: Unavailable`);
+    
+    if (!aiRes || !aiRes.ok) {
+      // If router is down, check NVIDIA as backup
+      const nvRes = await fetch('https://integrate.api.nvidia.com/v1/models', {
+        headers: { 'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}` }
+      }).catch(() => null);
+      if (!nvRes || !nvRes.ok) issues.push(`❌ AI Engine: Both Router and NVIDIA Unavailable`);
+    }
 
     const duration = Date.now() - startTime;
 

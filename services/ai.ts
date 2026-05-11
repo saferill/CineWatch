@@ -6,16 +6,17 @@ export interface AISuggestion {
   recommendations?: { id: number; title: string; type: 'movie' | 'tv' }[];
 }
 
-const ROUTER_ENDPOINT = 'http://localhost:20128/v1/chat/completions';
-const ROUTER_KEY = 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
+const ROUTER_ENDPOINT = process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions'; // Default to cloud if env not set
+const ROUTER_KEY = process.env.AI_ROUTER_KEY || 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
 
-const NVIDIA_ENDPOINT = process.env.NVIDIA_API_BASE_URL + '/chat/completions';
+const NVIDIA_ENDPOINT = (process.env.NVIDIA_API_BASE_URL || 'https://integrate.api.nvidia.com/v1') + '/chat/completions';
 const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
 
-export async function askAI(prompt: string, json: boolean = true): Promise<any> {
-  // Try NVIDIA first since it's more reliable
+export async function askAI(prompt: string, json: boolean = true, model?: string): Promise<any> {
+  // 1. Try NVIDIA first (Production Reliable)
   if (NVIDIA_KEY) {
     try {
+      console.log('AI: Attempting NVIDIA API...');
       const res = await fetch(NVIDIA_ENDPOINT, {
         method: 'POST',
         headers: { 
@@ -23,7 +24,7 @@ export async function askAI(prompt: string, json: boolean = true): Promise<any> 
           'Authorization': `Bearer ${NVIDIA_KEY}`
         },
         body: JSON.stringify({
-          model: 'meta/llama-3.3-70b-instruct',
+          model: model || 'meta/llama-3.3-70b-instruct',
           messages: [{ role: 'user', content: prompt }],
           response_format: json ? { type: 'json_object' } : undefined,
           stream: false
@@ -35,40 +36,51 @@ export async function askAI(prompt: string, json: boolean = true): Promise<any> 
         const content = data.choices[0].message.content;
         return json ? JSON.parse(content) : content;
       }
+      console.warn('AI: NVIDIA API returned status', res.status);
     } catch (error) {
-      console.warn('NVIDIA AI Error, falling back to local:', error);
+      console.warn('AI: NVIDIA API Error:', error);
     }
   }
 
-  // Fallback to local 9Router
+  // 2. Fallback to 9Router (Local or Cloud)
   try {
-    const res = await fetch(ROUTER_ENDPOINT, {
+    console.log('AI: Attempting 9Router/Fallback...');
+    const endpoint = process.env.NODE_ENV === 'production' 
+      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions')
+      : 'http://localhost:20128/v1/chat/completions';
+
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${ROUTER_KEY}`
       },
       body: JSON.stringify({
-        model: 'gemini/gemini-2.0-flash-exp', // Updated model for fallback
+        model: model || 'gemini/gemini-2.0-flash-exp',
         messages: [{ role: 'user', content: prompt }],
         response_format: json ? { type: 'json_object' } : undefined,
         stream: false
       }),
     });
 
-    if (!res.ok) throw new Error('AI Service Unavailable');
+    if (!res.ok) throw new Error(`AI Service Unavailable: ${res.status}`);
 
     const data = await res.json();
     const content = data.choices[0].message.content;
     
     return json ? JSON.parse(content) : content;
   } catch (error) {
-    console.error('All AI Services Failed:', error);
+    console.error('AI: All AI Services Failed:', error);
     return null;
   }
 }
 
-export async function askAIStream(prompt: string): Promise<Response | null> {
+/**
+ * Specifically for ChatDev style Multi-Agent workflows
+ */
+export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
+  const systemPrompt = `You are a professional member of the CineWatch ChatDev Team. Role: ${role}. Style Strategy: ${style || 'Cinematic & Professional'}. Always respond in Bahasa Indonesia.`;
+  
   // Try NVIDIA first
   if (NVIDIA_KEY) {
     try {
@@ -80,20 +92,30 @@ export async function askAIStream(prompt: string): Promise<Response | null> {
         },
         body: JSON.stringify({
           model: 'meta/llama-3.3-70b-instruct',
-          messages: [{ role: 'user', content: prompt }],
-          stream: true
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          stream: false
         }),
       });
 
-      if (res.ok) return res;
-    } catch (error) {
-      console.warn('NVIDIA Stream Error, falling back:', error);
+      if (res.ok) {
+        const data = await res.json();
+        return data.choices[0].message.content;
+      }
+    } catch (e) {
+      console.warn('AI: Agent NVIDIA Error', e);
     }
   }
 
-  // Fallback to local
+  // Fallback to Router
   try {
-    const res = await fetch(ROUTER_ENDPOINT, {
+    const endpoint = process.env.NODE_ENV === 'production' 
+      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions')
+      : 'http://localhost:20128/v1/chat/completions';
+
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -101,18 +123,25 @@ export async function askAIStream(prompt: string): Promise<Response | null> {
       },
       body: JSON.stringify({
         model: 'gemini/gemini-2.0-flash-exp',
-        messages: [{ role: 'user', content: prompt }],
-        stream: true
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        stream: false
       }),
     });
 
-    if (res.ok) return res;
-  } catch (error) {
-    console.error('All AI Stream Services Failed:', error);
+    if (res.ok) {
+      const data = await res.json();
+      return data.choices[0].message.content;
+    }
+  } catch (e) {
+    console.error('AI: Agent Router Error', e);
   }
 
-  return null;
+  return "Maaf, sistem AI sedang mengalami gangguan. Silakan coba lagi nanti.";
 }
+
 
 export async function getSmartRecommendations(history: any[]) {
   const titles = history.map(h => h.title).join(', ');
