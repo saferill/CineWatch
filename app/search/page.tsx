@@ -5,10 +5,13 @@ import { Search, Film, Tv, Info } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-import { analyzeSearchQuery } from '@/services/ai';
+import { analyzeSearchQuery, trackSearch } from '@/services/ai';
 
 async function SearchResults({ query }: { query: string }) {
   if (!query) return null;
+
+  // Track search in background
+  trackSearch(query);
 
   const [movies, series, aiAnalysis] = await Promise.all([
     searchMovies(query),

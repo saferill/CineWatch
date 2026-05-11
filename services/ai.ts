@@ -224,3 +224,31 @@ export async function getBlogSummary(content: string) {
   const prompt = `Summarize this blog post content into 3 concise bullet points. JSON: { "summary": ["...", "...", "..."] }`;
   return askAI(prompt);
 }
+
+/**
+ * NEW: Record search queries for Trending Search Alerts
+ */
+export async function trackSearch(query: string) {
+  if (!query) return;
+  const { supabase } = await import('@/lib/supabase');
+  await supabase.from('search_history').insert({ query: query.toLowerCase() }).catch(() => null);
+}
+
+/**
+ * NEW: Analyze platform stats for milestones
+ */
+export async function getPlatformMilestones() {
+  const { supabase } = await import('@/lib/supabase');
+  
+  const [users, posts, searches] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('posts').select('id', { count: 'exact', head: true }),
+    supabase.from('search_history').select('id', { count: 'exact', head: true })
+  ]);
+
+  return {
+    users: users.count || 0,
+    posts: posts.count || 0,
+    searches: searches.count || 0
+  };
+}

@@ -66,7 +66,9 @@ export async function GET(req: Request) {
       'health': '/api/ai/health-check',
       'sync': '/api/cron/release-sync',
       'mood': '/api/ai/mood-recommendation',
-      'digest': '/api/ai/editorial-digest'
+      'digest': '/api/ai/editorial-digest',
+      'search-hype': '/api/ai/search-hype',
+      'milestones': '/api/ai/milestones'
     };
     
     const targetPath = taskPaths[forcedTask] || `/api/ai/${forcedTask}`;
@@ -93,12 +95,19 @@ export async function GET(req: Request) {
     // 6. Editorial Digest (Sunday 10:00 UTC)
     if (hour === 10 && day === 0) await runTask('digest', '/api/ai/editorial-digest');
 
-    // 7. Health Check (Every 4 hours)
+    // 7. Search Hype (Daily 14:00 UTC / 21:00 WIB)
+    if (hour === 14) await runTask('search-hype', '/api/ai/search-hype');
+
+    // 8. Milestones (Saturday 11:00 UTC / 18:00 WIB)
+    if (hour === 11 && day === 6) await runTask('milestones', '/api/ai/milestones');
+
+    // 9. Health Check (Every 4 hours)
     if (hour % 4 === 0) await runTask('health', '/api/ai/health-check');
 
-    // 8. Release Sync (01:00 UTC)
+    // 10. Release Sync (01:00 UTC)
     if (hour === 1) await runTask('sync', '/api/cron/release-sync');
   }
+
 
 
   return NextResponse.json({
