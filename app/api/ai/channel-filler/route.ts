@@ -102,17 +102,11 @@ export async function GET(request: Request) {
   };
 
   try {
-    console.log(`🤖 AI: Executing Split Channel Filler [Mode: ${typeParam || 'All'}]...`);
+    console.log(`🤖 AI: Executing Main Channel Filler [Mode: ${typeParam || 'Main'}]...`);
     
-    if (!typeParam || typeParam === 'main') {
-      await processCategory('movie', mainChannelId);
-      await processCategory('series', mainChannelId);
-    }
-    
-    if (!typeParam || typeParam === 'anime') {
-      await processCategory('anime', animeChannelId);
-      await processCategory('donghua', animeChannelId);
-    }
+    // Only process for Main Channel (Movie/Series)
+    await processCategory('movie', mainChannelId);
+    await processCategory('series', mainChannelId);
 
     return NextResponse.json({ success: true, summary });
   } catch (error: any) {

@@ -55,31 +55,6 @@ export async function GET(request: Request) {
       }
     }
 
-    // 2. Process Anime Channel (Anime/Donghua)
-    if (animeChannelId) {
-      const historySlug = `sync-v2-anime-${today}`;
-      const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
-      if (!existing) {
-        const topAnime = anime.media?.[0];
-        const topDonghua = donghua.recent?.[0];
-        let tgText = `🍥 <b>CINEWATCH ANIME & DONGHUA DAILY</b>\n` +
-                     `━━━━━━━━━━━━━━━━━━━━\n\n`;
-        if (topAnime) tgText += `🍥 <b>ANIME: <a href="${siteUrl}/anime/${topAnime.id}/watch">${(topAnime.title?.english || topAnime.title?.romaji || 'Untitled').toUpperCase()}</a></b>\n` +
-                                `   Score: ⭐ ${topAnime.averageScore || 'N/A'}% | Sub Indo\n\n`;
-        if (topDonghua) tgText += `🐉 <b>DONGHUA: <a href="${siteUrl}/donghua/watch">${(topDonghua.title || 'Untitled').toUpperCase()}</a></b>\n` +
-                                 `   Update: Episode Terbaru | Sub Indo\n\n`;
-        tgText += `━━━━━━━━━━━━━━━━━━━━\n` +
-                  `🚀 <b>Pantau rilis terbaru di CineWatch!</b>`;
-
-        await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: animeChannelId, photo: topAnime ? topAnime.bannerImage || topAnime.coverImage?.large : `${siteUrl}/og-image.png`, caption: tgText, parse_mode: 'HTML' })
-        });
-        await supabase.from('posts').insert([{ title: `Daily Sync: Anime`, slug: historySlug, type: 'Bot History' }]);
-      }
-    }
-
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

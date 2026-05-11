@@ -86,26 +86,25 @@ export async function GET(request: Request) {
     ]);
 
     let alerts = [
-      ...(movies.results?.map((i: any) => ({ ...i, category: 'Movie' })) || []),
-      ...(tv.results?.map((i: any) => ({ ...i, category: 'Series' })) || []),
-      ...(anime.results?.map((i: any) => ({ ...i, category: 'Anime' })) || []),
-      ...(donghua.results?.map((i: any) => ({ ...i, category: 'Donghua' })) || []),
+      ...(movies.results || []).map((i: any) => ({ ...i, category: 'Movie' })),
+      ...(tv.results || []).map((i: any) => ({ ...i, category: 'Series' })),
+      ...(anime.results || []).map((i: any) => ({ ...i, category: 'Anime' })),
+      ...(donghua.results || []).map((i: any) => ({ ...i, category: 'Donghua' })),
     ];
 
     alerts = alerts.filter((i: any) => {
       const rDate = i.release_date || i.first_air_date;
-      return rDate && rDate <= today && (i.vote_average || 0) >= 4;
-    });
+      return rDate && rDate <= today && (i.vote_average || 0) >= 3;
+    }).slice(0, 15); // Safety limit per run
 
-    const uniqueCategories = ['Movie', 'Series', 'Anime', 'Donghua'];
-    const finalAlerts = uniqueCategories.map(cat => alerts.find(a => a.category === cat)).filter(Boolean);
-
-    for (const item of finalAlerts as any[]) {
+    let sentCount = 0;
+    for (const item of alerts) {
       const targetChannel = (item.category === 'Anime' || item.category === 'Donghua') 
         ? process.env.TELEGRAM_ANIME_CHANNEL_ID 
         : (process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID);
 
-      const historySlug = `release-v2-${item.id}-${item.category}-${targetChannel}`;
+      if (!targetChannel) continue;
+      const historySlug = `pulse-v2-${item.id}-${item.category}-${targetChannel}`;
 
       const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
       if (existing) continue;
@@ -116,19 +115,16 @@ export async function GET(request: Request) {
         teaser = await chatWithAgent('Luxury Promo', `Buat teaser pendek mewah untuk rilis baru: ${name}.`, 'Elegant');
         if (teaser.includes("gangguan") || teaser.includes("Maaf")) throw new Error("AI Error");
       } catch (e) {
-        teaser = (item.overview || 'Rilis baru eksklusif.').slice(0, 150) + "...";
+        teaser = (item.overview || 'Rilis baru eksklusif di CineWatch.').slice(0, 150) + "...";
       }
 
       await sendNotifications(item, teaser, item.category);
-
-      await supabase.from('posts').insert([{
-        title: `Release History: ${name}`,
-        slug: historySlug,
-        type: 'Bot History'
-      }]);
+      await supabase.from('posts').insert([{ title: `Pulse History: ${name}`, slug: historySlug, type: 'Bot History' }]);
+      sentCount++;
+      await new Promise(r => setTimeout(r, 2000)); // Delay to prevent TG ban
     }
 
-    return NextResponse.json({ success: true, alerted: finalAlerts.length });
+    return NextResponse.json({ success: true, alerted: sentCount });
 
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

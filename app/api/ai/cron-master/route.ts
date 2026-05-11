@@ -78,18 +78,17 @@ export async function GET(req: Request) {
     // Standard Time-based Logic
     console.log(`CRON-MASTER: Running at ${now.toISOString()} (Hour: ${hour}, Day: ${day})`);
 
-    // 11. Channel Filler (Main: 6 Jam | Anime: 2 Jam)
+    // 11. Channel Filler (Main Only: 6 Jam)
     if (hour % 6 === 0) await runTask('channel-filler-main', '/api/ai/channel-filler?type=main');
-    if (hour % 2 === 0) await runTask('channel-filler-anime', '/api/ai/channel-filler?type=anime');
+
+    // 2. Real-Time Release Pulse (Setiap Jam)
+    await runTask('release-pulse', '/api/ai/release-alert');
 
     // 1. Daily Mood (02:00 UTC / 09:00 WIB)
     if (hour === 2) await runTask('mood', '/api/ai/mood-recommendation');
 
     // 2. Daily Blog (05:00 UTC)
     if (hour === 5) await runTask('blog', '/api/ai/generate-news');
-
-    // 3. Release Alerts (00:00 & 12:00 UTC)
-    if (hour === 0 || hour === 12) await runTask('releases', '/api/ai/release-alert');
 
     // 4. Admin Intel (08:00 UTC)
     if (hour === 8) await runTask('intel', '/api/ai/admin-intel');

@@ -64,24 +64,18 @@ export async function GET(request: Request) {
   const generatedArticles = [];
 
   try {
-    const [moviesData, tvData, animeData, donghuaData] = await Promise.all([
+    const [moviesData, tvData] = await Promise.all([
       fetchTMDB('/trending/movie/day?language=id-ID'),
       fetchTMDB('/trending/tv/day?language=id-ID'),
-      fetchTMDB('/discover/tv?with_genres=16&sort_by=popularity.desc&language=id-ID'),
-      fetchTMDB('/discover/tv?with_origin_country=CN&sort_by=popularity.desc&language=id-ID'),
     ]);
 
     const items = [
       ...(moviesData.results?.slice(0, 1) || []).map((i: any) => ({ ...i, type: 'Movie' })),
       ...(tvData.results?.slice(0, 1) || []).map((i: any) => ({ ...i, type: 'Series' })),
-      ...(animeData.results?.slice(0, 1) || []).map((i: any) => ({ ...i, type: 'Anime' })),
-      ...(donghuaData.results?.slice(0, 1) || []).map((i: any) => ({ ...i, type: 'Donghua' })),
     ];
 
     for (const item of items) {
-      const targetChannel = (item.type === 'Anime' || item.type === 'Donghua') 
-        ? process.env.TELEGRAM_ANIME_CHANNEL_ID 
-        : (process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID);
+      const targetChannel = mainChannelId;
 
       const historySlug = `news-v2-${item.id}-${item.type}-${targetChannel}`;
 

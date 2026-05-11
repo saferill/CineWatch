@@ -90,10 +90,7 @@ export async function GET(request: Request) {
       await supabase.from('posts').insert([{ title: `Mood History: ${label}`, slug: historySlug, type: 'Bot History' }]);
     };
 
-    await Promise.all([
-      processMood('main', mainChannelId, 'Movie Mood'),
-      processMood('anime', animeChannelId, 'Anime Mood')
-    ]);
+    await processMood('main', mainChannelId, 'Movie Mood');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

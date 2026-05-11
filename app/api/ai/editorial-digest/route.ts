@@ -62,10 +62,7 @@ export async function GET(request: Request) {
       }
     };
 
-    await Promise.all([
-      processDigest(['Movie Intel', 'Series Intel'], mainChannelId, 'Movie'),
-      processDigest(['Anime Intel', 'Donghua Intel'], animeChannelId, 'Anime')
-    ]);
+    await processDigest(['Movie Intel', 'Series Intel'], mainChannelId, 'Movie');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
