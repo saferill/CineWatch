@@ -61,7 +61,7 @@ export default function Player({
     episodeTitle,
   });
 
-  const [source, setSource] = useState<Source>("nontongo");
+  const [source, setSource] = useState<Source>("vidking");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showNextModal, setShowNextModal] = useState(false);
   const [countdown, setCountdown] = useState(30);
