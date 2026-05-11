@@ -11,9 +11,16 @@ async function fetchTMDB(endpoint: string) {
 
 async function sendNotifications(item: any, teaser: string, type: string) {
   const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-  const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${item.id}/watch`;
+  const mainChannelId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+  const animeChannelId = process.env.TELEGRAM_ANIME_CHANNEL_ID;
+  
+  // Choose Target Channel
+  const isAnimeDonghua = type === 'Anime' || type === 'Donghua';
+  const targetChannel = isAnimeDonghua ? animeChannelId : mainChannelId;
 
+  if (!targetChannel || !tgToken) return;
+
+  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'}/${item.title ? 'movie' : 'series'}/${item.id}/watch`;
   const title = item.title || item.name;
   const year = (item.release_date || item.first_air_date || '').split('-')[0];
   const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
@@ -21,41 +28,39 @@ async function sendNotifications(item: any, teaser: string, type: string) {
   const genreMap: any = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi', 10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western' };
   const genres = item.genre_ids?.slice(0, 2).map((id: number) => genreMap[id] || 'Sinema').join(', ');
 
-  // 1. Telegram
-  if (tgToken && tgChatId) {
-    const message = `🚀 <b>RILIS BARU: ${title.toUpperCase()}</b>\n` +
-                    `━━━━━━━━━━━━━━━━━━━━\n\n` +
-                    `🏆 <b>Status:</b> <code>VERIFIED QUALITY</code> ✅\n` +
-                    `📅 <b>Tahun:</b> ${year}\n` +
-                    `🌟 <b>Rating:</b> ${rating}\n` +
-                    `🎭 <b>Genre:</b> ${genres}\n` +
-                    `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
-                    `🎥 <b>Kualitas:</b> Full HD 1080p\n\n` +
-                    `📝 <b>SINOPSIS:</b>\n` +
-                    `<i>"${teaser}"</i>\n\n` +
-                    `━━━━━━━━━━━━━━━━━━━━\n` +
-                    `🎬 <b>CineWatch Intelligence Protocol v2.0</b>\n` +
-                    `🔗 <a href="${siteUrl}">KLIK UNTUK MULAI NONTON</a>`;
-    try {
-      await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          chat_id: tgChatId, 
-          photo: `https://image.tmdb.org/t/p/w780${item.backdrop_path || item.poster_path}`,
-          caption: message, 
-          parse_mode: 'HTML',
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "🍿 NONTON SEKARANG (SUB INDO)", url: siteUrl }],
-              [{ text: "🌐 Website Utama", url: process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app' }]
-            ]
-          }
-        })
-      });
-    } catch (e) {
-      console.error('Telegram notification failed:', e);
-    }
+  const message = `🚀 <b>RILIS BARU: ${title.toUpperCase()}</b>\n` +
+                  `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                  `🏆 <b>Status:</b> <code>VERIFIED QUALITY</code> ✅\n` +
+                  `📅 <b>Tahun:</b> ${year}\n` +
+                  `🌟 <b>Rating:</b> ${rating}\n` +
+                  `🎭 <b>Genre:</b> ${genres}\n` +
+                  `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
+                  `🎥 <b>Kualitas:</b> Full HD 1080p\n\n` +
+                  `📝 <b>SINOPSIS:</b>\n` +
+                  `<i>"${teaser}"</i>\n\n` +
+                  `━━━━━━━━━━━━━━━━━━━━\n` +
+                  `🎬 <b>CineWatch Intel Protocol v2.0</b>\n` +
+                  `🔗 <a href="${siteUrl}">KLIK UNTUK MULAI NONTON</a>`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        chat_id: targetChannel, 
+        photo: `https://image.tmdb.org/t/p/w780${item.backdrop_path || item.poster_path}`,
+        caption: message, 
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "🍿 NONTON SEKARANG (SUB INDO)", url: siteUrl }],
+            [{ text: "🌐 Website Utama", url: process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app' }]
+          ]
+        }
+      })
+    });
+  } catch (e) {
+    console.error('Telegram notification failed:', e);
   }
 }
 
@@ -87,7 +92,6 @@ export async function GET(request: Request) {
       ...(donghua.results?.map((i: any) => ({ ...i, category: 'Donghua' })) || []),
     ];
 
-    // Filter: Released, Today or Past, and Decent Rating
     alerts = alerts.filter((i: any) => {
       const rDate = i.release_date || i.first_air_date;
       return rDate && rDate <= today && (i.vote_average || 0) >= 4;
@@ -97,39 +101,36 @@ export async function GET(request: Request) {
     const finalAlerts = uniqueCategories.map(cat => alerts.find(a => a.category === cat)).filter(Boolean);
 
     for (const item of finalAlerts as any[]) {
-      const historySlug = `release-alert-${item.id}-${item.category}`;
+      const targetChannel = (item.category === 'Anime' || item.category === 'Donghua') 
+        ? process.env.TELEGRAM_ANIME_CHANNEL_ID 
+        : (process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID);
 
-      // ANTI-DUPLICATE
+      const historySlug = `release-v2-${item.id}-${item.category}-${targetChannel}`;
+
       const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
       if (existing) continue;
 
       const name = item.title || item.name;
-      const overview = item.overview || 'Rilis baru yang sangat dinantikan di CineWatch.';
-
       let teaser = "";
       try {
         teaser = await chatWithAgent('Luxury Promo', `Buat teaser pendek mewah untuk rilis baru: ${name}.`, 'Elegant');
         if (teaser.includes("gangguan") || teaser.includes("Maaf")) throw new Error("AI Error");
       } catch (e) {
-        teaser = overview.slice(0, 150) + "...";
+        teaser = (item.overview || 'Rilis baru eksklusif.').slice(0, 150) + "...";
       }
 
       await sendNotifications(item, teaser, item.category);
 
-      // SAVE TO HISTORY
       await supabase.from('posts').insert([{
         title: `Release History: ${name}`,
         slug: historySlug,
-        content: `Alert sent at ${new Date().toISOString()}`,
-        type: 'Bot History',
-        image: `https://image.tmdb.org/t/p/w780${item.poster_path}`
+        type: 'Bot History'
       }]);
     }
 
     return NextResponse.json({ success: true, alerted: finalAlerts.length });
 
   } catch (error: any) {
-    console.error('Release Alert Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

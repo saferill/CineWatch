@@ -78,8 +78,9 @@ export async function GET(req: Request) {
     // Standard Time-based Logic
     console.log(`CRON-MASTER: Running at ${now.toISOString()} (Hour: ${hour}, Day: ${day})`);
 
-    // 11. Channel Filler (Setiap 6 Jam)
-    if (hour % 6 === 0) await runTask('channel-filler', '/api/ai/channel-filler');
+    // 11. Channel Filler (Main: 6 Jam | Anime: 2 Jam)
+    if (hour % 6 === 0) await runTask('channel-filler-main', '/api/ai/channel-filler?type=main');
+    if (hour % 2 === 0) await runTask('channel-filler-anime', '/api/ai/channel-filler?type=anime');
 
     // 1. Daily Mood (02:00 UTC / 09:00 WIB)
     if (hour === 2) await runTask('mood', '/api/ai/mood-recommendation');

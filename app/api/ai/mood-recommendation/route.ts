@@ -29,97 +29,73 @@ export async function GET(request: Request) {
     return new Response('Unauthorized', { status: 401 });
   }
 
+  const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+  const mainChannelId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+  const animeChannelId = process.env.TELEGRAM_ANIME_CHANNEL_ID;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
+
   try {
     const today = new Date().getUTCDay();
     const config = MOODS.find(m => m.day === today) || MOODS[0];
 
-    const data = await fetchTMDB(`/discover/movie?with_genres=${config.genre}&sort_by=popularity.desc&language=id-ID`);
-    const movie = data.results?.[Math.floor(Math.random() * 5)] || data.results?.[0];
+    const processMood = async (type: string, targetChannel: string | undefined, label: string) => {
+      if (!targetChannel) return;
+      
+      const page = Math.floor(Math.random() * 5) + 1;
+      let endpoint = type === 'main' 
+        ? `/discover/movie?with_genres=${config.genre}&sort_by=popularity.desc&language=id-ID&page=${page}`
+        : `/discover/tv?with_genres=16&sort_by=popularity.desc&language=id-ID&page=${page}`;
 
-    if (!movie) throw new Error('No movie found');
+      const data = await fetchTMDB(endpoint);
+      const item = data.results?.[Math.floor(Math.random() * 5)] || data.results?.[0];
+      if (!item) return;
 
-    const historySlug = `mood-history-${movie.id}-${today}`;
+      const historySlug = `mood-v2-${item.id}-${type}-${today}`;
+      const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
+      if (existing) return;
 
-    // ANTI-DUPLICATE
-    const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
-    if (existing) {
-      return NextResponse.json({ success: true, message: 'Mood already sent today' });
-    }
+      const title = item.title || item.name;
+      const year = (item.release_date || item.first_air_date || '').split('-')[0];
+      const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
 
-    const title = movie.title || movie.name;
-    const year = (movie.release_date || movie.first_air_date || '').split('-')[0];
-    const rating = movie.vote_average ? `⭐ ${movie.vote_average.toFixed(1)}/10` : '⭐ N/A';
+      let curation = "";
+      try {
+        curation = await chatWithAgent('Mood Curator', `Hari ini ${config.mood}. Mengapa ${type === 'main' ? 'film' : 'anime'} "${title}" cocok ditonton?`, 'Inspiratif');
+        if (curation.includes("gangguan") || curation.includes("Maaf")) throw new Error("AI Error");
+      } catch (e) {
+        curation = `Pilihan terbaik untuk ${config.mood} Anda hari ini.`;
+      }
 
-    // 2. AI Curation
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
-    const movieUrl = `${siteUrl}/movie/${movie.id}/watch`;
-    
-    let curation = "";
-    try {
-      curation = await chatWithAgent(
-        'Mood Curator', 
-        `Hari ini adalah ${config.mood}. Berikan sapaan mewah dan jelaskan kenapa film "${title}" (${year}) cocok ditonton hari ini.`,
-        'Inspiratif dan Cinematic'
-      );
-      if (curation.includes("gangguan") || curation.includes("Maaf")) throw new Error("AI Error");
-    } catch (e) {
-      curation = `Pilihan terbaik untuk menemani ${config.mood} Anda hari ini adalah "${title}". Saksikan sekarang di CineWatch.`;
-    }
+      const watchUrl = `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch`;
+      const tgMessage = `✨ <b>CINEWATCH DAILY MOOD</b> ✨\n` +
+                        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                        `🌟 <b>${config.mood.toUpperCase()}</b>\n\n` +
+                        `🔥 <b>${title.toUpperCase()}</b> (${year})\n` +
+                        `🌟 <b>Rating:</b> ${rating}\n\n` +
+                        `📝 <i>"${curation}"</i>\n\n` +
+                        `━━━━━━━━━━━━━━━━━━━━\n` +
+                        `🚀 <a href="${watchUrl}">NONTON SESUAI MOOD</a>`;
 
-    // 3. Dispatch
-    const discordUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL || process.env.DISCORD_RELEASE_WEBHOOK_URL;
-    const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-    const tgChannelId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-
-    const tgMessage = `✨ <b>CINEWATCH DAILY MOOD</b> ✨\n` +
-                      `━━━━━━━━━━━━━━━━━━\n\n` +
-                      `🌟 <b>${config.mood.toUpperCase()}</b>\n\n` +
-                      `🔥 <b>${title.toUpperCase()}</b> (${year})\n` +
-                      `🌟 <b>Rating:</b> ${rating}\n\n` +
-                      `📝 <i>"${curation}"</i>\n\n` +
-                      `━━━━━━━━━━━━━━━━━━\n` +
-                      `🚀 <a href="${movieUrl}">NONTON SESUAI MOOD</a>`;
-
-    if (tgToken && tgChannelId) {
       await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          chat_id: tgChannelId, 
-          photo: `https://image.tmdb.org/t/p/w780${movie.backdrop_path || movie.poster_path}`,
+          chat_id: targetChannel, 
+          photo: `https://image.tmdb.org/t/p/w780${item.backdrop_path || item.poster_path}`,
           caption: tgMessage, 
           parse_mode: 'HTML' 
         })
       });
-    }
 
-    if (discordUrl) {
-      await fetch(discordUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          embeds: [{
-            title: `✨ DAILY MOOD: ${config.mood}`,
-            description: `**${title}** (${year})\n\n` + curation + `\n\n🎬 **[NONTON SEKARANG](${movieUrl})**`,
-            color: 0x8B5CF6,
-            image: { url: `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` },
-            footer: { text: "CineWatch Mood Concierge" },
-            timestamp: new Date().toISOString()
-          }]
-        })
-      });
-    }
+      await supabase.from('posts').insert([{ title: `Mood History: ${label}`, slug: historySlug, type: 'Bot History' }]);
+    };
 
-    // SAVE TO HISTORY
-    await supabase.from('posts').insert([{
-      title: `Mood History: ${config.mood}`,
-      slug: historySlug,
-      content: `Mood sent at ${new Date().toISOString()}`,
-      type: 'Bot History'
-    }]);
+    await Promise.all([
+      processMood('main', mainChannelId, 'Movie Mood'),
+      processMood('anime', animeChannelId, 'Anime Mood')
+    ]);
 
-    return NextResponse.json({ success: true, movie: title, mood: config.mood });
-
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -10,62 +10,44 @@ async function fetchTMDB(endpoint: string) {
 }
 
 // Notification Helper
-async function notifyAll(title: string, slug: string, item: any) {
+async function notifyAll(title: string, slug: string, item: any, category: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
   const url = `${siteUrl}/blog/${slug}`;
   const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-  const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+  const mainChannelId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+  const animeChannelId = process.env.TELEGRAM_ANIME_CHANNEL_ID;
   const discordUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL || process.env.DISCORD_RELEASE_WEBHOOK_URL;
+
+  const isAnimeDonghua = category === 'Anime' || category === 'Donghua';
+  const targetChannel = isAnimeDonghua ? animeChannelId : mainChannelId;
+
+  if (!targetChannel || !tgToken) return;
 
   const year = (item.release_date || item.first_air_date || '').split('-')[0];
   const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
 
-  // 1. Telegram
-  if (tgToken && tgChatId) {
-    const tgText = `📰 <b>CINEWATCH INSIDER</b>\n` +
-                    `━━━━━━━━━━━━━━━━━━\n\n` +
-                    `🔥 <b>${title.toUpperCase()}</b> (${year})\n\n` +
-                    `🌟 <b>Rating:</b> ${rating}\n` +
-                    `📝 Sebuah ulasan mendalam tentang mahakarya ini baru saja diterbitkan di blog eksklusif kami.\n\n` +
-                    `━━━━━━━━━━━━━━━━━━\n` +
-                    `🔗 <a href="${url}">BACA ULASAN LENGKAP</a>`;
-    try {
-      await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          chat_id: tgChatId, 
-          photo: `https://image.tmdb.org/t/p/w780${item.backdrop_path || item.poster_path}`,
-          caption: tgText, 
-          parse_mode: 'HTML' 
-        })
-      });
-    } catch (e) {
-      console.error('Telegram notification error:', e);
-    }
-  }
+  const tgText = `📰 <b>CINEWATCH INSIDER</b>\n` +
+                  `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                  `🔥 <b>${title.toUpperCase()}</b> (${year})\n\n` +
+                  `🌟 <b>Rating:</b> ${rating}\n` +
+                  `📝 Sebuah ulasan mendalam tentang mahakarya ini baru saja diterbitkan di blog eksklusif kami.\n\n` +
+                  `━━━━━━━━━━━━━━━━━━━━\n` +
+                  `🎬 <b>CineWatch Intel Protocol v2.0</b>\n` +
+                  `🔗 <a href="${url}">BACA ULASAN LENGKAP</a>`;
 
-  // 2. Discord
-  if (discordUrl) {
-    try {
-      await fetch(discordUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          embeds: [{
-            title: `📰 CineWatch Insider: ${title}`,
-            description: `**Rating:** ${rating}\n\nSebuah mahakarya kolaborasi multi-agen ChatDev baru saja diterbitkan.`,
-            url: url,
-            color: 0x00BFFF,
-            image: { url: `https://image.tmdb.org/t/p/w1280${item.backdrop_path || item.poster_path}` },
-            footer: { text: "CineWatch Intelligence System" },
-            timestamp: new Date().toISOString()
-          }]
-        })
-      });
-    } catch (e) {
-      console.error('Discord notification error:', e);
-    }
+  try {
+    await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        chat_id: targetChannel, 
+        photo: `https://image.tmdb.org/t/p/w780${item.backdrop_path || item.poster_path}`,
+        caption: tgText, 
+        parse_mode: 'HTML' 
+      })
+    });
+  } catch (e) {
+    console.error('Telegram notification error:', e);
   }
 }
 
@@ -80,12 +62,8 @@ export async function GET(request: Request) {
   }
 
   const generatedArticles = [];
-  const errors = [];
 
   try {
-    console.log('📰 AI: Starting News Generation...');
-    
-    // 1. DATA GATHERING
     const [moviesData, tvData, animeData, donghuaData] = await Promise.all([
       fetchTMDB('/trending/movie/day?language=id-ID'),
       fetchTMDB('/trending/tv/day?language=id-ID'),
@@ -101,82 +79,43 @@ export async function GET(request: Request) {
     ];
 
     for (const item of items) {
-      try {
-        const historySlug = `news-history-${item.id}-${item.type}`;
+      const targetChannel = (item.type === 'Anime' || item.type === 'Donghua') 
+        ? process.env.TELEGRAM_ANIME_CHANNEL_ID 
+        : (process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID);
 
-        // ANTI-DUPLICATE CHECK
-        const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
-        if (existing) {
-          console.log(`⏭️ News already exists for: ${item.title || item.name}`);
-          continue;
-        }
+      const historySlug = `news-v2-${item.id}-${item.type}-${targetChannel}`;
 
-        const title = item.title || item.name;
-        const overview = item.overview || 'Trending content on CineWatch.';
-        console.log(`🎬 ChatDev Deep-Dive: ${title} (${item.type})`);
+      const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
+      if (existing) continue;
 
-        // AI WORKFLOW
-        const [romanticDraft, realismDraft, magicalDraft] = await Promise.all([
-          chatWithAgent('Romanticism Writer', `Tulis ulasan mendalam tentang ${item.type} berjudul "${title}".`, 'Emosional'),
-          chatWithAgent('Realism Writer', `Tulis ulasan mendalam tentang ${item.type} berjudul "${title}".`, 'Faktual'),
-          chatWithAgent('Magical Realism Writer', `Tulis ulasan mendalam tentang ${item.type} berjudul "${title}".`, 'Futuristik')
-        ]);
+      const title = item.title || item.name;
+      const [romanticDraft, realismDraft, magicalDraft] = await Promise.all([
+        chatWithAgent('Romanticism Writer', `Review ${item.type}: "${title}".`, 'Emosional'),
+        chatWithAgent('Realism Writer', `Review ${item.type}: "${title}".`, 'Faktual'),
+        chatWithAgent('Magical Realism Writer', `Review ${item.type}: "${title}".`, 'Futuristik')
+      ]);
 
-        const finalArticle = await chatWithAgent(
-          'Chief Editor',
-          `Sintesiskan ulasan berikut tentang "${title}" menjadi artikel blog elit.\n\nDraft 1: ${romanticDraft}\nDraft 2: ${realismDraft}\nDraft 3: ${magicalDraft}`,
-          'Profesional'
-        );
-
-        // Silent Fallback if AI errors
-        if (finalArticle.includes("gangguan") || finalArticle.includes("Maaf")) {
-           throw new Error("AI News Error - Silent Fallback triggered");
-        }
-
-        const slug = `insider-${item.id}-${new Date().getTime()}`;
-        const featuredImg = item.backdrop_path 
-          ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`
-          : 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1280';
-
-        // 1. SAVE TO HISTORY
-        await supabase.from('posts').insert([{
-           title: `History: News ${title}`,
-           slug: historySlug,
-           content: `News generated at ${new Date().toISOString()}`,
-           type: 'Bot History'
-        }]);
-
-        // 2. SAVE REAL ARTICLE
-        const { error: insertError } = await supabase
-          .from('posts')
-          .insert([{
-            title: `${item.type} Spotlight: ${title}`,
-            slug: slug,
-            content: finalArticle,
-            image: featuredImg,
-            type: `${item.type} Intel`,
-            created_at: new Date().toISOString(),
-          }]);
-
-        if (insertError) throw insertError;
-        
-        await notifyAll(`${item.type} Spotlight: ${title}`, slug, item);
-        generatedArticles.push(title);
-
-      } catch (err: any) {
-        console.error(`Workflow Error [${item.title || item.name}]:`, err.message);
-        errors.push(`Workflow Error [${item.title || item.name}]: ${err.message}`);
+      let finalArticle = await chatWithAgent('Chief Editor', `Synthesize these reviews for "${title}":\n\n1: ${romanticDraft}\n2: ${realismDraft}\n3: ${magicalDraft}`, 'Professional');
+      if (finalArticle.includes("gangguan") || finalArticle.includes("Maaf")) {
+         finalArticle = item.overview || "Mahakarya sinematik terbaru di CineWatch.";
       }
+
+      const slug = `insider-${item.id}-${new Date().getTime()}`;
+      await supabase.from('posts').insert([{ title: `History: News ${title}`, slug: historySlug, type: 'Bot History' }]);
+      await supabase.from('posts').insert([{
+        title: `${item.type} Spotlight: ${title}`,
+        slug: slug,
+        content: finalArticle,
+        image: item.backdrop_path ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}` : 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1280',
+        type: `${item.type} Intel`
+      }]);
+      
+      await notifyAll(`${item.type} Spotlight: ${title}`, slug, item, item.type);
+      generatedArticles.push(title);
     }
 
-    return NextResponse.json({ 
-      status: 'ChatDev High-Output Success',
-      total_generated: generatedArticles.length,
-      articles: generatedArticles
-    });
-
+    return NextResponse.json({ success: true, total_generated: generatedArticles.length });
   } catch (error: any) {
-    console.error('Generate News System Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
