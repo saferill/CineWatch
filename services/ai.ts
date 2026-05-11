@@ -142,6 +142,56 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
   return "Maaf, sistem AI sedang mengalami gangguan. Silakan coba lagi nanti.";
 }
 
+export async function askAIStream(prompt: string): Promise<Response | null> {
+  // 1. Try NVIDIA first
+  if (NVIDIA_KEY) {
+    try {
+      const res = await fetch(NVIDIA_ENDPOINT, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${NVIDIA_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'meta/llama-3.3-70b-instruct',
+          messages: [{ role: 'user', content: prompt }],
+          stream: true
+        }),
+      });
+
+      if (res.ok) return res;
+    } catch (error) {
+      console.warn('AI: NVIDIA Stream Error, falling back:', error);
+    }
+  }
+
+  // 2. Fallback to Router
+  try {
+    const endpoint = process.env.NODE_ENV === 'production' 
+      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions')
+      : 'http://localhost:20128/v1/chat/completions';
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ROUTER_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gemini/gemini-2.0-flash-exp',
+        messages: [{ role: 'user', content: prompt }],
+        stream: true
+      }),
+    });
+
+    if (res.ok) return res;
+  } catch (error) {
+    console.error('AI: All Stream Services Failed:', error);
+  }
+
+  return null;
+}
+
 
 export async function getSmartRecommendations(history: any[]) {
   const titles = history.map(h => h.title).join(', ');
