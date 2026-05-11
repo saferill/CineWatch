@@ -47,7 +47,18 @@ export async function GET(req: Request) {
   // Manual Trigger via ?task=...
   if (forcedTask) {
     console.log(`CRON-MASTER: Manual trigger for task: ${forcedTask}`);
-    await runTask(forcedTask, `/api/ai/${forcedTask}`);
+    // Map manual task names to correct paths
+    const taskPaths: any = {
+      'blog': '/api/ai/generate-news',
+      'releases': '/api/ai/release-alert',
+      'intel': '/api/ai/admin-intel',
+      'weekly': '/api/ai/weekly-hype',
+      'health': '/api/ai/health-check',
+      'sync': '/api/cron/release-sync'
+    };
+    
+    const targetPath = taskPaths[forcedTask] || `/api/ai/${forcedTask}`;
+    await runTask(forcedTask, targetPath);
   } else {
     // Standard Time-based Logic
     console.log(`CRON-MASTER: Running at ${now.toISOString()} (Hour: ${hour}, Day: ${day})`);
