@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     const discordUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL || process.env.DISCORD_RELEASE_WEBHOOK_URL;
     const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
     const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
 
     const title = "🗓️ **CINEWATCH WEEKLY HYPEx CALENDAR**";
     let tgMessage = `🗓️ <b>CINEWATCH WEEKLY HYPEx CALENDAR</b>\n\n`;

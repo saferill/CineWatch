@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     });
 
     const embeds = [];
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
 
     // Movie Embed
     if (topMovie) {

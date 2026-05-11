@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     if (!movie) throw new Error('No movie found');
 
     // 2. AI Curation
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
     const movieUrl = `${siteUrl}/movie/${movie.id}`;
     
     const curation = await chatWithAgent(

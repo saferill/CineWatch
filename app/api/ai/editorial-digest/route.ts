@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
 
     // 1. Fetch top 3 articles from last 7 days
     const lastWeek = new Date();
