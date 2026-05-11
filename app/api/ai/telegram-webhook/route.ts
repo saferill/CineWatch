@@ -121,7 +121,7 @@ export async function POST(req: Request) {
         
         const buttons: any[][] = results.map((r: any) => ([{
           text: `🎬 ${r.title || r.name} (Sub Indo) - ${(r.release_date || r.first_air_date || '').split('-')[0]}`,
-          url: `${r.title ? siteUrl + '/movie/' + r.id : siteUrl + '/series/' + r.id}`
+          url: `${r.title ? siteUrl + '/movie/' + r.id + '/watch' : siteUrl + '/series/' + r.id + '/watch'}`
         }]));
         
         buttons.push([{ text: "« Kembali ke Menu", callback_data: "start" }]);

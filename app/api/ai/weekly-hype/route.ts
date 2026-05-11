@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     let discordDescription = `Bersiaplah! Ini adalah film-film besar yang akan segera hadir di CineWatch minggu depan:\n\n`;
 
     upcoming.forEach((m: any, i: number) => {
-      const movieUrl = `${siteUrl}/movie/${m.id}`;
+      const movieUrl = `${siteUrl}/movie/${m.id}/watch`;
       const dateStr = new Date(m.release_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
       
       tgMessage += `${i+1}. 🎬 <b><a href="${movieUrl}">${m.title}</a></b> (Sub Indo)\n`;

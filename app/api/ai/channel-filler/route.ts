@@ -56,7 +56,7 @@ export async function GET(request: Request) {
                     `${hype}\n\n` +
                     `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
                     `🎥 <b>Kualitas:</b> 1080p Full HD\n\n` +
-                    `🚀 <a href="${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}">MULAI NONTON SEKARANG</a>`;
+                    `🚀 <a href="${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch">MULAI NONTON SEKARANG</a>`;
 
     const posterUrl = `https://image.tmdb.org/t/p/w780${item.poster_path}`;
 
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
         caption: message,
         parse_mode: 'HTML',
         reply_markup: {
-          inline_keyboard: [[{ text: "🍿 Tonton / Download Sub Indo", url: `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}` }]]
+          inline_keyboard: [[{ text: "🍿 Tonton / Download Sub Indo", url: `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch` }]]
         }
       })
     });

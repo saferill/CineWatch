@@ -12,7 +12,7 @@ async function sendNotifications(title: string, teaser: string, image: string, t
   const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
   const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL || process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${id}`;
+  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${id}/watch`;
 
   // 1. Telegram
   if (tgToken && tgChatId) {

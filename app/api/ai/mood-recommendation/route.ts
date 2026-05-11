@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
     // 2. AI Curation
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app';
-    const movieUrl = `${siteUrl}/movie/${movie.id}`;
+    const movieUrl = `${siteUrl}/movie/${movie.id}/watch`;
     
     const curation = await chatWithAgent(
       'Mood Curator', 

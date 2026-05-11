@@ -140,10 +140,10 @@ export async function GET(request: Request) {
       console.log('CRON: Sending to Telegram...');
       let tgText = "<b>🔥 RINGKASAN CINEWATCH HARI INI</b>\n\n";
       
-      if (topMovie) tgText += `🎬 <b>FILM:</b> <a href="${siteUrl}/movie/${topMovie.id}">${topMovie.title}</a> (Sub Indo)\n`;
-      if (topSeries) tgText += `📺 <b>SERIES:</b> <a href="${siteUrl}/series/${topSeries.id}">${topSeries.name}</a> (Sub Indo)\n`;
-      if (topAnime) tgText += `🍥 <b>ANIME:</b> <a href="${siteUrl}/anime/${topAnime.id}">${topAnime.title.english || topAnime.title.romaji}</a> (Sub Indo)\n`;
-      if (topDonghua) tgText += `🐉 <b>DONGHUA:</b> <a href="${siteUrl}/donghua">${topDonghua.title}</a> (Sub Indo)\n`;
+      if (topMovie) tgText += `🎬 <b>FILM:</b> <a href="${siteUrl}/movie/${topMovie.id}/watch">${topMovie.title}</a> (Sub Indo)\n`;
+      if (topSeries) tgText += `📺 <b>SERIES:</b> <a href="${siteUrl}/series/${topSeries.id}/watch">${topSeries.name}</a> (Sub Indo)\n`;
+      if (topAnime) tgText += `🍥 <b>ANIME:</b> <a href="${siteUrl}/anime/${topAnime.id}/watch">${topAnime.title.english || topAnime.title.romaji}</a> (Sub Indo)\n`;
+      if (topDonghua) tgText += `🐉 <b>DONGHUA:</b> <a href="${siteUrl}/donghua/watch">${topDonghua.title}</a> (Sub Indo)\n`;
       
       tgText += "\n🇮🇩 <b>Status:</b> Seluruh konten mendukung Subtitle Indonesia.\n";
       tgText += "🚀 <b>Tonton sekarang di CineWatch!</b>";
