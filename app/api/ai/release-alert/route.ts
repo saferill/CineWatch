@@ -81,8 +81,8 @@ export async function GET(request: Request) {
     const [movies, tv, anime, donghua] = await Promise.all([
       fetchTMDB('/movie/now_playing?language=id-ID&page=1'),
       fetchTMDB('/tv/on_the_air?language=id-ID&page=1'),
-      fetchTMDB(`/discover/tv?with_genres=16&air_date.gte=${today}&air_date.lte=${today}&language=id-ID`),
-      fetchTMDB(`/discover/tv?with_origin_country=CN&air_date.gte=${today}&air_date.lte=${today}&language=id-ID`)
+      fetchTMDB('/discover/tv?with_genres=16&sort_by=popularity.desc&language=id-ID'),
+      fetchTMDB('/discover/tv?with_origin_country=CN&sort_by=popularity.desc&language=id-ID')
     ]);
 
     let alerts = [
