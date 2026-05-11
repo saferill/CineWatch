@@ -61,7 +61,7 @@ export default function Player({
     episodeTitle,
   });
 
-  const [source, setSource] = useState<Source>("vidking");
+  const [source, setSource] = useState<Source>("nontongo");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showNextModal, setShowNextModal] = useState(false);
   const [countdown, setCountdown] = useState(30);
@@ -189,18 +189,18 @@ export default function Player({
     if (src === "vidking") {
       const color = "ffffff";
       if (type === "movie") {
-        return `https://www.vidking.net/embed/movie/${movieId}?autoPlay=true&color=${color}&sub_indo=1&sub_lang=id&sub=id`;
+        return `https://www.vidking.net/embed/movie/${movieId}?autoPlay=true&color=${color}&sub_indo=1&sub_lang=id&sub=id&subTitle=Indonesian`;
       }
       if (type === "tv" && season && episode) {
-        return `https://www.vidking.net/embed/tv/${movieId}/${season}/${episode}?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true&sub_indo=1&sub_lang=id&sub=id`;
+        return `https://www.vidking.net/embed/tv/${movieId}/${season}/${episode}?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true&sub_indo=1&sub_lang=id&sub=id&subTitle=Indonesian`;
       }
-      return `https://www.vidking.net/embed/tv/${movieId}/1/1?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true&sub_indo=1&sub_lang=id&sub=id`;
+      return `https://www.vidking.net/embed/tv/${movieId}/1/1?autoPlay=true&color=${color}&episodeSelector=true&nextEpisode=true&sub_indo=1&sub_lang=id&sub=id&subTitle=Indonesian`;
     }
 
     if (src === "autoembed") {
-      if (type === "movie") return `https://autoembed.co/movie/tmdb/${movieId}?sub_indo=1&sub_lang=id`;
-      if (type === "tv" && season && episode) return `https://autoembed.co/tv/tmdb/${movieId}-${season}-${episode}?sub_indo=1&sub_lang=id`;
-      return `https://autoembed.co/tv/tmdb/${movieId}-1-1?sub_indo=1&sub_lang=id`;
+      if (type === "movie") return `https://autoembed.co/movie/tmdb/${movieId}?sub_indo=1&sub_lang=id&sub=id`;
+      if (type === "tv" && season && episode) return `https://autoembed.co/tv/tmdb/${movieId}-${season}-${episode}?sub_indo=1&sub_lang=id&sub=id`;
+      return `https://autoembed.co/tv/tmdb/${movieId}-1-1?sub_indo=1&sub_lang=id&sub=id`;
     }
 
     if (src === "vidlink") {
@@ -212,8 +212,8 @@ export default function Player({
         primaryColor: "06b6d4",
         secondaryColor: "18181b",
         iconColor: "ffffff",
-        subTitle: "indonesia",
-        subTitleLanguage: "indonesia", // Double force for VidLink
+        subTitle: "Indonesian", // Capitalized
+        subTitleLanguage: "id",
         autoplay: "true"
       });
 
@@ -225,42 +225,42 @@ export default function Player({
     }
 
     if (src === "vidsrcrip") {
-      if (type === "movie") return `https://vidsrc.rip/embed/movie/${movieId}?sub.indo=1&sub=id`;
-      if (type === "tv" && season && episode) return `https://vidsrc.rip/embed/tv/${movieId}/${season}/${episode}?sub.indo=1&sub=id`;
-      return `https://vidsrc.rip/embed/tv/${movieId}/1/1?sub.indo=1&sub=id`;
+      if (type === "movie") return `https://vidsrc.rip/embed/movie/${movieId}?sub.indo=1&sub=id&sub_lang=id`;
+      if (type === "tv" && season && episode) return `https://vidsrc.rip/embed/tv/${movieId}/${season}/${episode}?sub.indo=1&sub=id&sub_lang=id`;
+      return `https://vidsrc.rip/embed/tv/${movieId}/1/1?sub.indo=1&sub=id&sub_lang=id`;
     }
 
     if (src === "embedsu") {
-      if (type === "movie") return `https://embed.su/embed/movie/${movieId}?sub_lang=id`;
-      if (type === "tv" && season && episode) return `https://embed.su/embed/tv/${movieId}/${season}/${episode}?sub_lang=id`;
-      return `https://embed.su/embed/tv/${movieId}/1/1?sub_lang=id`;
+      if (type === "movie") return `https://embed.su/embed/movie/${movieId}?sub_lang=id&sub=id`;
+      if (type === "tv" && season && episode) return `https://embed.su/embed/tv/${movieId}/${season}/${episode}?sub_lang=id&sub=id`;
+      return `https://embed.su/embed/tv/${movieId}/1/1?sub_lang=id&sub=id`;
     }
 
     if (src === "nontongo") {
-      if (type === "movie") return `https://www.nontongo.win/embed/movie/${movieId}`;
-      if (type === "tv" && season && episode) return `https://www.nontongo.win/embed/tv/${movieId}/${season}/${episode}`;
-      return `https://www.nontongo.win/embed/tv/${movieId}/1/1`;
+      if (type === "movie") return `https://www.nontongo.win/embed/movie/${movieId}?sub_indo=1&sub=id`;
+      if (type === "tv" && season && episode) return `https://www.nontongo.win/embed/tv/${movieId}/${season}/${episode}?sub_indo=1&sub=id`;
+      return `https://www.nontongo.win/embed/tv/${movieId}/1/1?sub_indo=1&sub=id`;
     }
 
     if (src === "superembed") {
-      if (type === "movie") return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&sub_indo=1&sub_lang=id`;
-      if (type === "tv" && season && episode) return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=${season}&e=${episode}&sub_indo=1&sub_lang=id`;
-      return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=1&e=1&sub_indo=1&sub_lang=id`;
+      if (type === "movie") return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&sub_indo=1&sub_lang=id&sub=id`;
+      if (type === "tv" && season && episode) return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=${season}&e=${episode}&sub_indo=1&sub_lang=id&sub=id`;
+      return `https://multiembed.mov/?video_id=${movieId}&tmdb=1&s=1&e=1&sub_indo=1&sub_lang=id&sub=id`;
     }
 
     if (src === "vidsrcto") {
-      if (type === "movie") return `https://vidsrc.to/embed/movie/${movieId}?sub.indo=1&sub=id&sub_lang=id`;
-      if (type === "tv" && season && episode) return `https://vidsrc.to/embed/tv/${movieId}/${season}/${episode}?sub.indo=1&sub=id&sub_lang=id`;
-      return `https://vidsrc.to/embed/tv/${movieId}/1/1?sub.indo=1&sub=id&sub_lang=id`;
+      if (type === "movie") return `https://vidsrc.to/embed/movie/${movieId}?sub.indo=1&sub=id&sub_lang=id&subTitle=Indonesian`;
+      if (type === "tv" && season && episode) return `https://vidsrc.to/embed/tv/${movieId}/${season}/${episode}?sub.indo=1&sub=id&sub_lang=id&subTitle=Indonesian`;
+      return `https://vidsrc.to/embed/tv/${movieId}/1/1?sub.indo=1&sub=id&sub_lang=id&subTitle=Indonesian`;
     }
 
     if (type === "anime") {
-      return `https://vidsrc.me/embed/anime/${movieId}?sub.indo=1&sub=id`;
+      return `https://vidsrc.me/embed/anime/${movieId}?sub.indo=1&sub=id&sub_lang=id`;
     }
     if (type === "tv" && season && episode) {
-      return `https://vidsrc.me/embed/tv/${movieId}/${season}/${episode}?sub.indo=1&sub=id`;
+      return `https://vidsrc.me/embed/tv/${movieId}/${season}/${episode}?sub.indo=1&sub=id&sub_lang=id`;
     }
-    return `https://vidsrc.me/embed/${type}/${movieId}?sub.indo=1&sub=id`;
+    return `https://vidsrc.me/embed/${type}/${movieId}?sub.indo=1&sub=id&sub_lang=id`;
   }
 
   const embedUrl = getEmbedUrl(source);
