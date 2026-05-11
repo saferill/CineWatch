@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { chatWithAgent } from '@/services/ai';
+import { supabase } from '@/lib/supabase';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
@@ -8,50 +9,46 @@ async function fetchTMDB(endpoint: string) {
   return res.json();
 }
 
-async function sendNotifications(title: string, teaser: string, image: string, type: string, id: string) {
+async function sendNotifications(item: any, teaser: string, type: string) {
   const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-  const discordUrl = process.env.DISCORD_RELEASE_WEBHOOK_URL || process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${id}/watch`;
+  const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'}/${type.toLowerCase() === 'movie' ? 'movie' : 'series'}/${item.id}/watch`;
+
+  const title = item.title || item.name;
+  const year = (item.release_date || item.first_air_date || '').split('-')[0];
+  const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
+  
+  const genreMap: any = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi', 10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western' };
+  const genres = item.genre_ids?.slice(0, 2).map((id: number) => genreMap[id] || 'Sinema').join(', ');
 
   // 1. Telegram
   if (tgToken && tgChatId) {
-    const message = `🚀 <b>RILIS BARU: ${title}</b> (${type})\n\n` +
-                    `📝 <i>${teaser}</i>\n\n` +
+    const message = `🚀 <b>RILIS BARU: ${title.toUpperCase()}</b>\n` +
+                    `━━━━━━━━━━━━━━━━━━\n\n` +
+                    `📅 <b>Tahun:</b> ${year}\n` +
+                    `🌟 <b>Rating:</b> ${rating}\n` +
+                    `🎭 <b>Genre:</b> ${genres}\n` +
                     `🇮🇩 <b>Subtitle:</b> Indonesia (Aktif)\n` +
                     `🎥 <b>Kualitas:</b> Full HD 1080p\n\n` +
+                    `📝 <i>"${teaser}"</i>\n\n` +
+                    `━━━━━━━━━━━━━━━━━━\n` +
                     `🔗 <a href="${siteUrl}">TONTON SEKARANG</a>`;
     try {
-      await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+      await fetch(`https://api.telegram.org/bot${tgToken}/sendPhoto`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: tgChatId, text: message, parse_mode: 'HTML' })
-      });
-    } catch (e) {
-      console.error('Telegram notification failed:', e);
-    }
-  }
-
-  // 2. Discord
-  if (discordUrl) {
-    try {
-      await fetch(discordUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          embeds: [{
-            title: `🚀 NEW RELEASE: ${title}`,
-            description: teaser,
-            url: siteUrl,
-            color: 0x00FF7F,
-            image: { url: image },
-            footer: { text: `CineWatch ${type} Sentinel` },
-            timestamp: new Date().toISOString()
-          }]
+        body: JSON.stringify({ 
+          chat_id: tgChatId, 
+          photo: `https://image.tmdb.org/t/p/w780${item.backdrop_path || item.poster_path}`,
+          caption: message, 
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[{ text: "🍿 Mulai Nonton (Sub Indo)", url: siteUrl }]]
+          }
         })
       });
     } catch (e) {
-      console.error('Discord notification failed:', e);
+      console.error('Telegram notification failed:', e);
     }
   }
 }
@@ -77,7 +74,6 @@ export async function GET(request: Request) {
       fetchTMDB(`/discover/tv?with_origin_country=CN&air_date.gte=${today}&air_date.lte=${today}&language=id-ID`)
     ]);
 
-    // Pick 1 from each category for high-quality alerts
     let alerts = [
       ...(movies.results?.map((i: any) => ({ ...i, category: 'Movie' })) || []),
       ...(tv.results?.map((i: any) => ({ ...i, category: 'Series' })) || []),
@@ -91,34 +87,40 @@ export async function GET(request: Request) {
       return rDate && rDate <= today && (i.vote_average || 0) >= 4;
     });
 
-    // Take top 1 from each category for the daily blast
     const uniqueCategories = ['Movie', 'Series', 'Anime', 'Donghua'];
     const finalAlerts = uniqueCategories.map(cat => alerts.find(a => a.category === cat)).filter(Boolean);
 
-    if (finalAlerts.length === 0) {
-      return NextResponse.json({ success: true, message: 'No high-quality releases found today' });
-    }
-
     for (const item of finalAlerts as any[]) {
+      const historySlug = `release-alert-${item.id}-${item.category}`;
+
+      // ANTI-DUPLICATE
+      const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
+      if (existing) continue;
+
       const name = item.title || item.name;
       const overview = item.overview || 'Rilis baru yang sangat dinantikan di CineWatch.';
 
-      // CHATDEV MULTI-AGENT WORKFLOW FOR TEASER
-      // Phase 1: Hype Draft
-      const hypeDraft = await chatWithAgent('Hype Agent', `Buat teaser super seru dan emosional untuk rilis baru: ${name}. Deskripsi: ${overview}`, 'Eksklusif, Seru, Penuh Emosi');
-      
-      // Phase 2: Fact Check
-      const factReview = await chatWithAgent('Analyst Agent', `Berikan 2 alasan objektif kenapa orang harus menonton ${name}. Dasar: ${overview}`, 'Lugas dan Faktual');
-      
-      // Phase 3: Final Social Post
-      const finalTeaser = await chatWithAgent('Social Media Manager', `Gabungkan teaser ini: "${hypeDraft}" dengan ulasan ini: "${factReview}". Buat satu paragraf pendek (max 300 karakter) yang sangat menarik untuk Telegram/Discord.`, 'Viral dan Catchy');
+      let teaser = "";
+      try {
+        teaser = await chatWithAgent('Luxury Promo', `Buat teaser pendek mewah untuk rilis baru: ${name}.`, 'Elegant');
+        if (teaser.includes("gangguan") || teaser.includes("Maaf")) throw new Error("AI Error");
+      } catch (e) {
+        teaser = overview.slice(0, 150) + "...";
+      }
 
-      // 3. Send Notifications
-      const img = `https://image.tmdb.org/t/p/w1280${item.backdrop_path || item.poster_path}`;
-      await sendNotifications(name, finalTeaser, img, item.category, item.id);
+      await sendNotifications(item, teaser, item.category);
+
+      // SAVE TO HISTORY
+      await supabase.from('posts').insert([{
+        title: `Release History: ${name}`,
+        slug: historySlug,
+        content: `Alert sent at ${new Date().toISOString()}`,
+        type: 'Bot History',
+        image: `https://image.tmdb.org/t/p/w780${item.poster_path}`
+      }]);
     }
 
-    return NextResponse.json({ success: true, alerted: alerts.length });
+    return NextResponse.json({ success: true, alerted: finalAlerts.length });
 
   } catch (error: any) {
     console.error('Release Alert Error:', error);
