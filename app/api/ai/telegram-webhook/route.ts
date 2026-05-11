@@ -119,7 +119,7 @@ export async function POST(req: Request) {
 
         const caption = `📽️ <b>INTELLIGENCE REPORT</b> 📽️\n\n${recommendation}\n\n🔍 <i>Hasil lainnya di bawah ini:</i>`;
         
-        const buttons = results.map(r => ([{
+        const buttons = results.map((r: any) => ([{
           text: `🎬 ${r.title || r.name} (${(r.release_date || r.first_air_date || '').split('-')[0]})`,
           url: `${r.title ? siteUrl + '/movie/' + r.id : siteUrl + '/series/' + r.id}`
         }]));
