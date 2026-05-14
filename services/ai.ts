@@ -219,7 +219,7 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
   // 1. PRIMARY: YOU.COM (YDC)
   if (YDC_KEY) {
     try {
-      console.log(`AI: Agent ${role} is using You.com Intelligence...`);
+      console.log(`AI: [RECRUITING] ${role} for task...`);
       const res = await fetch(`https://ydc-index.io/v1/research`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': YDC_KEY },
@@ -228,14 +228,18 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
 
       if (res.ok) {
         const data = await res.json();
-        return data.answer || data.content || "Maaf, data riset tidak ditemukan.";
+        const response = data.answer || data.content;
+        if (response && response.length > 10) return response;
       }
     } catch (e) {
-      console.warn('AI: You.com Agent Error', e);
+      console.warn(`AI: [STAFF ISSUE] ${role} failed. Escalating to Senior Management...`);
     }
   }
 
-  // 2. EMERGENCY FALLBACK: NVIDIA
+  // 2. REDUNDANCY: Escalation to Senior Department Head (NVIDIA)
+  const seniorRole = `Senior VP of ${deptKey}`;
+  console.log(`AI: [EMERGENCY] ${seniorRole} taking over...`);
+  
   if (NVIDIA_KEY) {
     try {
       const res = await fetch(NVIDIA_ENDPOINT, {
@@ -244,7 +248,7 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
         body: JSON.stringify({
           model: 'meta/llama-3.3-70b-instruct',
           messages: [
-            { role: 'system', content: systemPrompt },
+            { role: 'system', content: `URGENT ESCALATION: You are the ${seniorRole}. A junior staff member failed. Complete this task with 100% reliability. Respond in Bahasa Indonesia.` },
             { role: 'user', content: prompt }
           ],
         }),
@@ -253,10 +257,12 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
         const data = await res.json();
         return data.choices[0].message.content;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(`AI: [CRITICAL FAILURE] Senior Management also failed.`);
+    }
   }
 
-  return "Maaf, sistem sedang mengalami gangguan.";
+  return "Maaf Boss, tim kami sedang mengalami kendala teknis massal. Namun kami tetap bekerja 24/7 untuk pulih otomatis.";
 }
 
 export async function askAIStream(prompt: string): Promise<Response | null> {
