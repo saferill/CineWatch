@@ -234,6 +234,7 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
   }
 
   return "Maaf, sistem sedang mengalami gangguan.";
+}
 
 export async function askAIStream(prompt: string): Promise<Response | null> {
   // 1. Try NVIDIA first
