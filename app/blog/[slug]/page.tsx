@@ -8,8 +8,33 @@ import { getBlogSummary } from '@/services/ai';
 import { CinematicImage } from '@/components/media/cinematic-image';
 import { AtmosphereBG } from '@/components/media/atmosphere-bg';
 import { BlogCTA } from '@/components/blog/blog-cta';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const { data: post } = await supabase.from('posts').select('title, content, image').eq('slug', slug).single();
+
+  if (!post) return { title: 'Post Not Found' };
+
+  return {
+    title: `${post.title} | CineWatch Global Media`,
+    description: post.content.slice(0, 160).replace(/[#*]/g, '') + '...',
+    openGraph: {
+      title: post.title,
+      description: post.content.slice(0, 160).replace(/[#*]/g, ''),
+      images: [post.image],
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.content.slice(0, 160).replace(/[#*]/g, ''),
+      images: [post.image],
+    },
+  };
+}
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
