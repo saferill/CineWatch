@@ -125,8 +125,11 @@ export async function GET(req: Request) {
     // 8. Milestones (Saturday 11:00 UTC / 18:00 WIB)
     if (hour === 11 && day === 6) await runTask('milestones', '/api/ai/milestones');
 
-    // 9. Health Check (Every 4 hours)
-    if (hour % 4 === 0) await runTask('health', '/api/ai/health-check');
+    // 9. Health & Tech Audit (Every 4 hours)
+    if (hour % 4 === 0) {
+      await runTask('health', '/api/ai/health-check');
+      await runTask('tech-audit', '/api/ai/tech-audit');
+    }
 
     // 10. Live Office Pulse (Only every 6 hours to avoid spam)
     if (hour % 6 === 0) await runOfficePulse();
