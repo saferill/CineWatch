@@ -60,7 +60,6 @@ export async function GET(request: Request) {
         type: 'Bot History' 
       }]);
 
-      const title = item.title || item.name;
       const year = (item.release_date || item.first_air_date || '').split('-')[0];
       const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
       const genreMap: any = { 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 27: 'Horror', 10749: 'Romance', 878: 'Sci-Fi', 53: 'Thriller' };
