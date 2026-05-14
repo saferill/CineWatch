@@ -128,11 +128,19 @@ export async function GET(req: Request) {
     // 9. Health Check (Every 4 hours)
     if (hour % 4 === 0) await runTask('health', '/api/ai/health-check');
 
-    // 10. Live Office Pulse (Every hour or minute depending on cron)
-    await runOfficePulse();
+    // 10. Live Office Pulse (Only every 6 hours to avoid spam)
+    if (hour % 6 === 0) await runOfficePulse();
 
     // 10. Release Sync (01:00 UTC)
     if (hour === 1) await runTask('sync', '/api/cron/release-sync');
+  }
+
+  // GLOBAL ERROR REPORTING: Jika ada tugas yang gagal, staf lapor ke Boss
+  const failedTasks = Object.entries(results).filter(([_, res]) => (res as any).error);
+  if (failedTasks.length > 0) {
+    for (const [taskName, res] of failedTasks) {
+      await sendInternalLog('Elite Intelligence Scout', `⚠️ BOSS! SAYA LAPOR: Staf di bagian [${taskName}] sedang mengalami kendala teknis.\nDetail: ${(res as any).error}\n\nMohon dicek kembali, Boss!`);
+    }
   }
 
 
