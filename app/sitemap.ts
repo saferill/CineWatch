@@ -2,7 +2,8 @@ import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatch.id'; // Ganti dengan domain asli Boss nanti
+  // Gunakan domain yang sedang aktif atau fallback ke vercel domain Boss
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinewatchh.vercel.app'; 
 
   // Fetch all blog posts
   const { data: posts } = await supabase
