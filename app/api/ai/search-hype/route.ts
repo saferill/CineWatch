@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { chatWithAgent, searchYou } from '@/services/ai';
+import { chatWithAgent, searchYou, researchYou } from '@/services/ai';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
