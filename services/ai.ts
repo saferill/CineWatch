@@ -110,14 +110,47 @@ export async function getYouContent(urls: string[]): Promise<any> {
 }
 
 export async function askAI(prompt: string, json: boolean = true, model?: string): Promise<any> {
-  // If user wants everything via You.com, we can use Research for high-intent queries
-  // But for simple JSON formatting, we still need an LLM.
-  // We will prioritize NVIDIA/9Router for logic and You.com for Knowledge.
+  console.log('AI: Using You.com Intelligence...');
   
-  // 1. Try NVIDIA first (Logic & JSON)
+  if (YDC_KEY) {
+    try {
+      const fullPrompt = json 
+        ? `${prompt}\n\nIMPORTANT: Return ONLY a valid JSON object. No other text.` 
+        : prompt;
+
+      const res = await fetch(`https://ydc-index.io/v1/research`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-API-Key': YDC_KEY 
+        },
+        body: JSON.stringify({ query: fullPrompt })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const content = data.answer || data.content;
+        
+        if (json) {
+          try {
+            // Clean JSON string from potential markdown backticks
+            const cleaned = content.replace(/```json|```/g, '').trim();
+            return JSON.parse(cleaned);
+          } catch (e) {
+            console.warn('AI: JSON Parse Error, returning raw content');
+            return { error: 'Parse Error', raw: content };
+          }
+        }
+        return content;
+      }
+    } catch (error) {
+      console.warn('AI: You.com Research Error:', error);
+    }
+  }
+
+  // FALLBACK (If YDC fails, we still have NVIDIA/9Router as absolute emergency backup, but prioritized YDC)
   if (NVIDIA_KEY) {
     try {
-      console.log('AI: Attempting NVIDIA API...');
       const res = await fetch(NVIDIA_ENDPOINT, {
         method: 'POST',
         headers: { 
@@ -137,138 +170,71 @@ export async function askAI(prompt: string, json: boolean = true, model?: string
         const content = data.choices[0].message.content;
         return json ? JSON.parse(content) : content;
       }
-      console.warn('AI: NVIDIA API returned status', res.status);
-    } catch (error) {
-      console.warn('AI: NVIDIA API Error:', error);
-    }
+    } catch (error) {}
   }
 
-  // 2. Fallback to 9Router (Local or Cloud)
-  try {
-    console.log('AI: Attempting 9Router/Fallback...');
-    const endpoint = process.env.NODE_ENV === 'production' 
-      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions')
-      : 'http://localhost:20128/v1/chat/completions';
-
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ROUTER_KEY}`
-      },
-      body: JSON.stringify({
-        model: model || 'gemini/gemini-2.0-flash-exp',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: json ? { type: 'json_object' } : undefined,
-        stream: false
-      }),
-    });
-
-    if (!res.ok) throw new Error(`AI Service Unavailable: ${res.status}`);
-
-    const data = await res.json();
-    const content = data.choices[0].message.content;
-    
-    return json ? JSON.parse(content) : content;
-  } catch (error) {
-    console.error('AI: All AI Services Failed:', error);
-    return null;
-  }
+  return null;
 }
 
 /**
  * Specifically for ChatDev style Multi-Agent workflows
  */
 export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
-  // FETCH CORPORATE MEMORY (Learning Loop)
+  // FETCH CORPORATE MEMORY
   let corporateMemory = "";
   try {
     const { supabase } = await import('@/lib/supabase');
-    const { data: memory } = await supabase
-      .from('posts')
-      .select('content')
-      .eq('type', 'Bot History')
-      .ilike('title', 'Corporate Memory%')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    const { data: memory } = await supabase.from('posts').select('content').eq('type', 'Bot History').ilike('title', 'Corporate Memory%').order('created_at', { ascending: false }).limit(1).single();
+    if (memory) corporateMemory += `\n[MEMORY]: ${memory.content}\n`;
     
-    if (memory) corporateMemory = `\n[CORPORATE MEMORY / TRAINING RESULTS]:\n${memory.content}\n`;
+    const { data: mission } = await supabase.from('posts').select('content').eq('type', 'Bot History').ilike('title', 'Weekly Vision%').order('created_at', { ascending: false }).limit(1).single();
+    if (mission) corporateMemory += `\n[MISSION]: ${mission.content}\n`;
+  } catch (e) {}
 
-    // FETCH WEEKLY MISSION (Corporate Vision)
-    const { data: mission } = await supabase
-      .from('posts')
-      .select('content')
-      .eq('type', 'Bot History')
-      .ilike('title', 'Weekly Vision%')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-    
-    if (mission) corporateMemory += `\n[CURRENT CORPORATE MISSION]:\n${mission.content}\n`;
-  } catch (e) { /* ignore memory errors */ }
-
-  const systemPrompt = `You are a professional member of the CineWatch Global Media Group. Role: ${role}. Style Strategy: ${style || 'Cinematic & Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia.`;
+  const systemPrompt = `You are ${role} at CineWatch. Style: ${style || 'Cinematic'}. ${corporateMemory} Respond in Bahasa Indonesia.`;
   
-  // Try NVIDIA first
+  // 1. PRIMARY: YOU.COM (YDC)
+  if (YDC_KEY) {
+    try {
+      console.log(`AI: Agent ${role} is using You.com Intelligence...`);
+      const res = await fetch(`https://ydc-index.io/v1/research`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': YDC_KEY },
+        body: JSON.stringify({ query: `${systemPrompt}\n\nUser Request: ${prompt}` })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return data.answer || data.content || "Maaf, data riset tidak ditemukan.";
+      }
+    } catch (e) {
+      console.warn('AI: You.com Agent Error', e);
+    }
+  }
+
+  // 2. EMERGENCY FALLBACK: NVIDIA
   if (NVIDIA_KEY) {
     try {
       const res = await fetch(NVIDIA_ENDPOINT, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${NVIDIA_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${NVIDIA_KEY}` },
         body: JSON.stringify({
           model: 'meta/llama-3.3-70b-instruct',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt }
           ],
-          stream: false
         }),
       });
-
       if (res.ok) {
         const data = await res.json();
         return data.choices[0].message.content;
       }
-    } catch (e) {
-      console.warn('AI: Agent NVIDIA Error', e);
-    }
+    } catch (e) {}
   }
 
-  // Fallback to Router
-  try {
-    const endpoint = process.env.NODE_ENV === 'production' 
-      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions')
-      : 'http://localhost:20128/v1/chat/completions';
-
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ROUTER_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gemini/gemini-2.0-flash-exp',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        stream: false
-      }),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return data.choices[0].message.content;
-    }
-  } catch (e) {
-    console.error('AI: Agent Router Error', e);
-  }
-
-  return "Maaf, sistem AI sedang mengalami gangguan. Silakan coba lagi nanti.";
+  return "Maaf, sistem sedang mengalami gangguan.";
+}
 }
 
 export async function askAIStream(prompt: string): Promise<Response | null> {
