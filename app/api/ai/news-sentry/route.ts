@@ -15,8 +15,8 @@ export async function GET(request: Request) {
       'Hyper-Alert'
     );
 
-    if (analysis.includes('NONE')) {
-      return NextResponse.json({ success: true, message: 'No breaking news detected.' });
+    if (analysis.includes('NONE') || analysis.includes('gangguan') || analysis.includes('Maaf')) {
+      return NextResponse.json({ success: true, message: 'No breaking news detected or AI busy.' });
     }
 
     // 3. Check for duplicates
