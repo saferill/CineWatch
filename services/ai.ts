@@ -1,5 +1,42 @@
 import { getTrending } from "@/app/lib/tmdb";
 
+// INTERNAL OFFICE LOGGING (Live Activity Reporting)
+export async function sendInternalLog(agentName: string, message: string) {
+  const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+  const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+
+  if (!tgToken || !tgChatId) return;
+
+  const icons: any = {
+    'CEO': '👔',
+    'Editor-in-Chief': '📝',
+    'Head of Intelligence': '🕵️',
+    'SEO & Growth Engineer': '📊',
+    'Luxury Brand Manager': '💎',
+    'Community Engagement Manager': '🤝',
+    'Strategic Growth Forecaster': '🔮',
+    'Luxury Personal Butler': '🤵',
+    'Elite Intelligence Scout': '🚀',
+    'Empathy Specialist': '✨',
+    'Managing Editor': '🏢'
+  };
+
+  const icon = icons[agentName] || '🤖';
+  const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const formattedMsg = `${icon} <b>[${agentName.toUpperCase()}]</b> | <i>${timestamp}</i>\n\n${message}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: tgChatId, text: formattedMsg, parse_mode: 'HTML' })
+    });
+  } catch (e) {
+    console.error('Internal Log Error:', e);
+  }
+}
+
+
 export interface AISuggestion {
   suggestion: string;
   messageToUser: string;
@@ -12,8 +49,72 @@ const ROUTER_KEY = process.env.AI_ROUTER_KEY || 'sk-3b8bb76c31c5d9f6-ou98nq-8db2
 const NVIDIA_ENDPOINT = (process.env.NVIDIA_API_BASE_URL || 'https://integrate.api.nvidia.com/v1') + '/chat/completions';
 const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
 
+const YDC_KEY = process.env.YDC_API_KEY;
+
+export async function searchYou(query: string): Promise<any> {
+  if (!YDC_KEY) return null;
+  
+  try {
+    const res = await fetch(`https://ydc-index.io/v1/search?query=${encodeURIComponent(query)}`, {
+      headers: { 'X-API-Key': YDC_KEY }
+    });
+
+    if (res.ok) return await res.json();
+  } catch (error) {
+    console.warn('AI: You.com Search Error:', error);
+  }
+  return null;
+}
+
+export async function researchYou(query: string): Promise<string | null> {
+  if (!YDC_KEY) return null;
+  
+  try {
+    const res = await fetch(`https://ydc-index.io/v1/research`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-API-Key': YDC_KEY 
+      },
+      body: JSON.stringify({ query })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data.answer || data.content || null;
+    }
+  } catch (error) {
+    console.warn('AI: You.com Research Error:', error);
+  }
+  return null;
+}
+
+export async function getYouContent(urls: string[]): Promise<any> {
+  if (!YDC_KEY) return null;
+  
+  try {
+    const res = await fetch(`https://ydc-index.io/v1/contents`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-API-Key': YDC_KEY 
+      },
+      body: JSON.stringify({ urls })
+    });
+
+    if (res.ok) return await res.json();
+  } catch (error) {
+    console.warn('AI: You.com Contents Error:', error);
+  }
+  return null;
+}
+
 export async function askAI(prompt: string, json: boolean = true, model?: string): Promise<any> {
-  // 1. Try NVIDIA first (Production Reliable)
+  // If user wants everything via You.com, we can use Research for high-intent queries
+  // But for simple JSON formatting, we still need an LLM.
+  // We will prioritize NVIDIA/9Router for logic and You.com for Knowledge.
+  
+  // 1. Try NVIDIA first (Logic & JSON)
   if (NVIDIA_KEY) {
     try {
       console.log('AI: Attempting NVIDIA API...');
@@ -79,7 +180,35 @@ export async function askAI(prompt: string, json: boolean = true, model?: string
  * Specifically for ChatDev style Multi-Agent workflows
  */
 export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
-  const systemPrompt = `You are a professional member of the CineWatch ChatDev Team. Role: ${role}. Style Strategy: ${style || 'Cinematic & Professional'}. Always respond in Bahasa Indonesia.`;
+  // FETCH CORPORATE MEMORY (Learning Loop)
+  let corporateMemory = "";
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { data: memory } = await supabase
+      .from('posts')
+      .select('content')
+      .eq('type', 'Bot History')
+      .ilike('title', 'Corporate Memory%')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (memory) corporateMemory = `\n[CORPORATE MEMORY / TRAINING RESULTS]:\n${memory.content}\n`;
+
+    // FETCH WEEKLY MISSION (Corporate Vision)
+    const { data: mission } = await supabase
+      .from('posts')
+      .select('content')
+      .eq('type', 'Bot History')
+      .ilike('title', 'Weekly Vision%')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (mission) corporateMemory += `\n[CURRENT CORPORATE MISSION]:\n${mission.content}\n`;
+  } catch (e) { /* ignore memory errors */ }
+
+  const systemPrompt = `You are a professional member of the CineWatch Global Media Group. Role: ${role}. Style Strategy: ${style || 'Cinematic & Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia.`;
   
   // Try NVIDIA first
   if (NVIDIA_KEY) {

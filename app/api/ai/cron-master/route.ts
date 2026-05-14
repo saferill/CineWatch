@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendInternalLog } from '@/services/ai';
 
 // Import the logic or just fetch the internal APIs
 async function triggerTask(path: string, request: Request) {
@@ -69,8 +70,14 @@ export async function GET(req: Request) {
       'digest': '/api/ai/editorial-digest',
       'search-hype': '/api/ai/search-hype',
       'milestones': '/api/ai/milestones',
-      'channel-filler': '/api/ai/channel-filler'
+      'channel-filler': '/api/ai/channel-filler',
+      'office-pulse': 'INTERNAL_PULSE'
     };
+    
+    if (forcedTask === 'office-pulse') {
+      await runOfficePulse();
+      return NextResponse.json({ success: true, message: 'Office pulse sent' });
+    }
     
     const targetPath = taskPaths[forcedTask] || `/api/ai/${forcedTask}`;
     await runTask(forcedTask, targetPath);
@@ -78,25 +85,38 @@ export async function GET(req: Request) {
     // Standard Time-based Logic
     console.log(`CRON-MASTER: Running at ${now.toISOString()} (Hour: ${hour}, Day: ${day})`);
 
-    // 11. Channel Filler (Main Only: 6 Jam)
-    if (hour % 6 === 0) await runTask('channel-filler-main', '/api/ai/channel-filler?type=main');
+    // 11. Dual-Channel Filler (Setiap 6 Jam)
+    if (hour % 6 === 0) {
+      await runTask('channel-filler-main', '/api/ai/channel-filler?type=main');
+      await runTask('channel-filler-anime', '/api/ai/channel-filler?type=anime');
+    }
 
-    // 2. Real-Time Release Pulse (Setiap Jam)
-    await runTask('release-pulse', '/api/ai/release-alert');
+    // 2. Real-Time Release Pulse (Setiap 4 Jam - Sesuai Request User)
+    if (hour % 4 === 0) {
+      await runTask('release-pulse', '/api/ai/release-alert');
+    }
 
-    // 1. Daily Mood (02:00 UTC / 09:00 WIB)
-    if (hour === 2) await runTask('mood', '/api/ai/mood-recommendation');
+    // --- REDAKSI NEWSROOM SCHEDULE (WIB Based) ---
+    // 1. Movie Spotlight (02:00 UTC / 09:00 WIB)
+    if (hour === 2) await runTask('blog-movie', '/api/ai/generate-news?category=movie');
 
-    // 2. Daily Blog (05:00 UTC)
-    if (hour === 5) await runTask('blog', '/api/ai/generate-news');
+    // 2. Series Spotlight (05:00 UTC / 12:00 WIB)
+    if (hour === 5) await runTask('blog-series', '/api/ai/generate-news?category=series');
 
-    // 4. Admin Intel (08:00 UTC)
-    if (hour === 8) await runTask('intel', '/api/ai/admin-intel');
+    // 3. Anime Spotlight (08:00 UTC / 15:00 WIB)
+    if (hour === 8) await runTask('blog-anime', '/api/ai/generate-news?category=anime');
 
-    // 5. Weekly Hype (Monday 09:00 UTC)
+    // 4. Donghua Spotlight (11:00 UTC / 18:00 WIB)
+    if (hour === 11) await runTask('blog-donghua', '/api/ai/generate-news?category=donghua');
+
+    // 5. Admin Intel (03:00 UTC)
+    if (hour === 3) await runTask('intel', '/api/ai/admin-intel');
+    // 11. Global News Sentry (Every hour)
+    await runTask('sentry', '/api/ai/news-sentry');
+    // 6. Weekly Hype (Monday 09:00 UTC)
     if (hour === 9 && day === 1) await runTask('weekly', '/api/ai/weekly-hype');
 
-    // 6. Editorial Digest (Sunday 10:00 UTC)
+    // 7. Editorial Digest (Sunday 10:00 UTC)
     if (hour === 10 && day === 0) await runTask('digest', '/api/ai/editorial-digest');
 
     // 7. Search Hype (Daily 14:00 UTC / 21:00 WIB)
@@ -107,6 +127,9 @@ export async function GET(req: Request) {
 
     // 9. Health Check (Every 4 hours)
     if (hour % 4 === 0) await runTask('health', '/api/ai/health-check');
+
+    // 10. Live Office Pulse (Every hour or minute depending on cron)
+    await runOfficePulse();
 
     // 10. Release Sync (01:00 UTC)
     if (hour === 1) await runTask('sync', '/api/cron/release-sync');
@@ -121,6 +144,24 @@ export async function GET(req: Request) {
     tasks_triggered: Object.keys(results),
     details: results
   });
+}
+
+async function runOfficePulse() {
+  const updates = [
+    { agent: 'CEO', msg: 'Sedang mereview laporan performa mingguan. Standar kita harus tetap nomor satu.' },
+    { agent: 'Head of Intelligence', msg: 'Mendeteksi pergerakan menarik di server rilis global. Sedang memverifikasi data.' },
+    { agent: 'SEO & Growth Engineer', msg: 'Optimasi metadata sedang berjalan. Kita menargetkan posisi #1 di Google hari ini.' },
+    { agent: 'Luxury Brand Manager', msg: 'Memastikan semua narasi tetap elegan. Kita menjual kemewahan, bukan sekadar berita.' },
+    { agent: 'Elite Intelligence Scout', msg: 'Menyisir database rilis 2026. Menemukan beberapa judul yang potensial viral.' },
+    { agent: 'Managing Editor', msg: 'Koordinasi tim penulis selesai. Semua draf sedang dalam proses kurasi ketat.' },
+    { agent: 'Empathy Specialist', msg: 'Menganalisis tren mood user malam ini. Rekomendasi sedang disiapkan.' },
+    { agent: 'Legal Officer', msg: 'Melakukan audit kepatuhan konten. Kita harus tetap aman dari sisi hukum.' },
+    { agent: 'QA Ruthless Critic', msg: 'Draf artikel ini sampah! Saya sudah memberikan 10 catatan perbaikan untuk tim penulis.' },
+    { agent: 'Viral Growth Strategist', msg: 'Menganalisis algoritma TikTok malam ini. Konten kita berikutnya harus meledak!' }
+  ];
+
+  const random = updates[Math.floor(Math.random() * updates.length)];
+  await sendInternalLog(random.agent, random.msg);
 }
 
 

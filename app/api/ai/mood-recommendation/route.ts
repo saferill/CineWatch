@@ -50,20 +50,28 @@ export async function GET(request: Request) {
       const item = data.results?.[Math.floor(Math.random() * 5)] || data.results?.[0];
       if (!item) return;
 
-      const historySlug = `mood-v2-${item.id}-${type}-${today}`;
+      const historySlug = `v3-mood-${item.id}-${type}-${today}`;
       const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
       if (existing) return;
 
       const title = item.title || item.name;
+      
+      // Record FIRST to prevent duplicates
+      await supabase.from('posts').insert([{ title: `History Mood: ${title}`, slug: historySlug, type: 'Bot History' }]);
+
       const year = (item.release_date || item.first_air_date || '').split('-')[0];
       const rating = item.vote_average ? `⭐ ${item.vote_average.toFixed(1)}/10` : '⭐ N/A';
 
       let curation = "";
       try {
-        curation = await chatWithAgent('Mood Curator', `Hari ini ${config.mood}. Mengapa ${type === 'main' ? 'film' : 'anime'} "${title}" cocok ditonton?`, 'Inspiratif');
+        curation = await chatWithAgent(
+          'Empathy & Atmosphere Specialist', 
+          `Hari ini ${config.mood}. Hubungkan suasana hari ini dengan tema film/anime "${title}". Mengapa ini pilihan yang sempurna untuk memuaskan batin user saat ini?`, 
+          'Inspirational & Deep'
+        );
         if (curation.includes("gangguan") || curation.includes("Maaf")) throw new Error("AI Error");
       } catch (e) {
-        curation = `Pilihan terbaik untuk ${config.mood} Anda hari ini.`;
+        curation = `Pilihan terbaik untuk melengkapi ${config.mood} Anda hari ini. Selamat menikmati mahakarya sinematik ini.`;
       }
 
       const watchUrl = `${siteUrl}/${item.title ? 'movie' : 'series'}/${item.id}/watch`;
@@ -86,8 +94,6 @@ export async function GET(request: Request) {
           parse_mode: 'HTML' 
         })
       });
-
-      await supabase.from('posts').insert([{ title: `Mood History: ${label}`, slug: historySlug, type: 'Bot History' }]);
     };
 
     await processMood('main', mainChannelId, 'Movie Mood');

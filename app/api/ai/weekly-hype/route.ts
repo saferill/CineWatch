@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { chatWithAgent, researchYou } from '@/services/ai';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
@@ -53,9 +54,24 @@ export async function GET(request: Request) {
       const upcoming = data.results?.slice(0, 5) || [];
 
       if (upcoming.length > 0) {
+        console.log(`[GROWTH FORECASTER] Analyzing market impact for upcoming ${label}...`);
+        
+        const list = upcoming.map((m: any) => `- ${m.title || m.name} (${m.release_date || m.first_air_date})`).join('\n');
+        
+        // STAGE 1: Market Intelligence
+        const marketIntel = await researchYou(`Anticipation and hype analysis for upcoming ${label} releases: ${list}. Which ones are likely to break the internet in 2026?`);
+
+        // STAGE 2: Forecast Generation
+        const forecast = await chatWithAgent('Strategic Growth Forecaster', 
+          `Upcoming Releases:\n${list}\n\nMarket Intelligence: ${marketIntel}\n\nTask: Berikan satu paragraf analisis pertumbuhan tentang kenapa rilis-rilis ini akan mendominasi pasar dan bagaimana user harus bersiap. Gunakan bahasa bisnis yang visioner.`, 
+          'Visionary & Analytical'
+        );
+
         let tgMessage = `🗓️ <b>CINEWATCH ${label.toUpperCase()} CALENDAR</b>\n` +
                         `━━━━━━━━━━━━━━━━━━━━\n\n` +
-                        `<i>Rangkuman rilis paling dinantikan minggu depan:</i>\n\n`;
+                        `💡 <b>STRATEGIC FORECAST:</b>\n` +
+                        `<i>"${forecast}"</i>\n\n` +
+                        `🔥 <b>TOP UPCOMING RELEASES:</b>\n\n`;
 
         upcoming.forEach((m: any, i: number) => {
           const watchUrl = `${siteUrl}/${m.title ? 'movie' : 'series'}/${m.id}/watch`;
@@ -83,7 +99,23 @@ export async function GET(request: Request) {
       processHype('anime', animeChannelId, 'Anime/Donghua')
     ]);
 
-    return NextResponse.json({ success: true });
+    // STAGE 3: Corporate Vision Setting
+    console.log(`[BOARDROOM] CEO & Forecaster setting Weekly Vision...`);
+    const vision = await chatWithAgent('CineWatch CEO', 
+      `Berdasarkan tren rilis minggu ini, tentukan satu "Misi Besar" perusahaan kita untuk 7 hari ke depan. Fokus pada dominasi pasar dan kualitas brand.`, 
+      'Visionary & Strategic'
+    );
+
+    await supabase.from('posts').insert([{
+      title: `Weekly Vision: ${new Date().toLocaleDateString()}`,
+      content: vision,
+      slug: `vision-${Date.now()}`,
+      type: 'Bot History'
+    }]);
+
+    await sendInternalLog('CEO', `Visi Mingguan Telah Ditetapkan: "${vision}"\n\nSeluruh departemen diperintahkan untuk menyesuaikan strategi mereka!`);
+
+    return NextResponse.json({ success: true, vision });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

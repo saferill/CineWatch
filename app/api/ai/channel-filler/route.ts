@@ -45,9 +45,20 @@ export async function GET(request: Request) {
     const items = data.results?.slice(0, count) || []; 
 
     for (const item of items) {
-      const historySlug = `filler-v2-${item.id}-${type}-${targetChannel}`;
+      // STABLE SLUG
+      const historySlug = `v3-filler-${item.id}-${type}`;
+
+      // 1. Check History FIRST
       const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
       if (existing) continue;
+
+      // 2. Record History BEFORE sending (Prevent duplicates even if sending fails)
+      const title = item.title || item.name;
+      await supabase.from('posts').insert([{ 
+        title: `History: ${title}`, 
+        slug: historySlug, 
+        type: 'Bot History' 
+      }]);
 
       const title = item.title || item.name;
       const year = (item.release_date || item.first_air_date || '').split('-')[0];
@@ -95,18 +106,23 @@ export async function GET(request: Request) {
         })
       });
 
-      await supabase.from('posts').insert([{ title: `History: ${title}`, slug: historySlug, type: 'Bot History' }]);
       if (targetChannel === mainChannelId) summary.main++; else summary.anime++;
       await new Promise(r => setTimeout(r, 2000));
     }
   };
 
   try {
-    console.log(`🤖 AI: Executing Main Channel Filler [Mode: ${typeParam || 'Main'}]...`);
+    console.log(`🤖 AI: Executing Channel Filler [Mode: ${typeParam || 'Main'}]...`);
     
-    // Only process for Main Channel (Movie/Series)
-    await processCategory('movie', mainChannelId);
-    await processCategory('series', mainChannelId);
+    if (typeParam === 'anime') {
+      // Process for Anime/Donghua Channel
+      await processCategory('anime', animeChannelId);
+      await processCategory('donghua', animeChannelId);
+    } else {
+      // Default: Process for Main Channel (Movie/Series)
+      await processCategory('movie', mainChannelId);
+      await processCategory('series', mainChannelId);
+    }
 
     return NextResponse.json({ success: true, summary });
   } catch (error: any) {

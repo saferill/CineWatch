@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { chatWithAgent } from '@/services/ai';
+import { chatWithAgent, searchYou } from '@/services/ai';
 import { supabase } from '@/lib/supabase';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -81,8 +81,8 @@ export async function GET(request: Request) {
     const [movies, tv, anime, donghua] = await Promise.all([
       fetchTMDB('/movie/now_playing?language=id-ID&page=1'),
       fetchTMDB('/tv/on_the_air?language=id-ID&page=1'),
-      fetchTMDB('/discover/tv?with_genres=16&sort_by=popularity.desc&language=id-ID'),
-      fetchTMDB('/discover/tv?with_origin_country=CN&sort_by=popularity.desc&language=id-ID')
+      fetchTMDB('/discover/tv?with_genres=16&with_original_language=ja&sort_by=first_air_date.desc&language=id-ID&page=1'),
+      fetchTMDB('/discover/tv?with_genres=16&with_origin_country=CN&sort_by=first_air_date.desc&language=id-ID&page=1')
     ]);
 
     let alerts = [
@@ -104,22 +104,37 @@ export async function GET(request: Request) {
         : (process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID);
 
       if (!targetChannel) continue;
-      const historySlug = `pulse-v2-${item.id}-${item.category}-${targetChannel}`;
+      
+      // STABLE SLUG: Independent of fallback changes
+      const historySlug = `v3-pulse-${item.id}-${item.category}`;
 
+      // 1. Check History FIRST
       const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
       if (existing) continue;
 
+      // 2. Record History IMMEDIATELY (Prevent race conditions)
       const name = item.title || item.name;
+      await supabase.from('posts').insert([{ 
+        title: `History: ${name}`, 
+        slug: historySlug, 
+        type: 'Bot History' 
+      }]);
+
       let teaser = "";
       try {
-        teaser = await chatWithAgent('Luxury Promo', `Buat teaser pendek mewah untuk rilis baru: ${name}.`, 'Elegant');
+        // STAGE 1: Elite Intel Gathering
+        console.log(`[ELITE SCOUT] Scanning global intel for: ${name}...`);
+        const intel = await researchYou(`Search for the most interesting fact or news about the ${item.category} "${name}" released in 2026. What makes it a must-watch?`);
+        
+        // STAGE 2: Premium Promo Generation
+        teaser = await chatWithAgent('Elite Intelligence Scout', `Rilis Baru Terdeteksi: ${name}.\n\nIntel Terkini: ${intel}\n\nTask: Buat teaser pendek (max 200 karakter) yang sangat menggoda, eksklusif, dan profesional. Fokus pada "Kenapa user harus nonton SEKARANG".`, 'Compelling & Authoritative');
+        
         if (teaser.includes("gangguan") || teaser.includes("Maaf")) throw new Error("AI Error");
       } catch (e) {
-        teaser = (item.overview || 'Rilis baru eksklusif di CineWatch.').slice(0, 150) + "...";
+        teaser = (item.overview || 'Mahakarya terbaru telah tiba di CineWatch. Segera amankan kursi digital Anda.').slice(0, 150) + "...";
       }
 
       await sendNotifications(item, teaser, item.category);
-      await supabase.from('posts').insert([{ title: `Pulse History: ${name}`, slug: historySlug, type: 'Bot History' }]);
       sentCount++;
       await new Promise(r => setTimeout(r, 2000)); // Delay to prevent TG ban
     }

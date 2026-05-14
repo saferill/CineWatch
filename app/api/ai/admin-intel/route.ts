@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { chatWithAgent } from '@/services/ai';
 
 export async function GET() {
   try {
@@ -8,29 +9,32 @@ export async function GET() {
     const todayISO = today.toISOString();
 
     // 1. Gather Intelligence Stats
-    
-    // Total articles generated today
     const { count: articleCount } = await supabase
       .from('posts')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', todayISO);
 
-    // Any recent dead link reports? (Optional: assume a 'reports' table exists if you want tracking)
-    // For now, we use metadata or just health stats.
+    // 2. Executive Intelligence Analysis
+    console.log(`[ADMIN INTEL] Advisor is analyzing daily operations...`);
+    const analysis = await chatWithAgent('Executive Intelligence Advisor', 
+      `Statistik Hari Ini: ${articleCount} Artikel Terbit.\n\nTask: Berikan laporan eksekutif singkat kepada CEO. Evaluasi performa sistem dan berikan satu saran strategis untuk meningkatkan engagement hari ini.`, 
+      'Professional & Strategic'
+    );
 
-    // 2. Build the Intelligence Report (ChatDev Style)
     const discordWebhook = process.env.DISCORD_RELEASE_WEBHOOK_URL;
     const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
     const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
-    const reportTitle = `📊 DAILY ADMIN INTELLIGENCE [${new Date().toLocaleDateString('id-ID')}]`;
+    const reportTitle = `💎 **EXECUTIVE INTELLIGENCE BRIEFING** [${new Date().toLocaleDateString('id-ID')}]`;
     const reportText = `
-🛡️ *STATUS KESEHATAN SISTEM:* OPTIMAL
-📰 *KONTEN BARU:* ${articleCount || 0} Artikel Elit terbit hari ini.
-⚡ *PERFORMA:* Database Supabase Stabil.
-🤖 *AI STATUS:* 4 Agen ChatDev aktif & sinkron.
+**SITUASI OPERASIONAL:**
+✅ **Status**: Optimal High-Efficiency
+📰 **Konten**: ${articleCount || 0} Intel Articles Published
+⚡ **Sistem**: Database Synchronized
+🤖 **AI Ops**: 7-Stage Pipeline Active
 
-*Rangkuman:* Website berjalan dalam mode High-Output. Semua sistem otomatisasi berfungsi 100%.
+**ADVISORY INSIGHT:**
+_"${analysis}"_
     `;
 
     // 3. Dispatch to Admin Channels

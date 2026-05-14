@@ -25,9 +25,9 @@ export async function GET(request: Request) {
     const tgChatId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
     const celebrationMsg = await chatWithAgent(
-      'Celebration Manager',
-      `CineWatch mencapai angka baru: ${stats.users} User Terdaftar, ${stats.posts} Artikel Blog, dan ${stats.searches} Total Pencarian. Buat pesan perayaan yang sangat antusias dan bangga!`,
-      'Energik, Bangga, dan Viral'
+      'Community Engagement Manager',
+      `Platform Update: ${stats.users} Users, ${stats.posts} Articles, ${stats.searches} Searches.\n\nTask: Buat pesan perayaan korporat yang elegan dan apresiatif. Fokus pada "Terima Kasih kepada Komunitas" dan "Visi Masa Depan CineWatch".`,
+      'Appreciative & Professional'
     );
 
     const message = `🎉 **CINEWATCH MILESTONE REACHED!** 🎉\n\n` +

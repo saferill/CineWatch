@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { chatWithAgent } from '@/services/ai';
+import { chatWithAgent, searchYou } from '@/services/ai';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -39,18 +39,24 @@ export async function GET(request: Request) {
 
     if (trending.length === 0) return NextResponse.json({ success: true });
 
-    // 3. AI Analysis
+    // 3. STAGE 1: Market Data Analysis
     const list = trending.map(([q, count]) => `${q} (${count}x)`).join(', ');
+    const topQuery = trending[0][0];
+    
+    console.log(`[DATA SCIENTIST] Analyzing psychological triggers for: ${topQuery}...`);
+    const trendContext = await researchYou(`Analyze why "${topQuery}" is trending in May 2026. What are the psychological triggers, release statuses, or news events behind this?`);
+    
+    // STAGE 2: Strategic Insight Generation
     let analysis = "";
     try {
       analysis = await chatWithAgent(
-        'Search Analyst',
-        `Berikut adalah kata kunci yang paling banyak dicari user dalam 24 jam terakhir: ${list}. Berikan ulasan singkat (1-2 kalimat) tentang tren apa yang sedang terjadi dan apa yang harus dilakukan Admin.`,
-        'Profesional & Strategis'
+        'Market Data Scientist',
+        `User Activity Data: ${list}.\n\nDeep Context: ${trendContext}\n\nTask: Jelaskan tren psikologi penonton saat ini dan berikan saran strategis untuk Admin (misal: "Segera rilis konten X" atau "User sedang mencari link Y"). Gunakan bahasa bisnis yang tajam dan elit.`,
+        'Strategic & Analytical'
       );
       if (analysis.includes("gangguan") || analysis.includes("Maaf")) throw new Error("AI Error");
     } catch (e) {
-      analysis = "Tren pencarian hari ini didominasi oleh judul-judul populer. Admin disarankan untuk memantau ketersediaan link pada judul-judul di atas.";
+      analysis = `Permintaan pencarian didominasi oleh "${topQuery}". Admin disarankan untuk memperbarui metadata dan ketersediaan link pada judul tersebut guna mempertahankan retensi user.`;
     }
 
     // 4. Dispatch to Admin
