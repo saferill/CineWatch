@@ -2,7 +2,7 @@ import React from 'react';
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { IconArrowLeft, IconCalendar, IconUser, IconSparkles, IconShare, IconPlayerPlay } from '@tabler/icons-react';
+import { IconArrowLeft, IconCalendar, IconUser, IconSparkles, IconShare, IconPlayerPlay, IconShieldCheck, IconCertificate, IconEyeCheck } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { getBlogSummary } from '@/services/ai';
 import { CinematicImage } from '@/components/media/cinematic-image';
@@ -68,7 +68,23 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
               <div className="flex items-center gap-2">
                 <IconUser className="w-4 h-4 text-accent" />
-                CineWatch Assistant
+                CineWatch Board
+              </div>
+            </div>
+
+            {/* CORPORATE EDITORIAL BADGES (Milestone 1) */}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
+                <IconShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Verified by Legal</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
+                <IconCertificate className="w-4 h-4 text-blue-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-blue-400">QA Audit Passed</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
+                <IconEyeCheck className="w-4 h-4 text-amber-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-400">Strategically Curated</span>
               </div>
             </div>
           </div>
