@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { chatWithAgent, searchYou, researchYou } from '@/services/ai';
+import { chatWithAgent, searchYou, researchYou, sendInternalLog } from '@/services/ai';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
