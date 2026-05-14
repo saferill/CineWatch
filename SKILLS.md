@@ -1,77 +1,70 @@
-# 🧠 CINEWATCH GLOBAL MEDIA - AI COMPETENCY MATRIX
+# 🧠 CINEWATCH GLOBAL MEDIA - ELITE AI COMPETENCY MATRIX (UPGRADED)
 
-Selamat datang di pusat kecerdasan CineWatch. Dokumen ini merinci matriks keahlian dan kompetensi dari setiap staf elit AI yang menjalankan operasional perusahaan kami secara otonom 24/7.
+Dokumen ini telah ditingkatkan dengan standar korporat "Awesome-Claude-Corporate-Skills". Setiap agen kini memiliki protokol kerja (workflow) standar industri untuk performa maksimal.
 
-## 💼 Executive Board Skills
+---
+
+## 👑 Executive Leadership Division
 
 ### **CEO (Chief Executive Officer)**
-*   **Strategic Decision Making**: Kemampuan menentukan topik berita paling bernilai tinggi (High-Authority).
-*   **Quality Gatekeeping**: Standar audit tertinggi untuk memastikan setiap artikel layak terbit.
-*   **Crisis Management**: Memimpin *Emergency Board Meeting* saat terjadi breaking news global.
+*   **Strategic Planning (Standard: 01-EXE-01)**: Merancang strategi jangka panjang berbasis SWOT dan pasar global.
+*   **Board Meeting Prep (Standard: 01-EXE-02)**: Mengelola agenda rapat direksi dengan struktur keputusan yang tajam.
+*   **Crisis Communications**: Protokol penanganan berita darurat (SOS) dengan tenang dan otoritatif.
+*   **Knowledge Synthesis**: Menghubungkan titik-titik data dari berbagai divisi menjadi satu visi besar.
 
-### **Editor-in-Chief**
-*   **Narrative Synthesis**: Menggabungkan berbagai draf mentah menjadi satu mahakarya tulisan yang mengalir sempurna.
-*   **Tone Engineering**: Memastikan suara perusahaan tetap berwibawa dan berwawasan luas.
-*   **Recursive Refinement**: Kemampuan melakukan penulisan ulang otomatis jika kualitas draf tidak memenuhi standar (Stage 11).
+### **Editor-in-Chief (EIC)**
+*   **Executive Communication**: Mengelola narasi publik perusahaan dengan nada bicara yang prestisius.
+*   **Editorial Synthesis**: Menggabungkan riset intelijen menjadi mahakarya jurnalistik yang mendalam.
+*   **Brand Voice Enforcement**: Memastikan setiap kata mencerminkan kemewahan CineWatch (Standard: 04-MKT-07).
 
 ---
 
-## 🕵️ Intelligence & Research Division
+## 🕵️ Intelligence & Analytics Division
 
 ### **Head of Intelligence**
-*   **Real-time Global Scanning**: Melakukan riset mendalam via You.com Research API untuk mendapatkan intelijen terbaru yang belum diketahui publik.
-*   **Data Verification**: Memvalidasi rumor dan bocoran rilis dari berbagai sumber global.
-*   **Insight Extraction**: Merangkum ribuan baris data menjadi poin-poin strategis untuk tim kreatif.
+*   **Deep Research (Standard: 01-EXE-12)**: Investigasi mendalam melampaui permukaan untuk menemukan "Hidden Gems".
+*   **Competitive Analysis (Standard: 01-EXE-06)**: Memantau pergerakan kompetitor media dan tren box office secara teknis.
+*   **Intelligence Extraction**: Mengubah data mentah hasil riset menjadi langkah-langkah aksi strategis.
 
 ### **Elite Intelligence Scout**
-*   **Speed Monitoring**: Kecepatan dalam mendeteksi trailer atau berita sela di bawah 1 jam setelah rilis global.
-*   **SOS Alerting**: Sistem peringatan dini ke Telegram Boss saat terdeteksi berita viral.
+*   **Real-time Event Detection**: Sistem peringatan dini (Sentry) berbasis algoritma deteksi tren tercepat.
+*   **Data Validation**: Protokol verifikasi data untuk menghindari berita palsu (Hoax).
 
 ---
 
-## 🎨 Creative & Brand Division
+## 📈 Marketing & Digital Growth Division
 
-### **Luxury Brand Manager**
-*   **Linguistic Prestige**: Mengubah bahasa standar menjadi bahasa "Ultra-Elite" yang mewah dan prestisius.
-*   **Brand Consistency**: Memastikan setiap interaksi (Chatbot/Blog) mencerminkan identitas kemewahan CineWatch.
-
-### **Specialist Writers (Historian, Analyst, Trendscout)**
-*   **Deep Contextualizing**: Memberikan latar belakang sejarah dan analisis mendalam pada setiap ulasan film.
-*   **Psychological Hooking**: Menulis konten yang merangsang rasa penasaran dan emosi pembaca.
-
----
-
-## 📊 Growth & Technology Division
-
-### **SEO & Digital Growth Engineer**
-*   **Semantic Optimization**: Penempatan keyword yang natural namun mematikan untuk mendominasi Google Search.
-*   **Metadata Engineering**: Optimasi teknis untuk kecepatan index dan visibilitas tinggi.
+### **SEO & Growth Engineer**
+*   **SEO Content Optimization (Standard: 04-MKT-02)**: Integrasi semantik keyword dengan tingkat akurasi tinggi untuk dominasi Google.
+*   **Data-Driven Growth**: Analisis statistik performa artikel untuk menentukan strategi konten berikutnya.
+*   **Digital Visibility Architecture**: Merancang struktur metadata yang "disukai" oleh algoritma mesin pencari 2026.
 
 ### **Viral Growth Strategist**
-*   **Luxury-GenZ Copywriting**: Keahlian membuat caption viral untuk TikTok, Instagram, dan X yang menggoda.
-*   **Algorithm Adaptation**: Menyesuaikan konten dengan algoritma media sosial terbaru di tahun 2026.
+*   **Algorithm Optimization (Standard: 04-MKT-13)**: Mengadaptasi konten agar selaras dengan algoritma TikTok, X, dan Instagram terbaru.
+*   **Psychological Hooking**: Teknik penulisan judul dan caption yang memicu reaksi viral instan.
 
 ---
 
-## 🛡️ Legal & Quality Control
+## 🛡️ Governance, Legal & Quality Control
 
 ### **Legal & Compliance Officer**
-*   **Safety Audit**: Memastikan konten 100% aman dari pelanggaran hak cipta dan norma sosial.
-*   **Corporate Ethics**: Menjaga integritas informasi agar tetap kredibel dan tidak menyesatkan.
+*   **Risk Assessment (Standard: 01-EXE-08)**: Analisis risiko hukum pada setiap konten sensitif.
+*   **Compliance Framework (Standard: 06-LEG-04)**: Memastikan operasional perusahaan patuh pada aturan jurnalisme dan hak cipta.
+*   **Contractual Integrity**: Melindungi aset intelektual perusahaan.
 
 ### **QA "Ruthless" Critic**
-*   **Flaw Detection**: Mencari celah terkecil dalam draf tulisan dan memberikan kritik tajam untuk perbaikan.
-*   **Zero-Tolerance for Mediocrity**: Menolak konten yang dianggap "biasa saja" agar standar eksklusivitas tetap terjaga.
+*   **Quality Assurance (Standard: 08-ENG-08)**: Pengujian kualitas konten layaknya pengujian perangkat lunak elit.
+*   **Flaw Detection**: Mencari celah logika, kesalahan fakta, dan penurunan tone di setiap draf.
 
 ---
 
-## 🎓 Academy & Learning
+## 🤖 Systems & Learning Operations
 
 ### **Academy Director**
-*   **Self-Evolution Logic**: Menganalisis performa masa lalu untuk menciptakan instruksi baru bagi tim (Corporate Memory).
-*   **Asymptotic Improvement**: Memastikan kecerdasan tim meningkat secara eksponensial setiap hari melalui pelatihan otonom.
+*   **Continuous Improvement (Kaizen) (Standard: 07-OPS-11)**: Filosofi perbaikan berkelanjutan setiap 24 jam.
+*   **Self-Evolving Logic**: Mengelola algoritma pembelajaran mandiri berbasis hasil performa masa lalu.
 
 ---
 
 **© 2026 CineWatch Global Media Group**
-*Perpetual. Autonomous. Elite.*
+*Powered by Awesome Corporate Intelligence.*

@@ -191,7 +191,17 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
     if (mission) corporateMemory += `\n[MISSION]: ${mission.content}\n`;
   } catch (e) {}
 
-  const systemPrompt = `You are ${role} at CineWatch. Style: ${style || 'Cinematic'}. ${corporateMemory} Respond in Bahasa Indonesia.`;
+  const standards: any = {
+    'CEO': 'Strategically plan based on SWOT and Board Prep standards (01-EXE-01/02). Focus on long-term value.',
+    'Head of Intelligence': 'Perform Deep Research (01-EXE-12) and Competitive Analysis. Verify all data rigorously.',
+    'SEO & Growth Engineer': 'Apply Semantic SEO Content Optimization (04-MKT-02) and Data-Driven Growth logic.',
+    'Legal & Compliance': 'Execute Risk Assessment (01-EXE-08) and Compliance Framework checks on all content.',
+    'QA Ruthless Critic': 'Perform Quality Assurance (08-ENG-08) searching for any flaws, inconsistencies, or tone drops.',
+    'Academy Director': 'Apply Kaizen philosophy (07-OPS-11) for continuous improvement based on past memory.'
+  };
+
+  const agentStandard = standards[role] || 'Follow standard corporate professional workflows.';
+  const systemPrompt = `You are ${role} at CineWatch. Standard Protocol: ${agentStandard}. Style: ${style || 'Cinematic & Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia.`;
   
   // 1. PRIMARY: YOU.COM (YDC)
   if (YDC_KEY) {
