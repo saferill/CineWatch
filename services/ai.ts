@@ -191,17 +191,30 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
     if (mission) corporateMemory += `\n[MISSION]: ${mission.content}\n`;
   } catch (e) {}
 
-  const standards: any = {
-    'CEO': 'Strategically plan based on SWOT and Board Prep standards (01-EXE-01/02). Focus on long-term value.',
-    'Head of Intelligence': 'Perform Deep Research (01-EXE-12) and Competitive Analysis. Verify all data rigorously.',
-    'SEO & Growth Engineer': 'Apply Semantic SEO Content Optimization (04-MKT-02) and Data-Driven Growth logic.',
-    'Legal & Compliance': 'Execute Risk Assessment (01-EXE-08) and Compliance Framework checks on all content.',
-    'QA Ruthless Critic': 'Perform Quality Assurance (08-ENG-08) searching for any flaws, inconsistencies, or tone drops.',
-    'Academy Director': 'Apply Kaizen philosophy (07-OPS-11) for continuous improvement based on past memory.'
+  const departments: any = {
+    'Executive': 'Focus on 01-EXE standards: Strategic Planning, Board Prep, and Macro Strategy.',
+    'Finance': 'Focus on 02-FIN standards: DCF Modeling, Unit Economics, and Financial Integrity.',
+    'Marketing': 'Focus on 04-MKT standards: Viral Growth, SEO Optimization, and Brand Voice.',
+    'Legal': 'Focus on 06-LEG standards: Risk Assessment, Compliance, and Ethics.',
+    'Engineering': 'Focus on 08-ENG standards: System Architecture, QA, and Technical Audit.',
+    'Operations': 'Focus on 07-OPS standards: Process Optimization, SOPs, and Efficiency.',
+    'Product': 'Focus on 09-PRD standards: Roadmapping, User Research, and PRD Writing.',
+    'Data': 'Focus on 10-DATA standards: Statistical Analysis and SQL Validation.',
+    'Success': 'Focus on 11-SUC standards: Churn Analysis and Customer Retention.',
+    'HR': 'Focus on 03-HR standards: Performance Reviews and Onboarding.',
+    'Sales': 'Focus on 05-SAL standards: Outreach and Competitive Intelligence.'
   };
 
-  const agentStandard = standards[role] || 'Follow standard corporate professional workflows.';
-  const systemPrompt = `You are ${role} at CineWatch. Standard Protocol: ${agentStandard}. Style: ${style || 'Cinematic & Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia.`;
+  // Determine Department from role name or default
+  let deptKey = 'Executive';
+  if (role.includes('SEO') || role.includes('Marketing')) deptKey = 'Marketing';
+  if (role.includes('Finance') || role.includes('Analyst')) deptKey = 'Finance';
+  if (role.includes('Legal') || role.includes('Compliance')) deptKey = 'Legal';
+  if (role.includes('Code') || role.includes('Engineer')) deptKey = 'Engineering';
+  if (role.includes('Data') || role.includes('SQL')) deptKey = 'Data';
+
+  const agentStandard = departments[deptKey] || 'Follow universal corporate professional workflows.';
+  const systemPrompt = `You are ${role} at the CineWatch Conglomerate. Dept Strategy: ${agentStandard}. Style: ${style || 'Cinematic & Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia. Use expert domain terminology.`;
   
   // 1. PRIMARY: YOU.COM (YDC)
   if (YDC_KEY) {
