@@ -19,11 +19,22 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: true, message: 'No breaking news detected or AI busy.' });
     }
 
-    // 3. Check for duplicates
-    const slug = `breaking-${Date.now()}`;
+    // 3. Robust Deduplication (Anti-Spam)
+    const cleanAnalysis = analysis.slice(0, 50).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const slug = `sentry-v4-${cleanAnalysis}`;
     
-    // 4. Emergency Board Meeting
-    await sendInternalLog('Elite Intelligence Scout', `⚠️ SOS! BERITA BREAKING DETECTED: "${analysis.slice(0, 50)}..."`);
+    const { data: existing } = await supabase.from('posts').select('id').eq('slug', slug).maybeSingle();
+    if (existing) return NextResponse.json({ success: true, message: 'News already processed.' });
+
+    // 4. Record History IMMEDIATELY
+    await supabase.from('posts').insert([{ 
+      title: `Breaking News: ${analysis.slice(0, 50)}`, 
+      slug: slug, 
+      type: 'Bot History'
+    }]);
+
+    // 5. Emergency Board Meeting
+    await sendInternalLog('Elite Intelligence Scout', `⚠️ SOS! BERITA BREAKING DETECTED: "${analysis.slice(0, 100)}..."`);
     
     const decision = await chatWithAgent('CEO', 
       `Breaking News: ${analysis}\n\nTask: Kita harus segera bereaksi! Berikan instruksi kepada tim redaksi untuk membuat artikel spesial 'Breaking News' sekarang juga.`, 

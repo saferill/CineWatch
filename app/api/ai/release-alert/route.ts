@@ -14,9 +14,12 @@ async function sendNotifications(item: any, teaser: string, type: string) {
   const mainChannelId = process.env.TELEGRAM_CHANNEL_ID || process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
   const animeChannelId = process.env.TELEGRAM_ANIME_CHANNEL_ID;
   
-  // Choose Target Channel
+  // Choose Target Channel with robust fallback
   const isAnimeDonghua = type === 'Anime' || type === 'Donghua';
-  const targetChannel = isAnimeDonghua ? animeChannelId : mainChannelId;
+  let targetChannel = isAnimeDonghua ? animeChannelId : mainChannelId;
+  
+  // Jika channel anime kosong, kirim ke channel utama agar info tidak hilang
+  if (!targetChannel && isAnimeDonghua) targetChannel = mainChannelId;
 
   if (!targetChannel || !tgToken) return;
 
@@ -105,20 +108,33 @@ export async function GET(request: Request) {
 
       if (!targetChannel) continue;
       
-      // STABLE SLUG: Independent of fallback changes
-      const historySlug = `v3-pulse-${item.id}-${item.category}`;
+      // STABLE SLUG: Independent of fallback changes (v4 for fresh start)
+      const historySlug = `v4-final-alert-${item.id}-${item.category.toLowerCase()}`;
 
-      // 1. Check History FIRST
-      const { data: existing } = await supabase.from('posts').select('id').eq('slug', historySlug).single();
-      if (existing) continue;
+      // 1. Check History FIRST with extra caution
+      const { data: existing, error: checkError } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('slug', historySlug)
+        .maybeSingle(); // Menggunakan maybeSingle agar tidak error jika null
+      
+      if (existing || (checkError && checkError.code !== 'PGRST116')) {
+        console.log(`[DEDUPLICATOR] Skipping duplicate: ${name}`);
+        continue;
+      }
 
       // 2. Record History IMMEDIATELY (Prevent race conditions)
-      const name = item.title || item.name;
-      await supabase.from('posts').insert([{ 
-        title: `History: ${name}`, 
+      const { error: insertError } = await supabase.from('posts').insert([{ 
+        title: `Alert Sent: ${name}`, 
         slug: historySlug, 
-        type: 'Bot History' 
+        type: 'Bot History',
+        content: `Sent to Telegram on ${new Date().toISOString()}`
       }]);
+
+      if (insertError) {
+        console.warn(`[DEDUPLICATOR] Conflict or Error for ${name}:`, insertError.message);
+        continue; // Jika gagal catat sejarah, JANGAN KIRIM (demi keamanan spam)
+      }
 
       let teaser = "";
       try {
