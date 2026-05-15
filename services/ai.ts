@@ -263,6 +263,29 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
   return "Maaf Boss, tim AI sedang sinkronisasi. Coba lagi dalam beberapa saat.";
 }
 
+/**
+ * NEW: Autonomous SOP Engine
+ * Orchestrates a multi-stage workflow for high-quality output
+ */
+export async function executeWorkflow(taskName: string, initialPrompt: string): Promise<string> {
+  console.log(`[WORKFLOW] Starting: ${taskName}`);
+  
+  // STAGE 1: PLANNING (Project Manager)
+  const plan = await chatWithAgent('Project Manager', `Task: ${taskName}. Content: ${initialPrompt}. Buat rencana kerja detail untuk spesialis agar hasilnya sempurna.`);
+  
+  // STAGE 2: EXECUTION (Primary Specialist)
+  const draft = await chatWithAgent('Senior Specialist', `Rencana Kerja: ${plan}. Kerjakan tugas ini sekarang dengan kualitas terbaik.`, 'Deep & Detailed');
+  
+  // STAGE 3: QA & AUDIT (Ruthless Auditor)
+  const audit = await chatWithAgent('QA Auditor', `Draft Hasil: ${draft}. Cari kesalahan, inkonsistensi, atau bagian yang kurang mewah. Berikan feedback pedas.`);
+  
+  // STAGE 4: FINAL REFINEMENT (Executive Editor)
+  const final = await chatWithAgent('Executive Editor', `Draft: ${draft}. Feedback Audit: ${audit}. Perbaiki draft ini menjadi hasil akhir yang sempurna dan layak tayang di CineWatch. Respond in Bahasa Indonesia.`);
+  
+  console.log(`[WORKFLOW] Completed: ${taskName}`);
+  return final;
+}
+
 export async function askAIStream(prompt: string): Promise<Response | null> {
   // 1. Try NVIDIA first
   if (NVIDIA_KEY) {

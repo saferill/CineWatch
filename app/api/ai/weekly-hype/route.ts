@@ -61,10 +61,10 @@ export async function GET(request: Request) {
         // STAGE 1: Market Intelligence
         const marketIntel = await researchYou(`Anticipation and hype analysis for upcoming ${label} releases: ${list}. Which ones are likely to break the internet in 2026?`);
 
-        // STAGE 2: Forecast Generation
-        const forecast = await chatWithAgent('Strategic Growth Forecaster', 
-          `Upcoming Releases:\n${list}\n\nMarket Intelligence: ${marketIntel}\n\nTask: Berikan satu paragraf analisis pertumbuhan tentang kenapa rilis-rilis ini akan mendominasi pasar dan bagaimana user harus bersiap. Gunakan bahasa bisnis yang visioner.`, 
-          'Visionary & Analytical'
+        // STAGE 2: Professional SOP Execution (The Brain Flow)
+        const forecast = await executeWorkflow(
+          `Market Growth Forecast for ${label}`,
+          `Upcoming Releases:\n${list}\n\nMarket Intelligence: ${marketIntel}. Analisis bagaimana rilis ini akan mendominasi pasar.`
         );
 
         let tgMessage = `🗓️ <b>CINEWATCH ${label.toUpperCase()} CALENDAR</b>\n` +
@@ -99,11 +99,11 @@ export async function GET(request: Request) {
       processHype('anime', animeChannelId, 'Anime/Donghua')
     ]);
 
-    // STAGE 3: Corporate Vision Setting
-    console.log(`[BOARDROOM] CEO & Forecaster setting Weekly Vision...`);
-    const vision = await chatWithAgent('CineWatch CEO', 
-      `Berdasarkan tren rilis minggu ini, tentukan satu "Misi Besar" perusahaan kita untuk 7 hari ke depan. Fokus pada dominasi pasar dan kualitas brand.`, 
-      'Visionary & Strategic'
+    // STAGE 3: Corporate Vision Setting (Strategic SOP)
+    console.log(`[BOARDROOM] Executing Boardroom SOP for Weekly Vision...`);
+    const vision = await executeWorkflow(
+      'Weekly Corporate Mission',
+      `Berdasarkan tren rilis minggu ini, tentukan satu "Misi Besar" perusahaan kita untuk 7 hari ke depan. Fokus pada dominasi pasar dan kualitas brand.`
     );
 
     await supabase.from('posts').insert([{
