@@ -45,7 +45,7 @@ const YDC_KEY = process.env.YDC_API_KEY;
 const ROUTER_KEY = process.env.AI_ROUTER_KEY || 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
 
 export async function askAI(prompt: string, json: boolean = true): Promise<any> {
-  // 1. TRY NVIDIA (Fast & Powerful)
+  // 1. TRY NVIDIA
   if (NVIDIA_KEY) {
     try {
       const res = await fetch(NVIDIA_ENDPOINT, {
@@ -65,7 +65,7 @@ export async function askAI(prompt: string, json: boolean = true): Promise<any> 
     } catch (e) {}
   }
 
-  // 2. TRY GEMINI 2.0 (The Smart Backup)
+  // 2. TRY GEMINI (Fallback)
   try {
     const res = await fetch('https://api.9router.com/v1/chat/completions', {
       method: 'POST',
@@ -85,6 +85,30 @@ export async function askAI(prompt: string, json: boolean = true): Promise<any> 
   return null;
 }
 
+export async function searchYou(query: string): Promise<any> {
+  if (!YDC_KEY) return null;
+  try {
+    const res = await fetch(`https://api.ydc-index.io/search?query=${encodeURIComponent(query)}`, {
+      headers: { 'X-API-Key': YDC_KEY }
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {}
+  return null;
+}
+
+export async function getYouContent(urls: string[]): Promise<any> {
+  if (!YDC_KEY) return null;
+  try {
+    const res = await fetch(`https://api.ydc-index.io/contents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': YDC_KEY },
+      body: JSON.stringify({ urls })
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {}
+  return null;
+}
+
 export async function researchYou(query: string): Promise<string | null> {
   if (!YDC_KEY) return null;
   try {
@@ -99,6 +123,24 @@ export async function researchYou(query: string): Promise<string | null> {
   return null;
 }
 
+export async function askAIStream(prompt: string): Promise<Response | null> {
+  if (NVIDIA_KEY) {
+    try {
+      const res = await fetch(NVIDIA_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${NVIDIA_KEY}` },
+        body: JSON.stringify({
+          model: 'meta/llama-3.3-70b-instruct',
+          messages: [{ role: 'user', content: prompt }],
+          stream: true
+        }),
+      });
+      if (res.ok) return res;
+    } catch (e) {}
+  }
+  return null;
+}
+
 export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
   let corporateMemory = "";
   try {
@@ -109,19 +151,16 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
 
   const systemPrompt = `You are ${role} at CineWatch. Style: ${style || 'Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia.`;
   
-  // 1. Research if needed
   let research = "";
   if (prompt.includes('berita') || prompt.includes('rilis')) {
     research = await researchYou(prompt) || "";
   }
 
-  // 2. Ask AI (NVIDIA -> GEMINI Fallback)
   const finalPrompt = `${systemPrompt}\n\nResearch: ${research}\n\nTask: ${prompt}`;
   const result = await askAI(finalPrompt, false);
 
   if (result) return result;
 
-  // 3. STATIC EMERGENCY FALLBACK
   const fallbacks: any = {
     'Scout': 'Intelijen kami mendeteksi rilis ini sebagai prioritas tinggi. Wajib tonton segera di CineWatch!',
     'CEO': 'Misi kita adalah dominasi konten dan kualitas brand sinematik terbaik.',
@@ -135,4 +174,37 @@ export async function executeWorkflow(taskName: string, initialPrompt: string): 
   const draft = await chatWithAgent('Senior Specialist', `Eksekusi: ${plan}`, 'Detailed');
   const final = await chatWithAgent('Executive Editor', `Refine draft: ${draft}`, 'Luxury');
   return final;
+}
+
+export async function analyzeSearchQuery(query: string) {
+  const trending = await getTrending().catch(() => []);
+  const trendingTitles = trending.slice(0, 5).map(m => m.title).join(', ');
+  const prompt = `User searched for: "${query}". Trending: ${trendingTitles}. Analyze intent and suggest 3 titles. JSON: { "type": "...", "intent": "...", "suggestedTitles": ["..."], "message": "..." }`;
+  return askAI(prompt);
+}
+
+export async function getMovieAIInsights(title: string, overview: string) {
+  const prompt = `Analyze movie: "${title}". Overview: "${overview}". Provide JSON: { "insight": "Why watch this (max 150 chars)", "mood": "One word mood" }`;
+  return askAI(prompt);
+}
+
+export async function getBlogSummary(content: string) {
+  const prompt = `Summarize blog post into 3 points. JSON: { "summary": ["...", "...", "..."] }`;
+  return askAI(prompt);
+}
+
+export async function trackSearch(query: string) {
+  if (!query) return;
+  const { supabase } = await import('@/lib/supabase');
+  supabase.from('search_history').insert({ query: query.toLowerCase() }).then();
+}
+
+export async function getPlatformMilestones() {
+  const { supabase } = await import('@/lib/supabase');
+  const [users, posts, searches] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('posts').select('id', { count: 'exact', head: true }),
+    supabase.from('search_history').select('id', { count: 'exact', head: true })
+  ]);
+  return { users: users.count || 0, posts: posts.count || 0, searches: searches.count || 0 };
 }
