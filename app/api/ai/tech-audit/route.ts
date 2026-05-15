@@ -46,8 +46,7 @@ export async function GET() {
         title: 'System Dynamic Config',
         content: JSON.stringify(auditData.config_update),
         type: 'System Config',
-        slug: 'system-dynamic-config',
-        author: 'CTO AI'
+        slug: 'system-dynamic-config'
       });
       console.log('CTO: Konfigurasi Sistem Telah Diperbarui secara Otomatis.');
     }

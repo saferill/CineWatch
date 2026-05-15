@@ -37,8 +37,7 @@ export async function GET() {
       title: `Office Life: ${role1} x ${role2}`,
       content: interaction,
       type: 'Internal Log',
-      slug: `office-story-${Date.now()}`,
-      author: 'Office Sentry'
+      slug: `office-story-${Date.now()}`
     });
 
     // 5. Kirim "Bocoran" ke Telegram Boss agar Boss tahu mereka lagi ngapain

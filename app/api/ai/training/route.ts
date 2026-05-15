@@ -38,8 +38,7 @@ export async function GET() {
       title: `Corporate Wisdom: ${new Date().toLocaleDateString()}`,
       content: newWisdom,
       type: 'Corporate Wisdom',
-      slug: `wisdom-${Date.now()}`,
-      author: 'Academy Director'
+      slug: `wisdom-${Date.now()}`
     });
 
     // 4. Lapor ke Boss bahwa staf sudah di-upgrade otaknya
