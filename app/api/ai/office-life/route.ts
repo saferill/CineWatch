@@ -32,6 +32,10 @@ export async function GET() {
 
     const interaction = await chatWithAgent(role1, prompt, 'Spontaneous & Realistic');
 
+    if (interaction === "OFFLINE") {
+      return NextResponse.json({ success: false, error: 'AI is offline, skipping notification.' });
+    }
+
     // 4. Simpan ke Database sebagai "Office Story"
     await supabase.from('posts').insert({
       title: `Office Life: ${role1} x ${role2}`,

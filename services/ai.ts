@@ -263,7 +263,7 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
     }
   }
 
-  return "Maaf Boss, tim AI sedang sinkronisasi. Coba lagi dalam beberapa saat.";
+  return "OFFLINE";
 }
 
 /**
