@@ -4,8 +4,11 @@ import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const silent = searchParams.get('silent') === 'true';
+
     // 1. Pilih 2 staf secara acak dari direktori untuk berinteraksi
     const departments = ['Executive', 'Marketing', 'Engineering', 'Operations', 'Finance', 'Product'];
     const dept1 = departments[Math.floor(Math.random() * departments.length)];
@@ -44,8 +47,8 @@ export async function GET() {
       slug: `office-story-${Date.now()}`
     });
 
-    // 5. Kirim "Bocoran" ke Telegram Boss agar Boss tahu mereka lagi ngapain
-    await sendInternalLog('Office Sentry', `🎭 **KABAR KANTOR:**\n\n${interaction}`);
+    // 5. Kirim "Bocoran" ke Telegram Boss (Muted if silent)
+    await sendInternalLog('Office Sentry', `🎭 **KABAR KANTOR:**\n\n${interaction}`, silent);
 
     return NextResponse.json({ success: true, story: interaction });
   } catch (error: any) {

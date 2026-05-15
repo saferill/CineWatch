@@ -1,11 +1,14 @@
 import { getTrending } from "@/app/lib/tmdb";
 
 // INTERNAL OFFICE LOGGING (Live Activity Reporting)
-export async function sendInternalLog(agentName: string, message: string) {
+export async function sendInternalLog(agentName: string, message: string, silent: boolean = false) {
   const tgToken = process.env.TELEGRAM_NOTIF_BOT_TOKEN || process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
   const tgChatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
-  if (!tgToken || !tgChatId) return;
+  if (silent || !tgToken || !tgChatId) {
+    console.log(`[SILENT LOG] [${agentName}]: ${message}`);
+    return;
+  }
 
   const icons: any = {
     'CEO': '👔',
@@ -36,211 +39,13 @@ export async function sendInternalLog(agentName: string, message: string) {
   }
 }
 
-
-export interface AISuggestion {
-  suggestion: string;
-  messageToUser: string;
-  recommendations?: { id: number; title: string; type: 'movie' | 'tv' }[];
-}
-
-const ROUTER_ENDPOINT = process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions'; // Default to cloud if env not set
-const ROUTER_KEY = process.env.AI_ROUTER_KEY || 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
-
 const NVIDIA_ENDPOINT = (process.env.NVIDIA_API_BASE_URL || 'https://integrate.api.nvidia.com/v1') + '/chat/completions';
 const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
-
 const YDC_KEY = process.env.YDC_API_KEY;
+const ROUTER_KEY = process.env.AI_ROUTER_KEY || 'sk-3b8bb76c31c5d9f6-ou98nq-8db2a0be';
 
-export async function searchYou(query: string): Promise<any> {
-  if (!YDC_KEY) return null;
-  
-  try {
-    const res = await fetch(`https://ydc-index.io/v1/search?query=${encodeURIComponent(query)}`, {
-      headers: { 'X-API-Key': YDC_KEY }
-    });
-
-    if (res.ok) return await res.json();
-  } catch (error) {
-    console.warn('AI: You.com Search Error:', error);
-  }
-  return null;
-}
-
-export async function researchYou(query: string): Promise<string | null> {
-  if (!YDC_KEY) return null;
-  
-  try {
-    const res = await fetch(`https://ydc-index.io/v1/research`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-API-Key': YDC_KEY 
-      },
-      body: JSON.stringify({ query })
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      return data.answer || data.content || null;
-    }
-  } catch (error) {
-    console.warn('AI: You.com Research Error:', error);
-  }
-  return null;
-}
-
-export async function getYouContent(urls: string[]): Promise<any> {
-  if (!YDC_KEY) return null;
-  
-  try {
-    const res = await fetch(`https://ydc-index.io/v1/contents`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-API-Key': YDC_KEY 
-      },
-      body: JSON.stringify({ urls })
-    });
-
-    if (res.ok) return await res.json();
-  } catch (error) {
-    console.warn('AI: You.com Contents Error:', error);
-  }
-  return null;
-}
-
-export async function askAI(prompt: string, json: boolean = true, model?: string): Promise<any> {
-  console.log('AI: Using You.com Intelligence...');
-  
-  if (YDC_KEY) {
-    try {
-      const fullPrompt = json 
-        ? `${prompt}\n\nIMPORTANT: Return ONLY a valid JSON object. No other text.` 
-        : prompt;
-
-      const res = await fetch(`https://ydc-index.io/v1/research`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-API-Key': YDC_KEY 
-        },
-        body: JSON.stringify({ query: fullPrompt })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const content = data.answer || data.content;
-        
-        if (json) {
-          try {
-            // Clean JSON string from potential markdown backticks
-            const cleaned = content.replace(/```json|```/g, '').trim();
-            return JSON.parse(cleaned);
-          } catch (e) {
-            console.warn('AI: JSON Parse Error, returning raw content');
-            return { error: 'Parse Error', raw: content };
-          }
-        }
-        return content;
-      }
-    } catch (error) {
-      console.warn('AI: You.com Research Error:', error);
-    }
-  }
-
-  // FALLBACK (If YDC fails, we still have NVIDIA/9Router as absolute emergency backup, but prioritized YDC)
-  if (NVIDIA_KEY) {
-    try {
-      const res = await fetch(NVIDIA_ENDPOINT, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${NVIDIA_KEY}`
-        },
-        body: JSON.stringify({
-          model: model || 'meta/llama-3.3-70b-instruct',
-          messages: [{ role: 'user', content: prompt }],
-          response_format: json ? { type: 'json_object' } : undefined,
-          stream: false
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const content = data.choices[0].message.content;
-        return json ? JSON.parse(content) : content;
-      }
-    } catch (error) {}
-  }
-
-  return null;
-}
-
-/**
- * Specifically for ChatDev style Multi-Agent workflows
- */
-export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
-  let corporateMemory = "";
-  try {
-    const { supabase } = await import('@/lib/supabase');
-    // Fetch Global Corporate Wisdom (The Evolving Brain)
-    const { data: wisdom } = await supabase.from('posts').select('content').eq('type', 'Corporate Wisdom').order('created_at', { ascending: false }).limit(1).single();
-    if (wisdom) corporateMemory += `\n[LATEST LESSONS LEARNED]: ${wisdom.content}\n`;
-
-    const { data: memory } = await supabase.from('posts').select('content').eq('type', 'Bot History').ilike('title', 'Corporate Memory%').order('created_at', { ascending: false }).limit(1).single();
-    if (memory) corporateMemory += `\n[MEMORY]: ${memory.content}\n`;
-    
-    const { data: mission } = await supabase.from('posts').select('content').eq('type', 'Bot History').ilike('title', 'Weekly Vision%').order('created_at', { ascending: false }).limit(1).single();
-    if (mission) corporateMemory += `\n[MISSION]: ${mission.content}\n`;
-  } catch (e) {}
-
-  const departments: any = {
-    'Executive': 'Focus on 01-EXE standards: Strategic Planning, Board Prep, and Macro Strategy.',
-    'Finance': 'Focus on 02-FIN standards: DCF Modeling, Unit Economics, and Financial Integrity.',
-    'Marketing': 'Focus on 04-MKT standards: Viral Growth, SEO Optimization, and Brand Voice.',
-    'Legal': 'Focus on 06-LEG standards: Risk Assessment, Compliance, and Ethics.',
-    'Engineering': 'Focus on 08-ENG standards: System Architecture, QA, and Technical Audit.',
-    'Operations': 'Focus on 07-OPS standards: Process Optimization, SOPs, and Efficiency.',
-    'Product': 'Focus on 09-PRD standards: Roadmapping, User Research, and PRD Writing.',
-    'Data': 'Focus on 10-DATA standards: Statistical Analysis and SQL Validation.',
-    'Success': 'Focus on 11-SUC standards: Churn Analysis and Customer Retention.',
-    'HR': 'Focus on 03-HR standards: Performance Reviews and Onboarding.',
-    'Sales': 'Focus on 05-SAL standards: Outreach and Competitive Intelligence.'
-  };
-
-  // Determine Department from role name or default
-  let deptKey = 'Executive';
-  if (role.includes('SEO') || role.includes('Marketing')) deptKey = 'Marketing';
-  if (role.includes('Finance') || role.includes('Analyst')) deptKey = 'Finance';
-  if (role.includes('Legal') || role.includes('Compliance')) deptKey = 'Legal';
-  if (role.includes('Code') || role.includes('Engineer')) deptKey = 'Engineering';
-  if (role.includes('Data') || role.includes('SQL')) deptKey = 'Data';
-
-  const agentStandard = departments[deptKey] || 'Follow universal corporate professional workflows.';
-  const systemPrompt = `You are ${role} at the CineWatch Conglomerate. Dept Strategy: ${agentStandard}. Style: ${style || 'Cinematic & Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia. Use expert domain terminology.`;
-  
-  // 1. PRIMARY: YOU.COM (YDC) - Only for Research Heavy Tasks
-  const isResearchNeeded = prompt.toLowerCase().includes('berita') || prompt.toLowerCase().includes('terbaru') || role.includes('Intelligence');
-
-  if (YDC_KEY && isResearchNeeded) {
-    try {
-      const res = await fetch(`https://ydc-index.io/v1/research`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': YDC_KEY },
-        body: JSON.stringify({ query: `${systemPrompt}\n\nUser Request: ${prompt}` })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const response = data.answer || data.content;
-        if (response && response.length > 5) return response;
-      }
-    } catch (e) {
-      console.warn(`AI: [RESEARCH ISSUE] ${role} failing research.`);
-    }
-  }
-
-  // 2. STANDARD/EMERGENCY: NVIDIA (Fast & Reliable for Reasoning)
+export async function askAI(prompt: string, json: boolean = true): Promise<any> {
+  // 1. TRY NVIDIA (Fast & Powerful)
   if (NVIDIA_KEY) {
     try {
       const res = await fetch(NVIDIA_ENDPOINT, {
@@ -248,154 +53,86 @@ export async function chatWithAgent(role: string, prompt: string, style?: string
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${NVIDIA_KEY}` },
         body: JSON.stringify({
           model: 'meta/llama-3.3-70b-instruct',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
+          messages: [{ role: 'user', content: prompt }],
+          response_format: json ? { type: 'json_object' } : undefined
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        return data.choices[0].message.content;
+        const content = data.choices[0].message.content;
+        return json ? JSON.parse(content) : content;
       }
-    } catch (e) {
-      console.error(`AI: [CRITICAL] NVIDIA Fallback failed.`);
-    }
+    } catch (e) {}
   }
 
-  return "OFFLINE";
-}
-
-/**
- * NEW: Autonomous SOP Engine
- * Orchestrates a multi-stage workflow for high-quality output
- */
-export async function executeWorkflow(taskName: string, initialPrompt: string): Promise<string> {
-  console.log(`[WORKFLOW] Starting: ${taskName}`);
-  
-  // STAGE 1: PLANNING (Project Manager)
-  const plan = await chatWithAgent('Project Manager', `Task: ${taskName}. Content: ${initialPrompt}. Buat rencana kerja detail untuk spesialis agar hasilnya sempurna.`);
-  
-  // STAGE 2: EXECUTION (Primary Specialist)
-  const draft = await chatWithAgent('Senior Specialist', `Rencana Kerja: ${plan}. Kerjakan tugas ini sekarang dengan kualitas terbaik.`, 'Deep & Detailed');
-  
-  // STAGE 3: QA & AUDIT (Ruthless Auditor)
-  const audit = await chatWithAgent('QA Auditor', `Draft Hasil: ${draft}. Cari kesalahan, inkonsistensi, atau bagian yang kurang mewah. Berikan feedback pedas.`);
-  
-  // STAGE 4: FINAL REFINEMENT (Executive Editor)
-  const final = await chatWithAgent('Executive Editor', `Draft: ${draft}. Feedback Audit: ${audit}. Perbaiki draft ini menjadi hasil akhir yang sempurna dan layak tayang di CineWatch. Respond in Bahasa Indonesia.`);
-  
-  console.log(`[WORKFLOW] Completed: ${taskName}`);
-  return final;
-}
-
-export async function askAIStream(prompt: string): Promise<Response | null> {
-  // 1. Try NVIDIA first
-  if (NVIDIA_KEY) {
-    try {
-      const res = await fetch(NVIDIA_ENDPOINT, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${NVIDIA_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'meta/llama-3.3-70b-instruct',
-          messages: [{ role: 'user', content: prompt }],
-          stream: true
-        }),
-      });
-
-      if (res.ok) return res;
-    } catch (error) {
-      console.warn('AI: NVIDIA Stream Error, falling back:', error);
-    }
-  }
-
-  // 2. Fallback to Router
+  // 2. TRY GEMINI 2.0 (The Smart Backup)
   try {
-    const endpoint = process.env.NODE_ENV === 'production' 
-      ? (process.env.AI_ROUTER_URL || 'https://api.9router.com/v1/chat/completions')
-      : 'http://localhost:20128/v1/chat/completions';
-
-    const res = await fetch(endpoint, {
+    const res = await fetch('https://api.9router.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ROUTER_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ROUTER_KEY}` },
       body: JSON.stringify({
         model: 'gemini/gemini-2.0-flash-exp',
-        messages: [{ role: 'user', content: prompt }],
-        stream: true
+        messages: [{ role: 'user', content: prompt }]
       }),
     });
-
-    if (res.ok) return res;
-  } catch (error) {
-    console.error('AI: All Stream Services Failed:', error);
-  }
+    if (res.ok) {
+      const data = await res.json();
+      const content = data.choices[0].message.content;
+      return json ? JSON.parse(content) : content;
+    }
+  } catch (e) {}
 
   return null;
 }
 
-
-export async function getSmartRecommendations(history: any[]) {
-  const titles = history.map(h => h.title).join(', ');
-  const prompt = `User has watched: ${titles}. Based on this, suggest 5 similar movies or shows. Provide JSON format: { "recommendations": [{ "title": "...", "reason": "..." }] }`;
-  return askAI(prompt);
+export async function researchYou(query: string): Promise<string | null> {
+  if (!YDC_KEY) return null;
+  try {
+    const res = await fetch(`https://api.ydc-index.io/rag?query=${encodeURIComponent(query)}`, {
+      headers: { 'X-API-Key': YDC_KEY }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.answer || data.content || null;
+    }
+  } catch (e) {}
+  return null;
 }
 
-export async function analyzeSearchQuery(query: string) {
-  const trending = await getTrending().catch(() => []);
-  const trendingTitles = trending.slice(0, 5).map(m => m.title).join(', ');
+export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
+  let corporateMemory = "";
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { data: wisdom } = await supabase.from('posts').select('content').eq('type', 'Corporate Wisdom').order('created_at', { ascending: false }).limit(1).maybeSingle();
+    if (wisdom) corporateMemory += `\n[WISDOM]: ${wisdom.content}\n`;
+  } catch (e) {}
+
+  const systemPrompt = `You are ${role} at CineWatch. Style: ${style || 'Professional'}. ${corporateMemory} Always respond in Bahasa Indonesia.`;
   
-  const prompt = `User searched for: "${query}". 
-  Analyze this query for CineWatch (Year: 2026). 
-  Current trending movies: ${trendingTitles}.
-  Provide JSON: { "type": "...", "intent": "...", "suggestedTitles": ["..."], "message": "..." }`;
-  return askAI(prompt);
-}
+  // 1. Research if needed
+  let research = "";
+  if (prompt.includes('berita') || prompt.includes('rilis')) {
+    research = await researchYou(prompt) || "";
+  }
 
-export async function getMovieAIInsights(title: string, overview: string) {
-  const prompt = `Analyze this movie: "${title}". Overview: "${overview}". Provide a catchy "Why Watch This" insight (max 150 chars) and a "Mood" (e.g. Cinematic, Thrilling, Heartbreaking). JSON: { "insight": "...", "mood": "..." }`;
-  return askAI(prompt);
-}
+  // 2. Ask AI (NVIDIA -> GEMINI Fallback)
+  const finalPrompt = `${systemPrompt}\n\nResearch: ${research}\n\nTask: ${prompt}`;
+  const result = await askAI(finalPrompt, false);
 
-export async function getMoodBasedRecommendations(mood: string) {
-  const prompt = `Recommend 5 movies/shows for a "${mood}" mood. JSON: { "recommendations": [{ "title": "...", "reason": "..." }] }`;
-  return askAI(prompt);
-}
+  if (result) return result;
 
-export async function getBlogSummary(content: string) {
-  const prompt = `Summarize this blog post content into 3 concise bullet points. JSON: { "summary": ["...", "...", "..."] }`;
-  return askAI(prompt);
-}
-
-/**
- * NEW: Record search queries for Trending Search Alerts
- */
-export async function trackSearch(query: string) {
-  if (!query) return;
-  const { supabase } = await import('@/lib/supabase');
-  supabase.from('search_history').insert({ query: query.toLowerCase() }).then();
-}
-
-/**
- * NEW: Analyze platform stats for milestones
- */
-export async function getPlatformMilestones() {
-  const { supabase } = await import('@/lib/supabase');
-  
-  const [users, posts, searches] = await Promise.all([
-    supabase.from('profiles').select('id', { count: 'exact', head: true }),
-    supabase.from('posts').select('id', { count: 'exact', head: true }),
-    supabase.from('search_history').select('id', { count: 'exact', head: true })
-  ]);
-
-  return {
-    users: users.count || 0,
-    posts: posts.count || 0,
-    searches: searches.count || 0
+  // 3. STATIC EMERGENCY FALLBACK
+  const fallbacks: any = {
+    'Scout': 'Intelijen kami mendeteksi rilis ini sebagai prioritas tinggi. Wajib tonton segera di CineWatch!',
+    'CEO': 'Misi kita adalah dominasi konten dan kualitas brand sinematik terbaik.',
+    'default': 'Konten eksklusif CineWatch telah diperbarui. Selamat menikmati pengalaman sinematik premium.'
   };
+  return fallbacks[role] || fallbacks['default'];
+}
+
+export async function executeWorkflow(taskName: string, initialPrompt: string): Promise<string> {
+  const plan = await chatWithAgent('Project Manager', `Buat rencana: ${taskName}. ${initialPrompt}`);
+  const draft = await chatWithAgent('Senior Specialist', `Eksekusi: ${plan}`, 'Detailed');
+  const final = await chatWithAgent('Executive Editor', `Refine draft: ${draft}`, 'Luxury');
+  return final;
 }
