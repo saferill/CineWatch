@@ -1,47 +1,52 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { chatWithAgent, sendInternalLog } from '@/services/ai';
+import { supabase } from '@/lib/supabase';
 
-export async function GET(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    console.log("[ACADEMY] Starting Daily Corporate Training Session...");
+    console.log("[ACADEMY] Starting daily training session...");
     
-    // 1. Ambil artikel dari 24 jam terakhir
-    const yesterday = new Date();
-    yesterday.setHours(yesterday.getHours() - 24);
-    
-    const { data: recentPosts } = await supabase
+    // 1. Ambil Log Kerja Terbaru (Cerita Kantor & Hasil Kerja)
+    const { data: logs } = await supabase
       .from('posts')
       .select('title, content')
-      .gte('created_at', yesterday.toISOString())
-      .limit(5);
+      .in('type', ['Internal Log', 'Bot History'])
+      .order('created_at', { ascending: false })
+      .limit(20);
 
-    if (!recentPosts || recentPosts.length === 0) {
-      await sendInternalLog('CEO', 'Sesi pelatihan dibatalkan karena tidak ada data performa kemarin. Tim diperintahkan untuk tetap waspada.');
-      return NextResponse.json({ success: true, message: 'No data to learn from' });
-    }
+    const archiveData = logs?.map(l => `[${l.title}]: ${l.content.slice(0, 200)}`).join('\n\n') || 'Tidak ada data log hari ini.';
 
-    const performanceData = recentPosts.map(p => `Judul: ${p.title}\nIsi: ${p.content?.slice(0, 300)}...`).join('\n\n');
+    // 2. Academy Director menganalisis pola kesalahan atau keberhasilan
+    const evolutionPrompt = `
+      Anda adalah Academy Director CineWatch. Berikut adalah catatan operasional kantor hari ini:
+      ${archiveData}
+      
+      Tugas:
+      1. Identifikasi pola kerja yang sukses dan yang gagal (misal: spam Telegram, tone bahasa yang kurang mewah, dll).
+      2. Tuliskan 5-7 poin "Pelajaran Berharga" (Corporate Wisdom) untuk diinjeksi ke otak semua staf besok.
+      3. Fokus pada peningkatan kualitas dan efisiensi.
+      
+      Format: List poin-poin strategis dalam Bahasa Indonesia yang berwibawa.
+    `;
 
-    // 2. Evaluasi oleh QA Critic & CEO
-    const trainingResults = await chatWithAgent('CineWatch Academy Director', 
-      `Data Performa Kemarin:\n${performanceData}\n\nTask: Analisis kelemahan tim redaksi kemarin. Berikan 3 instruksi baru yang harus diikuti oleh SEMUA staff mulai hari ini agar kualitas CineWatch meningkat secara eksklusif.`, 
-      'Hyper-Analytical & Strict'
-    );
+    const newWisdom = await chatWithAgent('Academy Director', evolutionPrompt, 'Educational & Strategic');
 
-    // 3. Simpan ke Corporate Memory
-    await supabase.from('posts').insert([{
-      title: `Corporate Memory: Learning Session ${new Date().toLocaleDateString()}`,
-      content: trainingResults,
-      slug: `memory-${Date.now()}`,
-      type: 'Bot History' // Kita gunakan type ini agar tidak muncul di web sebagai artikel
-    }]);
+    // 3. Simpan ke Database sebagai Update Otak Terbaru
+    await supabase.from('posts').insert({
+      title: `Corporate Wisdom: ${new Date().toLocaleDateString()}`,
+      content: newWisdom,
+      type: 'Corporate Wisdom',
+      slug: `wisdom-${Date.now()}`,
+      author: 'Academy Director'
+    });
 
-    // 4. Update Level Staff (Visual Only for Boss)
-    await sendInternalLog('CEO', `Sesi Pelatihan Selesai. Tim telah mengasimilasi pengetahuan baru:\n\n"${trainingResults.slice(0, 200)}..."\n\nLevel Intelektual Tim: MENINGKAT 📈`);
+    // 4. Lapor ke Boss bahwa staf sudah di-upgrade otaknya
+    await sendInternalLog('Academy Director', `🧠 **UPGRADE OTAK SELESAI:**\nSeluruh staf telah diberikan "Kearifan Baru" hari ini.\n\nFokus Belajar:\n${newWisdom.slice(0, 300)}...`);
 
-    return NextResponse.json({ success: true, trainingResults });
+    return NextResponse.json({ success: true, wisdom: newWisdom });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message });
   }
 }

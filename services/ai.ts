@@ -180,10 +180,13 @@ export async function askAI(prompt: string, json: boolean = true, model?: string
  * Specifically for ChatDev style Multi-Agent workflows
  */
 export async function chatWithAgent(role: string, prompt: string, style?: string): Promise<string> {
-  // FETCH CORPORATE MEMORY
   let corporateMemory = "";
   try {
     const { supabase } = await import('@/lib/supabase');
+    // Fetch Global Corporate Wisdom (The Evolving Brain)
+    const { data: wisdom } = await supabase.from('posts').select('content').eq('type', 'Corporate Wisdom').order('created_at', { ascending: false }).limit(1).single();
+    if (wisdom) corporateMemory += `\n[LATEST LESSONS LEARNED]: ${wisdom.content}\n`;
+
     const { data: memory } = await supabase.from('posts').select('content').eq('type', 'Bot History').ilike('title', 'Corporate Memory%').order('created_at', { ascending: false }).limit(1).single();
     if (memory) corporateMemory += `\n[MEMORY]: ${memory.content}\n`;
     

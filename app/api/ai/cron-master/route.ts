@@ -134,6 +134,9 @@ export async function GET(req: Request) {
     // 10. Live Office Pulse & Life Story (Every hour)
     await runTask('office-life', '/api/ai/office-life');
     if (hour % 6 === 0) await runOfficePulse();
+    
+    // 11. Autonomous Evolution & Training (Every 12 hours)
+    if (hour % 12 === 0) await runTask('academy-training', '/api/ai/training');
 
     // 10. Release Sync (01:00 UTC)
     if (hour === 1) await runTask('sync', '/api/cron/release-sync');
