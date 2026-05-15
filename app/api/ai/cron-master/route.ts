@@ -131,7 +131,8 @@ export async function GET(req: Request) {
       await runTask('tech-audit', '/api/ai/tech-audit');
     }
 
-    // 10. Live Office Pulse (Only every 6 hours to avoid spam)
+    // 10. Live Office Pulse & Life Story (Every hour)
+    await runTask('office-life', '/api/ai/office-life');
     if (hour % 6 === 0) await runOfficePulse();
 
     // 10. Release Sync (01:00 UTC)
