@@ -3,6 +3,7 @@ import { withPostHogConfig } from "@posthog/nextjs-config";
 
 const nextConfig: NextConfig = {
   output: "export",
+  basePath: process.env.NODE_ENV === "production" ? "/CineWatch" : "",
   typescript: {
     ignoreBuildErrors: true,
   },
