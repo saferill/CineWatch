@@ -1,5 +1,3 @@
-"use server";
-
 import { getPopular, getPopularTV, getAnimeMovies, getAnimeTV, getMoviesByGenre, getTVByGenre, searchMovies, searchTVShows } from "@/lib/legacy/tmdb";
 import { getPopularAnime, searchAnime } from "@/lib/legacy/anilist";
 

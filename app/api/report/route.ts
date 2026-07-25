@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-static';
+
 export async function POST(req: Request) {
   try {
     const { mediaTitle, mediaId, mediaType, episode, reason, userAgent, url, serverName } = await req.json()
