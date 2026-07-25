@@ -1,0 +1,65 @@
+import React from 'react'
+
+import { MovieDetails } from '@/types/movie-details'
+import { Movie } from '@/types/movie-result'
+import { SeriesDetails } from '@/types/series-details'
+import { cn, dateFormatter, getGenres, numberRounder } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Icons } from '@/components/icons'
+
+interface HeroRatesInfosProps {
+  movie?: Movie
+  movieDetails?: MovieDetails
+  seriesDetails?: SeriesDetails
+}
+
+export const HeroRatesInfos = ({
+  movie,
+  movieDetails,
+  seriesDetails,
+}: HeroRatesInfosProps) => {
+  const item = (movieDetails || movie || seriesDetails) as (
+    | MovieDetails
+    | Movie
+  ) &
+    SeriesDetails
+  const movieGenres = getGenres(
+    movie?.genre_ids,
+    movieDetails?.genres || seriesDetails?.genres
+  )
+
+  const displayRating = () => {
+    // Show IMDB rating if available for movieDetails or seriesDetails
+    if (movieDetails?.imdbRating) {
+      return <span className="font-semibold">{movieDetails.imdbRating}</span>
+    }
+
+    if (seriesDetails?.imdbRating) {
+      return <span className="font-semibold">{seriesDetails.imdbRating}</span>
+    }
+
+    // Fallback to TMDB rating
+    return (
+      <span className="font-semibold">{numberRounder(item?.vote_average)}</span>
+    )
+  }
+
+  return (
+    <div className="my-2 md:my-4 flex flex-wrap justify-center md:justify-start items-center gap-2 lg:gap-3">
+      <Badge className="uppercase text-[9px] px-1.5 py-0 md:text-xs">{item?.original_language}</Badge>
+      <Badge className="uppercase text-[9px] px-1.5 py-0 md:text-xs">{item?.adult ? 'NC-17' : 'PG-13'}</Badge>
+      <div className="flex items-center text-[10px] md:text-xs lg:text-base">
+        <Icons.fullStar className="mr-1 h-4 w-4 md:h-6 md:w-6" />
+        {displayRating()}
+      </div>
+      <p className="text-[10px] md:text-xs text-popover-foreground lg:text-base font-medium">
+        {dateFormatter(item?.release_date || item?.first_air_date)}
+      </p>
+      {movieGenres.slice(0, 3).map((genre, index) => (
+        <Badge key={genre.id} className={cn("font-medium text-[9px] px-1.5 py-0 md:text-xs", index >= 2 && "hidden sm:inline-flex")}>
+          {genre.name}
+        </Badge>
+      ))}
+    </div>
+  )
+}

@@ -1,0 +1,116 @@
+import { ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+import { MovieGenre } from '@/types/movie-genre'
+import { ItemType } from '@/types/movie-result'
+import { Season } from '@/types/series-details'
+import { MOVIES_GENRE } from '@/lib/genres'
+import { apiConfig } from '@/lib/tmdbConfig'
+import { IMAGE_CACHE_HOST_URL } from '@/lib/constants'
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+function getImageURL(path: string, size: string = 'original') {
+  if (path.startsWith("http")) return path;
+  return `${IMAGE_CACHE_HOST_URL}/${size}${path}`
+}
+
+function getPosterImageURL(path: string) {
+  if (path.startsWith("http")) return path;
+  return `${apiConfig.w500Image(path)}`
+}
+
+function dateFormatter(date: string, showDay: boolean = false) {
+  if (!date) return 'N/A'
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: showDay ? 'numeric' : undefined,
+  })
+}
+
+function numberRounder(number: number | undefined) {
+  if (number) return Math.round(number * 10) / 10
+}
+
+function getGenres(genres: number[] = [], defaultGenres: MovieGenre[] = []) {
+  if (defaultGenres.length) return defaultGenres
+  return MOVIES_GENRE.filter((genre) => genres.includes(genre.id))
+}
+
+function itemRedirect(itemType: ItemType) {
+  if (itemType === 'movie') return '/movies';
+  if (itemType === 'anime') return '/anime';
+  if (itemType === 'donghua') return '/donghua';
+  return '/series';
+}
+
+function itemDetailRedirect(itemType: ItemType) {
+  if (itemType === 'movie') return '/movie';
+  if (itemType === 'anime') return '/anime';
+  if (itemType === 'donghua') return '/donghua/detail';
+  return '/series';
+}
+
+function moneyFormatter(money: number) {
+  if (!money) return 'N/A'
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(money)
+}
+
+function convertMinutesToHours(minutes: number): string {
+  if (!minutes) return 'N/A'
+
+  const hours = Math.floor(minutes / 60)
+  const min = minutes % 60
+
+  let hoursString = hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : ''
+  let minString = min > 0 ? `${min} minute${min > 1 ? 's' : ''}` : ''
+
+  return `${hoursString} ${minString}`
+}
+
+function seasonsFormatter(seasons: Season[]) {
+  return seasons.map((season) => {
+    if (season.season_number === 0) return null
+    return {
+      id: season.id,
+      name: season.name,
+      poster_path: season.poster_path,
+      season_number: season.season_number,
+    }
+  })
+}
+
+function formatDate(
+  date: Date,
+  format: 'short' | 'long' | 'medium' = 'medium'
+): string {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month:
+      format === 'short' ? '2-digit' : format === 'long' ? 'long' : 'short',
+    day: '2-digit',
+  }
+
+  return date.toLocaleDateString('en-US', options)
+}
+
+export {
+  cn,
+  getImageURL,
+  getPosterImageURL,
+  dateFormatter,
+  getGenres,
+  numberRounder,
+  itemRedirect,
+  moneyFormatter,
+  convertMinutesToHours,
+  seasonsFormatter,
+  formatDate,
+  itemDetailRedirect,
+}
