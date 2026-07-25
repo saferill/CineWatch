@@ -6,6 +6,10 @@ import { getMovie, getMovieCredits } from "@/lib/legacy/tmdb";
 import { posterUrl } from "@/lib/legacy/tmdb-utils";
 import { IconArrowLeft } from "@tabler/icons-react";
 
+export async function generateStaticParams() {
+  return [{ id: '550' }];
+}
+
 export default async function CastPage({
   params,
 }: {

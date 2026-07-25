@@ -20,6 +20,10 @@ import { MovieDetailsHero } from '@/components/media/details-hero'
 
 export const revalidate = 86400;
 
+export async function generateStaticParams() {
+  return [{ id: '550' }];
+}
+
 export async function generateMetadata(
   props: PageDetailsProps
 ): Promise<Metadata> {

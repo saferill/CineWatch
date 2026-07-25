@@ -29,6 +29,10 @@ function formatDate(date: string | null): string {
   });
 }
 
+export async function generateStaticParams() {
+  return [{ id: '287' }];
+}
+
 export default async function PersonPage({
   params,
 }: {

@@ -3,6 +3,10 @@ import Player from "@/components/legacy/Player";
 import { getMovie } from "@/lib/legacy/tmdb";
 import { posterUrl } from "@/lib/legacy/tmdb-utils";
 
+export async function generateStaticParams() {
+  return [{ id: '550' }];
+}
+
 export default async function WatchPage({
   params,
 }: {

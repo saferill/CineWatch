@@ -20,6 +20,10 @@ import { SeriesDetailsHero } from '@/components/series/details-hero'
 
 export const revalidate = 86400;
 
+export async function generateStaticParams() {
+  return [{ id: '1399' }];
+}
+
 export async function generateMetadata(
   props: PageDetailsProps
 ): Promise<Metadata> {
@@ -92,8 +96,6 @@ import { getMovieAIInsights } from '@/services/ai'
 
 const SeriesPage = async (props: PageDetailsProps) => {
   const { id } = await props.params
-  const searchParams = await props.searchParams
-  const seasonParam = searchParams?.season
   
   let result
   try {
@@ -107,13 +109,7 @@ const SeriesPage = async (props: PageDetailsProps) => {
 
   let trailerId = null
   try {
-    let trailer
-    if (seasonParam) {
-      trailer = await getTVSeasonTrailer(Number(id), Number(seasonParam))
-    }
-    if (!trailer) {
-      trailer = await getTVTrailer(Number(id))
-    }
+    const trailer = await getTVTrailer(Number(id))
     if (trailer) trailerId = trailer.key
   } catch (e) {
     // ignore
