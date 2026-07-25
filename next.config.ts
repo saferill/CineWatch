@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { withPostHogConfig } from "@posthog/nextjs-config";
 
 const nextConfig: NextConfig = {
+  output: "export",
   typescript: {
     ignoreBuildErrors: true,
   },
