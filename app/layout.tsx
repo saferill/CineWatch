@@ -19,6 +19,7 @@ import CommandPalette from '@/components/legacy/CommandPalette'
 import { SplashScreen } from '@/components/splash-screen'
 import { MobileBottomNav } from '@/components/layouts/mobile-bottom-nav'
 import { SWRegister } from '@/components/sw-register'
+import { SpaRouter } from '@/components/spa-router'
 
 export const viewport: Viewport = {
   themeColor: [
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <JsonLd data={organizationJsonLd} />
       </head>
       <body className={cn('min-h-screen scroll-smooth bg-background font-sans antialiased', fontSans.variable)}>
+        <SpaRouter />
         <SWRegister />
         <SplashScreen />
         <FloatingPlayerProvider>

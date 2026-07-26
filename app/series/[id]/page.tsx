@@ -92,6 +92,7 @@ export async function generateMetadata(
   }
 }
 
+import { SeriesClientDetails } from './series-client-details'
 import { getMovieAIInsights } from '@/services/ai'
 
 const SeriesPage = async (props: PageDetailsProps) => {
@@ -101,58 +102,35 @@ const SeriesPage = async (props: PageDetailsProps) => {
   try {
     result = await populateSeriesDetailsPageData(id)
   } catch {
-    notFound()
+    // fallback to client
   }
-  const { seriesCredits, seriesDetails, similarSeries, recommendedSeries } =
-    result!
-  if (!seriesDetails?.id) notFound()
+
+  const seriesDetails = result?.seriesDetails
+  const seriesCredits = result?.seriesCredits
+  const similarSeries = result?.similarSeries || []
+  const recommendedSeries = result?.recommendedSeries || []
 
   let trailerId = null
-  try {
-    const trailer = await getTVTrailer(Number(id))
-    if (trailer) trailerId = trailer.key
-  } catch (e) {
-    // ignore
+  if (seriesDetails?.id) {
+    try {
+      const trailer = await getTVTrailer(Number(id))
+      if (trailer) trailerId = trailer.key
+    } catch (e) {}
   }
 
-  // AI SMART INSIGHTS
-  const aiInsights = await getMovieAIInsights(seriesDetails.name, seriesDetails.overview)
-
-  const jsonLd = tvSeriesJsonLd({
-    id: seriesDetails.id,
-    name: seriesDetails.name,
-    description: seriesDetails.overview,
-    firstAirDate: seriesDetails.first_air_date,
-    genres: seriesDetails.genres?.map((g) => g.name),
-    imageUrl: seriesDetails.backdrop_path
-      ? getImageURL(seriesDetails.backdrop_path)
-      : seriesDetails.poster_path
-        ? getPosterImageURL(seriesDetails.poster_path)
-        : null,
-    voteAverage: seriesDetails.vote_average,
-    voteCount: seriesDetails.vote_count,
-    tagline: seriesDetails.tagline,
-  })
+  const aiInsights = seriesDetails
+    ? await getMovieAIInsights(seriesDetails.name, seriesDetails.overview).catch(() => null)
+    : null
 
   return (
-    <div className="relative">
-      <JsonLd data={jsonLd} />
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: 'Home', url: '/' },
-          { name: 'Series', url: '/series' },
-          { name: seriesDetails.name, url: `/series/${seriesDetails.id}` },
-        ])}
-      />
-      <SeriesDetailsHero series={seriesDetails} trailerId={trailerId} aiInsights={aiInsights} />
-      <SeriesDetailsContent
-        series={seriesDetails}
-        seriesCredits={seriesCredits}
-        similarSeries={similarSeries}
-        recommendedSeries={recommendedSeries}
-        trailerId={trailerId}
-      />
-    </div>
+    <SeriesClientDetails
+      initialSeriesDetails={seriesDetails}
+      initialCredits={seriesCredits}
+      initialSimilar={similarSeries}
+      initialRecommended={recommendedSeries}
+      initialTrailerId={trailerId}
+      initialAiInsights={aiInsights}
+    />
   )
 }
 

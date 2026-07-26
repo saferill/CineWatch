@@ -92,6 +92,7 @@ export async function generateMetadata(
   }
 }
 
+import { MovieClientDetails } from './movie-client-details'
 import { getMovieAIInsights } from '@/services/ai'
 
 const MoviePage = async (props: PageDetailsProps) => {
@@ -100,59 +101,35 @@ const MoviePage = async (props: PageDetailsProps) => {
   try {
     result = await populateMovieDetailsPage(id)
   } catch {
-    notFound()
+    // fallback to client
   }
-  const { movieCredits, movieDetails, similarMovies, recommendedMovies } =
-    result!
-  if (!movieDetails?.id) notFound()
+
+  const movieDetails = result?.movieDetails
+  const movieCredits = result?.movieCredits
+  const similarMovies = result?.similarMovies || []
+  const recommendedMovies = result?.recommendedMovies || []
 
   let trailerId = null
-  try {
-    const trailer = await getMovieTrailer(Number(id))
-    if (trailer) trailerId = trailer.key
-  } catch (e) {
-    // ignore
+  if (movieDetails?.id) {
+    try {
+      const trailer = await getMovieTrailer(Number(id))
+      if (trailer) trailerId = trailer.key
+    } catch (e) {}
   }
 
-  // AI SMART INSIGHTS
-  const aiInsights = await getMovieAIInsights(movieDetails.title, movieDetails.overview)
-
-  const jsonLd = movieJsonLd({
-    id: movieDetails.id,
-    title: movieDetails.title,
-    description: movieDetails.overview,
-    releaseDate: movieDetails.release_date,
-    runtime: movieDetails.runtime,
-    genres: movieDetails.genres?.map((g) => g.name),
-    imageUrl: movieDetails.backdrop_path
-      ? getImageURL(movieDetails.backdrop_path)
-      : movieDetails.poster_path
-        ? getPosterImageURL(movieDetails.poster_path)
-        : null,
-    voteAverage: movieDetails.vote_average,
-    voteCount: movieDetails.vote_count,
-    tagline: movieDetails.tagline,
-  })
+  const aiInsights = movieDetails
+    ? await getMovieAIInsights(movieDetails.title, movieDetails.overview).catch(() => null)
+    : null
 
   return (
-    <div className="relative">
-      <JsonLd data={jsonLd} />
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: 'Home', url: '/' },
-          { name: 'Movies', url: '/movies' },
-          { name: movieDetails.title, url: `/movie/${movieDetails.id}` },
-        ])}
-      />
-      <MovieDetailsHero movie={movieDetails} trailerId={trailerId} aiInsights={aiInsights} />
-      <MoviesDetailsContent
-        movie={movieDetails}
-        movieCredits={movieCredits}
-        similarMovies={similarMovies}
-        recommendedMovies={recommendedMovies}
-        trailerId={trailerId}
-      />
-    </div>
+    <MovieClientDetails
+      initialMovieDetails={movieDetails}
+      initialCredits={movieCredits}
+      initialSimilar={similarMovies}
+      initialRecommended={recommendedMovies}
+      initialTrailerId={trailerId}
+      initialAiInsights={aiInsights}
+    />
   )
 }
 
